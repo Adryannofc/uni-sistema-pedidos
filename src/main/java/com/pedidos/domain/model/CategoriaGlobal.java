@@ -1,10 +1,21 @@
 package com.pedidos.domain.model;
 
+import jakarta.persistence.*;
+
 import java.util.UUID;
 
+@Entity
+@Table (name = "categorias_globais")
 public class CategoriaGlobal {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private final String id;
+
+    @Column(name = "nome")
     private String nome;
+
+    @Column(name = "descricao")
     private String descricao;
 
     public CategoriaGlobal(String nome, String descricao) {
