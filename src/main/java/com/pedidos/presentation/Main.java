@@ -1,7 +1,7 @@
 package com.pedidos.presentation;
 
 import com.pedidos.application.service.*;
-import com.pedidos.infra.config.FlywayConfig;
+import com.pedidos.infra.config.FlyWayconfig;
 import com.pedidos.infra.config.JPAUtil;
 import com.pedidos.infra.repository.impl.*;
 import com.pedidos.infra.seed.DataSeeder;
@@ -15,7 +15,7 @@ public class Main {
 
         // --- Iniciando Flyway ---
         try {
-            FlywayConfig.migrate();
+            FlyWayconfig.migrate();
         } catch (Exception e) {
             System.out.println("Flyway não executado: " + e.getMessage());
         }
