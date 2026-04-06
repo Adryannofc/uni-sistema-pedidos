@@ -2,15 +2,33 @@ package com.pedidos.domain.model;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+import jakarta.persistence.*;
 
+
+@Entity
+@Table (name = "produtos")
 public class Produto {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private final String id;
+
+    @Column (name = "nome")
     private String nome;
+
+    @Column (name = "descricao")
     private String descricao;
+
+    @Column (name = "preco", precision = 10, scale = 2)
     private BigDecimal preco;
+
+    @Column (name = "cateoria_Cardapio_Id")
     private String categoriaCardapioId;
+
+    @Column (name = "restaurante_Id")
     private String restauranteId;
+
+    @Column (name = "status_Ativo")
     private boolean statusAtivo;
 
     // Construtor completo — carregado do banco (UUID já existente)

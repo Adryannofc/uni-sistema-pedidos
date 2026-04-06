@@ -1,12 +1,26 @@
 package com.pedidos.domain.model;
 
+import jakarta.persistence.*;
+
+@Embeddable
 public class Endereco {
 
+    @Column (name = "rua")
     private String rua;
+
+    @Column (name = "numero")
     private String numero;
+
+    @Column (name = "bairro")
     private String bairro;
+
+    @Column (name = "cidade")
     private String cidade;
+
+    @Column (name = "estado")
     private String estado;
+
+    @Column (name = "cep")
     private String cep;
 
     public Endereco(String rua, String numero, String bairro, String cidade, String estado, String cep) {

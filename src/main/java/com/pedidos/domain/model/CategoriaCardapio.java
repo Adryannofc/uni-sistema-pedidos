@@ -1,11 +1,24 @@
 package com.pedidos.domain.model;
 
 import java.util.UUID;
+import jakarta.persistence.*;
 
+
+@Entity
+@Table(name = "categorias_cardapio")
 public class CategoriaCardapio {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private final String id;
+
+    @Column (name = "nome")
     private String nome;
+
+    @Column (name = "descricao")
     private String descricao;
+
+    @Column (name = "restaurante_Id")
     private String restauranteId;
 
     public CategoriaCardapio(String nome, String descricao, String restauranteId) {
