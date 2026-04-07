@@ -27,7 +27,7 @@
             <!-- JDBC LOCAL -->
             <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/postgres"/> <!--url padrão(modificar para database utilizada)-->
             <property name="jakarta.persistence.jdbc.user" value="postgres"/> <!--user padrão(modificar)-->
-            <property name="jakarta.persistence.jdbc.password" value="postgres"/> <!--password padrão(modificar)-->
+            <property name="jakarta.persistence.jdbc.password" value="1234"/> <!--password padrão(modificar)-->
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
 
             <!-- Hibernate (Flyway cria, Hibernate valida)-->
