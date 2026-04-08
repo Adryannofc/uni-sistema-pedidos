@@ -4,7 +4,7 @@ import com.pedidos.domain.model.Produto;
 import com.pedidos.domain.repository.ProdutoRepository;
 import java.util.*;
 
-public class ProdutoRepositoryMemoria implements ProdutoRepository {
+public class ProdutoRepositoryJPA implements ProdutoRepository {
     private final Map<String, Produto> storage = new HashMap<>();
 
     @Override

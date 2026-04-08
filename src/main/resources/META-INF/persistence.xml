@@ -23,16 +23,18 @@
         <properties>
 
             <!-- JDBC LOCAL -->
+<<<<<<< feature/guilherme
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/deliveryapp"/> <!--url padrão(modificar para database utilizada)-->
+=======
             <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/delivery_db"/> <!--url padrão(modificar para database utilizada)-->
+>>>>>>> develop
             <property name="jakarta.persistence.jdbc.user" value="postgres"/> <!--user padrão(modificar)-->
-            <property name="jakarta.persistence.jdbc.password" value="1234"/> <!--password padrão(modificar)-->
+            <property name="jakarta.persistence.jdbc.password" value="postgres"/> <!--password padrão(modificar)-->
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
 
             <!-- Hibernate (Flyway cria, Hibernate valida)-->
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
             <property name="hibernate.hbm2ddl.auto" value="validate"/>
-
-            <!-- Debug -->
             <property name="hibernate.show_sql" value="true"/>
 
         </properties>

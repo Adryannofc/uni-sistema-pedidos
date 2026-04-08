@@ -5,7 +5,7 @@ import com.pedidos.domain.repository.ClienteRepository;
 
 import java.util.*;
 
-public class ClienteRepositoryMemoria implements ClienteRepository {
+public class ClienteRepositoryJPA implements ClienteRepository {
 
     private final HashMap<String, Usuario> storage = new HashMap<>();
 

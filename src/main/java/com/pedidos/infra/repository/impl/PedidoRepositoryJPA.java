@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.List;
 
 
-public class PedidoRepositoryMemoria implements PedidoRepository {
+public class PedidoRepositoryJPA implements PedidoRepository {
 
     private final Map<String, Pedido> pedidos = new HashMap<>();
 
