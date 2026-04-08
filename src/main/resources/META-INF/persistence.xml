@@ -13,21 +13,19 @@
         <class>com.pedidos.domain.model.Usuario</class>
         <class>com.pedidos.domain.model.Admin</class>
         <class>com.pedidos.domain.model.Cliente</class>
-        <class>com.pedidos.domain.model.Carrinho</class>
-        <class>com.pedidos.domain.model.Endereco</class>
-        <class>com.pedidos.domain.model.ItemPedido</class>
-        <class>com.pedidos.domain.model.Pedido</class>
         <class>com.pedidos.domain.model.Restaurante</class>
         <class>com.pedidos.domain.model.Produto</class>
-        <class>com.pedidos.domain.model.CategoriaCardapio</class>
         <class>com.pedidos.domain.model.CategoriaGlobal</class>
+        <class>com.pedidos.domain.model.CategoriaCardapio</class>
+        <class>com.pedidos.domain.model.Pedido</class>
+        <class>com.pedidos.domain.model.ItemPedido</class>
 
         <properties>
 
             <!-- JDBC LOCAL -->
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/postgres"/> <!--url padrão(modificar para database utilizada)-->
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/delivery_db"/> <!--url padrão(modificar para database utilizada)-->
             <property name="jakarta.persistence.jdbc.user" value="postgres"/> <!--user padrão(modificar)-->
-            <property name="jakarta.persistence.jdbc.password" value="1234"/> <!--password padrão(modificar)-->
+            <property name="jakarta.persistence.jdbc.password" value="postgres"/> <!--password padrão(modificar)-->
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
 
             <!-- Hibernate (Flyway cria, Hibernate valida)-->
