@@ -1,56 +1,67 @@
 package com.pedidos.infra.repository.impl;
 
+import com.pedidos.domain.model.CategoriaCardapio;
 import com.pedidos.domain.model.CategoriaGlobal;
 import com.pedidos.domain.repository.CategoriaGlobalRepository;
+import jakarta.persistence.EntityManager;
+
 import java.util.*;
 
 public class CategoriaGlobalRepositoryJPA implements CategoriaGlobalRepository {
-    private final Map<String, CategoriaGlobal> storage = new HashMap<>();
+    private EntityManager em;
 
-    /**
-     * Busca uma categoria global pelo nome, ignorando maiúsculas e minúsculas.
-     * @param nome O nome da categoria global a ser buscada.
-     * @return Um Optional contendo a categoria global encontrada, ou vazio se não for encontrada.
-     */
-    @Override
-    public Optional<CategoriaGlobal> buscarPorNome(String nome) {
-        return storage.values().stream()
-                .filter(c -> c.getNome().equalsIgnoreCase(nome))
-                .findFirst();
+    public CategoriaGlobalRepositoryJPA (EntityManager em) { this.em = em; }
+
+    public void salvar(CategoriaGlobal categoria) {
+        try {
+            em.getTransaction().begin();
+            em.persist(categoria);
+            em.getTransaction().commit();
+        } catch (Exception e){
+            em.getTransaction().rollback();
+            throw new RuntimeException("Erro ao salvar o usuário", e);
+        }
     }
 
-    /**
-     * Salva ou atualiza uma categoria global no repositório. Se a categoria global já existir (com base no ID), ela será atualizada; caso contrário, uma nova entrada será criada.
-     * @param categoriaGlobal A categoria global a ser salva ou atualizada.
-     */
-    @Override
-    public void salvar(CategoriaGlobal categoriaGlobal) {
-        storage.put(categoriaGlobal.getId(), categoriaGlobal);
+    public void atualizar(CategoriaGlobal categoria) {
+        try {
+            em.getTransaction().begin();
+            em.merge(categoria);
+            em.getTransaction().commit();
+        } catch (Exception e){
+            em.getTransaction().rollback();
+            throw new RuntimeException("Erro em atualizar o usuário", e);
+        }
     }
 
-    /**
-     * Busca uma categoria global pelo ID.
-     * @param id O ID da categoria global a ser buscada.
-     * @return Um Optional contendo a categoria global encontrada, ou vazio se não for encontrada.
-     */
-    @Override
-    public Optional<CategoriaGlobal> buscarPorId(String id) { return Optional.ofNullable(storage.get(id)); }
-
-    /**
-     * Retorna uma lista imutável de todas as categorias globais armazenadas no repositório.
-     * @return Uma lista imutável de categorias globais.
-     */
-    @Override
-    public List<CategoriaGlobal> listarTodos() {
-        return Collections.unmodifiableList(new ArrayList<>(storage.values()));
-    }
-
-    /**
-     * Remove uma categoria global do repositório com base no ID fornecido.
-     * @param id O ID da categoria global a ser removida.
-     */
     @Override
     public void remover(String id) {
-        storage.remove(id);
+        try {
+            em.getTransaction().begin();
+            CategoriaGlobal categoria = em.find(CategoriaGlobal.class, id);
+            if (categoria != null) {
+                em.remove(categoria);
+            }
+            em.getTransaction().commit();
+        }
+        catch (Exception e) {
+            em.getTransaction().rollback();
+            throw new RuntimeException("Erro ao deletar admin", e);
+        }
+    }
+
+    @Override
+    public Optional<CategoriaGlobal> buscarPorId(String id) {
+        return Optional.ofNullable(em.find(CategoriaGlobal.class, id));
+    }
+
+    @Override
+    public Optional<CategoriaGlobal> buscarPorNome(String nome) {
+        return Optional.ofNullable(em.find(CategoriaGlobal.class, nome));
+    }
+
+    @Override
+    public List<CategoriaGlobal> listarTodos() {
+        return em.createQuery("select c from categorias_globais c").getResultList();
     }
 }
