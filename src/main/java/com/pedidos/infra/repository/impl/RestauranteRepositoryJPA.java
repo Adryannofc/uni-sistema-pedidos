@@ -6,7 +6,7 @@ import com.pedidos.domain.repository.RestauranteRepository;
 import java.util.*;
 import com.pedidos.domain.model.Restaurante;
 import java.util.stream.Collectors;
-public class RestauranteRepositoryMemoria implements RestauranteRepository {
+public class RestauranteRepositoryJPA implements RestauranteRepository {
 
     private final HashMap<String, Usuario> storage = new HashMap<>();
 

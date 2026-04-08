@@ -4,7 +4,7 @@ import com.pedidos.domain.model.CategoriaCardapio;
 import com.pedidos.domain.repository.CategoriaCardapioRepository;
 import java.util.*;
 
-public class CategoriaCardapioRepositoryMemoria implements CategoriaCardapioRepository {
+public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioRepository {
 
     private final Map<String, CategoriaCardapio> storage = new HashMap<>();
 

@@ -4,7 +4,7 @@ import com.pedidos.domain.model.CategoriaGlobal;
 import com.pedidos.domain.repository.CategoriaGlobalRepository;
 import java.util.*;
 
-public class CategoriaGlobalRepositoryMemoria implements CategoriaGlobalRepository {
+public class CategoriaGlobalRepositoryJPA implements CategoriaGlobalRepository {
     private final Map<String, CategoriaGlobal> storage = new HashMap<>();
 
     /**
