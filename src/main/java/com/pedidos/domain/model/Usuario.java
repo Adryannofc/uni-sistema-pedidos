@@ -1,27 +1,48 @@
-
 package com.pedidos.domain.model;
 
+import jakarta.persistence.*;
 import com.pedidos.domain.enums.TipoUsuario;
 
-import java.util.UUID;
-
+@Entity
+@Table(name = "usuarios")
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Usuario {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
     private String id;
+
+    @Column(nullable = false)
     private String nome;
+
+    @Column(unique = true, nullable = false)
     private String email;
+
+    @Column(name = "senha_hash", nullable = false)
     private String senhaHash;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_usuario", nullable = false)
     private TipoUsuario tipoUsuario;
 
+
+    protected Usuario() {}
+
     public Usuario(String nome, String email, String senhaHash, TipoUsuario tipoUsuario) {
-        this.id = UUID.randomUUID().toString();
         this.nome = nome;
         this.email = email;
         this.senhaHash = senhaHash;
         this.tipoUsuario = tipoUsuario;
     }
 
+
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getNome() {
@@ -57,12 +78,17 @@ public abstract class Usuario {
         this.senhaHash = senhaHash;
     }
 
-    public TipoUsuario getTipoUsuario() { return tipoUsuario; }
+    public TipoUsuario getTipoUsuario() {
+        return tipoUsuario;
+    }
+
+    public void setTipoUsuario(TipoUsuario tipoUsuario) {
+        this.tipoUsuario = tipoUsuario;
+    }
 
     public boolean verificarSenha(String senhaHash) {
         return this.senhaHash.equals(senhaHash);
     }
-
 
     @Override
     public String toString() {
