@@ -1,73 +1,82 @@
 package com.pedidos.infra.repository.impl;
 
+import com.pedidos.domain.model.Cliente;
 import com.pedidos.domain.model.Usuario;
 import com.pedidos.domain.repository.ClienteRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 
 import java.util.*;
 
 public class ClienteRepositoryJPA implements ClienteRepository {
 
-    private final HashMap<String, Usuario> storage = new HashMap<>();
+    private final EntityManager em;
 
-    /**
-     * Salva um usuário no repositório de memória, utilizando o ID do usuário como chave.
-     * @param usuario usuário a ser salvo no repositório
-     */
+    public ClienteRepositoryJPA(EntityManager em){this.em = em;}
+
     @Override
-    public void salvar(Usuario usuario) {
-        storage.put(usuario.getId().toString(), usuario);
-    }
-    /**
-     * Busca um usuário pelo ID, retornando um Optional para lidar com a possibilidade de não encontrar o usuário.
-     * @param id ID do usuário a ser buscado
-     * @return Optional contendo o usuário encontrado ou vazio se não encontrado
-     */
-    @Override
-    public Optional<Usuario> buscarPorId(String id) {
-        return Optional.ofNullable(storage.get(id));
+    public void salvar(Usuario usuario){
+        try {
+            em.getTransaction().begin();
+            em.persist(usuario);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            em.getTransaction().rollback();
+            throw new RuntimeException("Erro ao salvar cliente", e);
+        }
     }
 
-    /**
-     * Busca um usuário pelo email, retornando um Optional para lidar com a possibilidade de não encontrar o usuário.
-     * @param email email do usuário a ser buscado
-     * @return Optional contendo o usuário encontrado ou vazio se não encontrado
-     */
     @Override
-    public Optional<Usuario> buscarPorEmail(String email) {
-        return storage.values().stream()
-                .filter(u -> Objects.equals(u.getEmail(), email))
-                .findFirst();
+    public Optional<Usuario> buscarPorId (String id){
+        return Optional.ofNullable(em.find(Usuario.class, id));
     }
 
-    /**
-     * Lista todos os usuários armazenados no repositório de memória, retornando uma lista imutável para evitar modificações externas.
-     * @return lista de todos os usuários armazenados no repositório de memória
-     */
     @Override
-    public List<Usuario> listarTodos() {
-        return Collections.unmodifiableList(new ArrayList<>(storage.values()));
-    }
-    /**
-     * Remove um usuário do repositório de memória com base no ID fornecido.
-     * @param id ID do usuário a ser removido
-     */
-    @Override
-    public void deletar(String id) {
-        storage.remove(id);
+    public Optional<Usuario> buscarPorEmail (String email){
+        try {
+            Usuario usuario = em.createQuery("SELECT u FROM Cliente u WHERE LOWER(u.email) = LOWER(:email)", Usuario.class)
+                    .setParameter("email", email)
+                    .getSingleResult();
+                return  Optional.of(usuario);
+        } catch (NoResultException e) {
+            return Optional.empty();
+
+        }
     }
 
-    /**
-     * Busca um usuário pelo email e senha hash, retornando o usuário correspondente ou null se não encontrado.
-     * @param email email do usuário a ser buscado
-     * @param senhaHash senha hash do usuário a ser buscado
-     * @return o usuário correspondente ao email e senha hash fornecidos, ou null se não encontrado
-     */
     @Override
-    public Usuario buscarPorEmailSenha(String email, String senhaHash) {
-        return storage.values().stream()
-                .filter(u -> Objects.equals(u.getEmail(), email) && u.verificarSenha(senhaHash))
-                .findFirst()
-                .orElse(null);
+    public List<Usuario> listarTodos(){
+        return em.createQuery("SELECT u FROM Cliente u", Usuario.class).getResultList();
+    }
+
+    @Override
+    public void deletar (String id){
+        try {
+            em.getTransaction().begin();
+            Usuario usuario = em.find(Cliente.class, id);
+            if (usuario != null){
+                em.remove(usuario);
+            }
+            em.getTransaction().commit();
+        }catch (Exception e){
+            em.getTransaction().rollback();
+            throw new RuntimeException("Erro ao deletar cliente", e);
+        }
+    }
+
+    @Override
+    public Usuario buscarPorEmailSenha(String email, String senhaHash){
+        try {
+            return em.createQuery("SELECT u FROM Cliente u WHERE LOWER(u.email) = LOWER(:email) AND u.senhaHash = :senha", Usuario.class)
+                    .setParameter("email", email)
+                    .setParameter("senha", senhaHash)
+                    .getSingleResult();
+
+        }catch (NoResultException e){
+            return null;
+        }
     }
 }
+
+
 
