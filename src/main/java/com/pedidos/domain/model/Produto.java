@@ -22,10 +22,12 @@ public class Produto {
     @Column (name = "preco", precision = 10, scale = 2)
     private BigDecimal preco;
 
-    @Column (name = "cateoria_Cardapio_Id")
+    @ManyToOne
+    @JoinColumn (name = "cateoriaCardapio_Id")
     private String categoriaCardapioId;
 
-    @Column (name = "restaurante_Id")
+    @ManyToOne
+    @JoinColumn (name = "restaurante_Id")
     private String restauranteId;
 
     @Column (name = "status_Ativo")

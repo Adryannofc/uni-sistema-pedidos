@@ -1,9 +1,7 @@
 package com.pedidos.domain.model;
 
 import com.pedidos.domain.enums.TipoUsuario;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +15,12 @@ public class Cliente extends Usuario {
     private String cpf;
     private String telefone;
     private List<String> favoritos;
+
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     private Endereco enderecoEntrega;
+
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
+    private Pedido pedido;
 
     public Cliente(String nome, String email, String senhaHash, String cpf, String telefone) {
         super(nome, email, senhaHash, TipoUsuario.CLIENTE);
