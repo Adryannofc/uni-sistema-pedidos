@@ -6,6 +6,7 @@ import com.pedidos.infra.config.JPAUtil;
 import com.pedidos.infra.repository.impl.*;
 import com.pedidos.infra.seed.DataSeeder;
 import com.pedidos.presentation.menu.MenuLogin;
+import jakarta.persistence.EntityManager;
 
 import java.util.Scanner;
 
@@ -20,16 +21,18 @@ public class Main {
             System.out.println("Flyway não executado: " + e.getMessage());
         }
 
+        EntityManager em = JPAUtil.getEntityManager();
+
         Scanner scanner = new Scanner(System.in);
 
         // --- Repositórios ---
-        AdminRepositoryMemoria adminRepo = new AdminRepositoryMemoria();
-        RestauranteRepositoryMemoria restauranteRepo = new RestauranteRepositoryMemoria();
-        ClienteRepositoryJPA clienteRepo = new ClienteRepositoryJPA();
-        CategoriaGlobalRepositoryMemoria categoriaGlobalRepo = new CategoriaGlobalRepositoryMemoria();
-        CategoriaCardapioRepositoryMemoria categoriaCardapioRepo = new CategoriaCardapioRepositoryMemoria();
-        ProdutoRepositoryMemoria produtoRepo = new ProdutoRepositoryMemoria();
-        PedidoRepositoryJPA pedidoRepo = new PedidoRepositoryJPA();
+        AdminRepositoryJPA adminRepo = new AdminRepositoryJPA(em);
+        RestauranteRepositoryJPA restauranteRepo = new RestauranteRepositoryJPA(em);
+        ClienteRepositoryJPA clienteRepo = new ClienteRepositoryJPA(em);
+        CategoriaGlobalRepositoryJPA categoriaGlobalRepo = new CategoriaGlobalRepositoryJPA(em);
+        CategoriaCardapioRepositoryJPA categoriaCardapioRepo = new CategoriaCardapioRepositoryJPA(em);
+        ProdutoRepositoryJPA produtoRepo = new ProdutoRepositoryJPA(em);
+        PedidoRepositoryJPA pedidoRepo = new PedidoRepositoryJPA(em);
 
         // --- Services ---
         AutenticacaoService authService = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
