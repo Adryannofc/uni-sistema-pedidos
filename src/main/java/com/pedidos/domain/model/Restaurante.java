@@ -1,9 +1,9 @@
 package com.pedidos.domain.model;
 
 import com.pedidos.domain.enums.TipoUsuario;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
+import java.util.List;
 
 
 @Entity
@@ -14,8 +14,12 @@ public class Restaurante extends Usuario {
 
     private String cnpj;
     private boolean statusAtivo;
-    private String categoriaGlobalId;
     private String telefone;
+    private String categoriaGlobalId;
+
+
+    @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL)
+    private List<Produto> produtos;
 
     public Restaurante(String nome, String email, String senhaHash,String cnpj) {
         super(nome, email, senhaHash, TipoUsuario.RESTAURANTE);

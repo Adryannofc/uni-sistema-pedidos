@@ -23,6 +23,10 @@ public class Endereco {
     @Column (name = "cep")
     private String cep;
 
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
+
     public Endereco(String rua, String numero, String bairro, String cidade, String estado, String cep) {
         this.rua = rua;
         this.numero = numero;

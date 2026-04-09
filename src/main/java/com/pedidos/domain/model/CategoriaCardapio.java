@@ -1,5 +1,6 @@
 package com.pedidos.domain.model;
 
+import java.util.List;
 import java.util.UUID;
 import jakarta.persistence.*;
 
@@ -18,8 +19,13 @@ public class CategoriaCardapio {
     @Column (name = "descricao")
     private String descricao;
 
-    @Column (name = "restaurante_Id")
+    @ManyToOne
+    @JoinColumn (name = "restaurante_Id")
     private String restauranteId;
+
+    @OneToMany(mappedBy = "categoriaCardapio")
+    private List<Produto> produtos;
+
 
     public CategoriaCardapio(String nome, String descricao, String restauranteId) {
         this.id = UUID.randomUUID().toString();
