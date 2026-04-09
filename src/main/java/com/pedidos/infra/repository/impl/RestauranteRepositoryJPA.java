@@ -1,56 +1,100 @@
 package com.pedidos.infra.repository.impl;
 
+import com.pedidos.domain.model.Restaurante;
 import com.pedidos.domain.model.Usuario;
 import com.pedidos.domain.repository.RestauranteRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 
-import java.util.*;
-import com.pedidos.domain.model.Restaurante;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Optional;
+
 public class RestauranteRepositoryJPA implements RestauranteRepository {
 
-    private final HashMap<String, Usuario> storage = new HashMap<>();
+    private final EntityManager em;
+
+    public RestauranteRepositoryJPA (EntityManager em)
+    {
+        this.em = em;
+    };
+
 
     @Override
-    public void salvar(Usuario usuario) {
-        storage.put(usuario.getId().toString(), usuario);
-    }
+    public void salvar(Usuario usuario)
+    {
+        try {
+            em.getTransaction().begin();
+            em.persist(usuario);
+
+            em.getTransaction().commit();
+
+        }catch (Exception e){
+            em.getTransaction().rollback();
+            throw new RuntimeException("Erro ao salvar restaurante", e);
+        };
+
+    };
 
     @Override
-    public Optional<Usuario> buscarPorId(String id) {
-        return Optional.ofNullable(storage.get(id));
+    public Optional<Usuario> buscarPorId(String id){
+
+            return Optional.ofNullable(em.find(Usuario.class, id));
     }
 
     @Override
     public Optional<Usuario> buscarPorEmail(String email) {
-        return storage.values().stream()
-                .filter(u -> Objects.equals(u.getEmail(), email))
-                .findFirst();
+        return Optional.empty();
     }
 
     @Override
     public List<Usuario> listarTodos() {
-        return Collections.unmodifiableList(new ArrayList<>(storage.values()));
+        return List.of();
+    }
+
+    ;
+
+    @Override
+    public List<Restaurante> listarRestaurantes(){
+        return em.createQuery("SELECT p FROM Restaurantes p", Restaurante.class).getResultList();
+    };
+
+    @Override
+    public void deletar (String id) {
+        try {
+            em.getTransaction().begin();
+            Restaurante restaurante = em.find(Restaurante.class, id);
+            if (restaurante != null) {
+                em.remove(restaurante);
+            }
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Erro ao deletar produto", e);
+        }
+
     }
 
     @Override
-    public void deletar(String id) {
-        storage.remove(id);
+    public Optional<Usuario> buscarPorEmailSenha(String email, String senha) {
+        try {
+
+            String jpql = "SELECT u FROM Usuario u WHERE u.email = :email AND u.senhaHash = :senha";
+
+            Usuario usuario = em.createQuery(jpql, Usuario.class)
+                    .setParameter("email", email) // Define o valor do parâmetro :email
+                    .setParameter("senha", senha) // Define o valor do parâmetro :senha
+                    .getSingleResult(); // Busca apenas um resultado
+
+            return Optional.ofNullable(usuario);
+
+        } catch (NoResultException e) {
+
+            return Optional.empty();
+        }
     }
 
-    @Override
-    public Usuario buscarPorEmailSenha(String email, String senhaHash) {
-        return storage.values().stream()
-                .filter(u -> Objects.equals(u.getEmail(), email) && u.verificarSenha(senhaHash))
-                .findFirst()
-                .orElse(null);
-    }
 
-    @Override
-    public List<Restaurante> listarRestaurantes() {
-        return storage.values().stream()
-                .filter(u -> u instanceof Restaurante)
-                .map(u -> (Restaurante) u)
-                .collect(Collectors.toList());
-    }
 }
 
