@@ -24,11 +24,11 @@ public class Main {
 
         // --- Repositórios ---
         AdminRepositoryMemoria adminRepo = new AdminRepositoryMemoria();
-        RestauranteRepositoryMemoria restauranteRepo = new RestauranteRepositoryMemoria();
+        RestauranteRepositoryJPA restauranteRepo = new RestauranteRepositoryJPA();
         ClienteRepositoryMemoria clienteRepo = new ClienteRepositoryMemoria();
         CategoriaGlobalRepositoryMemoria categoriaGlobalRepo = new CategoriaGlobalRepositoryMemoria();
         CategoriaCardapioRepositoryMemoria categoriaCardapioRepo = new CategoriaCardapioRepositoryMemoria();
-        ProdutoRepositoryMemoria produtoRepo = new ProdutoRepositoryMemoria();
+        ProdutoRepositoryJPA produtoRepo = new ProdutoRepositoryJPA();
         PedidoRepositoryMemoria pedidoRepo = new PedidoRepositoryMemoria();
 
         // --- Services ---
