@@ -6,7 +6,7 @@ public class FlyWayconfig {
     public static void migrate() {
         Flyway flyway = Flyway.configure()
                 .dataSource(
-                        "jdbc:postgresql://localhost:5432/delivery_db",
+                        "jdbc:postgresql://localhost:5432/deliveryapp",
                         "postgres",
                         "postgres"
                 )

@@ -21,7 +21,7 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
             em.getTransaction().commit();
         } catch (Exception e){
             em.getTransaction().rollback();
-            throw new RuntimeException("Erro ao salvar o usuário", e);
+            throw new RuntimeException("Erro ao salvar a categoria no cardapio", e);
         }
     }
 
@@ -32,7 +32,7 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
             em.getTransaction().commit();
         } catch (Exception e){
             em.getTransaction().rollback();
-            throw new RuntimeException("Erro em atualizar o usuário", e);
+            throw new RuntimeException("Erro em atualizar a categoria no cardapio", e);
         }
     }
 
@@ -48,7 +48,7 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
         }
         catch (Exception e) {
             em.getTransaction().rollback();
-            throw new RuntimeException("Erro ao deletar admin", e);
+            throw new RuntimeException("Erro ao remover a categoria no cardapio", e);
         }
     }
 

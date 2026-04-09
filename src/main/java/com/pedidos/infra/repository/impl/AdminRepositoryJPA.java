@@ -48,7 +48,7 @@ public class AdminRepositoryJPA implements AdminRepository {
         }
         catch (Exception e) {
             em.getTransaction().rollback();
-            throw new RuntimeException("Erro ao deletar admin", e);
+            throw new RuntimeException("Erro ao remover admin", e);
         }
     }
 

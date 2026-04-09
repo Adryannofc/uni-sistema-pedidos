@@ -19,7 +19,7 @@ public class CategoriaGlobalRepositoryJPA implements CategoriaGlobalRepository {
             em.getTransaction().commit();
         } catch (Exception e){
             em.getTransaction().rollback();
-            throw new RuntimeException("Erro ao salvar o usuário", e);
+            throw new RuntimeException("Erro ao salvar o categoria global", e);
         }
     }
 
@@ -30,7 +30,7 @@ public class CategoriaGlobalRepositoryJPA implements CategoriaGlobalRepository {
             em.getTransaction().commit();
         } catch (Exception e){
             em.getTransaction().rollback();
-            throw new RuntimeException("Erro em atualizar o usuário", e);
+            throw new RuntimeException("Erro em atualizar categoria global", e);
         }
     }
 
@@ -46,7 +46,7 @@ public class CategoriaGlobalRepositoryJPA implements CategoriaGlobalRepository {
         }
         catch (Exception e) {
             em.getTransaction().rollback();
-            throw new RuntimeException("Erro ao deletar admin", e);
+            throw new RuntimeException("Erro ao remover categoria global", e);
         }
     }
 
