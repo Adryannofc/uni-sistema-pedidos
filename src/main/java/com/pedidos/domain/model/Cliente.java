@@ -19,6 +19,22 @@ public class Cliente extends Usuario {
     @OneToOne(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Endereco enderecoEntrega;
 
+    @ManyToMany
+    @JoinTable(
+            name = "cliente_restaurantes_favoritos",
+            joinColumns = @JoinColumn(name = "cliente_id"),
+            inverseJoinColumns = @JoinColumn(name = "restaurante_id")
+    )
+    private List<Restaurante> favoritos = new ArrayList<>();
+
+    public void adicionarFavorito(Restaurante restaurante) {
+        this.favoritos.add(restaurante);
+    }
+
+    public void removerFavorito(Restaurante restaurante) {
+        this.favoritos.remove(restaurante);
+    }
+
     protected Cliente() {}
 
     public Cliente(String nome, String email, String senhaHash, String cpf, String telefone) {
@@ -26,6 +42,8 @@ public class Cliente extends Usuario {
         this.cpf = cpf;
         this.telefone = telefone;
     }
+
+    public List<Restaurante> getFavoritos() { return favoritos; }
 
     public String getCpf() { return cpf; }
 
@@ -52,6 +70,10 @@ public class Cliente extends Usuario {
         if (endereco != null) {
             endereco.setCliente(this);
         }
+    }
+
+    public List<Restaurante> listarFavoritos(Cliente cliente) {
+        return cliente.getFavoritos();
     }
 
     @Override

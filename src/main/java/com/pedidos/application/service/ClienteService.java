@@ -2,10 +2,13 @@ package com.pedidos.application.service;
 
 import com.pedidos.domain.model.Cliente;
 import com.pedidos.domain.model.Endereco;
+import com.pedidos.domain.model.Restaurante;
 import com.pedidos.domain.model.Usuario;
 import com.pedidos.domain.repository.AdminRepository;
 import com.pedidos.domain.repository.ClienteRepository;
 import com.pedidos.domain.repository.RestauranteRepository;
+
+import java.util.List;
 
 public class ClienteService {
     private final ClienteRepository clienteRepository;
@@ -18,6 +21,15 @@ public class ClienteService {
         this.autenticacaoService = autenticacaoService;
         this.adminRepository = adminRepository;
         this.restauranteRepository = restauranteRepository;
+    }
+
+    public void favoritar(Cliente cliente, Restaurante restaurante) {
+        if (cliente.getFavoritos().contains(restaurante)) {
+            cliente.removerFavorito(restaurante);
+        } else {
+            cliente.adicionarFavorito(restaurante);
+        }
+        clienteRepository.salvar(cliente);
     }
 
     // Cadastro
