@@ -14,12 +14,12 @@
         <class>com.pedidos.domain.model.Admin</class>
         <class>com.pedidos.domain.model.Cliente</class>
         <class>com.pedidos.domain.model.Restaurante</class>
-        <class>com.pedidos.domain.model.Produto</class>
+        <class>com.pedidos.domain.model.Endereco</class>
         <class>com.pedidos.domain.model.CategoriaGlobal</class>
         <class>com.pedidos.domain.model.CategoriaCardapio</class>
+        <class>com.pedidos.domain.model.Produto</class>
         <class>com.pedidos.domain.model.Pedido</class>
         <class>com.pedidos.domain.model.ItemPedido</class>
-
         <properties>
 
             <!-- JDBC LOCAL -->

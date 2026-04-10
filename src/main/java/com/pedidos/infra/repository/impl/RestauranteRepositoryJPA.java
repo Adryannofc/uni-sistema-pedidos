@@ -85,7 +85,6 @@ public class RestauranteRepositoryJPA implements RestauranteRepository {
     @Override
     public Usuario buscarPorEmailSenha(String email, String senha) {
         try {
-
             String jpql = "SELECT u FROM Usuario u WHERE u.email = :email AND u.senhaHash = :senha";
 
             return em.createQuery(jpql, Usuario.class)
@@ -99,7 +98,5 @@ public class RestauranteRepositoryJPA implements RestauranteRepository {
             return null;
         }
     }
-
-
 }
 
