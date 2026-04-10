@@ -39,7 +39,7 @@ public class CarrinhoService {
                         "Produto pertence a outro restaurante. Esvazie o carrinho antes.");
             }
             carrinho.adicionarItem(
-                    produto,
+                    produto.getId(),
                     produto.getNome(),
                     quantidade,
                     produto.getPreco()
