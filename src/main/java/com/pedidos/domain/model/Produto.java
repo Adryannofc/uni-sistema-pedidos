@@ -23,7 +23,7 @@ public class Produto {
     private BigDecimal preco;
 
     @ManyToOne
-    @JoinColumn (name = "cateoriaCardapio_Id")
+    @JoinColumn (name = "cateoria_cardapio_Id")
     private String categoriaCardapioId;
 
     @ManyToOne
@@ -32,6 +32,10 @@ public class Produto {
 
     @Column (name = "status_Ativo")
     private boolean statusAtivo;
+
+    public Produto() {
+
+    }
 
     // Construtor completo — carregado do banco (UUID já existente)
     public Produto(String nome, String descricao, BigDecimal preco, String categoriaCardapioId, String restauranteId) {

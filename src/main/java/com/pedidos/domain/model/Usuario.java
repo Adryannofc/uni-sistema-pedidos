@@ -26,7 +26,6 @@ public abstract class Usuario {
     @Column(name = "tipo_usuario", nullable = false)
     private TipoUsuario tipoUsuario;
 
-
     protected Usuario() {}
 
     public Usuario(String nome, String email, String senhaHash, TipoUsuario tipoUsuario) {

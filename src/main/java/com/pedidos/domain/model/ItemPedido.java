@@ -1,24 +1,41 @@
 package com.pedidos.domain.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
+@Entity
+
 public class ItemPedido {
 
-    private String produtoId;
     private String nomeProduto;
     private int quantidade;
     private BigDecimal precoUnitario;
 
-    public ItemPedido(String produtoId, String nomeProduto, int quantidade, BigDecimal precoUnitario) {
-        this.produtoId = produtoId;
+    @ManyToOne
+    @JoinColumn(name = "pedido_id")
+    private Pedido pedido;
+
+    @ManyToOne
+    @JoinColumn(name = "produto_id")
+    private Produto produto;
+
+    public ItemPedido() {
+
+    }
+
+    public ItemPedido(Produto produto, String nomeProduto, int quantidade, BigDecimal precoUnitario) {
+        this.produto = produto;
         this.nomeProduto = nomeProduto;
         this.quantidade = quantidade;
         this.precoUnitario = precoUnitario;
     }
 
     public String getProdutoId() {
-        return produtoId;
+        return produto.getId();
     }
 
     public String getNomeProduto() {
@@ -40,7 +57,7 @@ public class ItemPedido {
     @Override
     public String toString() {
         return "ItemPedido{" +
-                "produtoId='" + produtoId + '\'' +
+                "produtoId='" + produto + '\'' +
                 ", nomeProduto='" + nomeProduto + '\'' +
                 ", quantidade=" + quantidade +
                 ", precoUnitario=" + precoUnitario +
