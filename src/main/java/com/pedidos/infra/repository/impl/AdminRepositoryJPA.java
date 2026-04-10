@@ -17,7 +17,7 @@ public class AdminRepositoryJPA implements AdminRepository {
     public void salvar(Usuario usuario) {
         try {
             em.getTransaction().begin();
-            em.persist(usuario);
+            em.merge(usuario);
             em.getTransaction().commit();
         } catch (Exception e){
             em.getTransaction().rollback();

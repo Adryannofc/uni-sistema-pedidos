@@ -53,17 +53,21 @@ public class AutenticacaoService {
      * @throw tratamento de erro na autenticação
      */
     public Usuario autenticar(String email, String senha) {
-        String senhaHash = hashSenha(senha);
+        try {
+            String senhaHash = hashSenha(senha);
 
-        Usuario usuario = adminRepository.buscarPorEmailSenha(email, senhaHash);
-        if (usuario != null) return usuario;
+            Usuario usuario = adminRepository.buscarPorEmailSenha(email, senhaHash);
+            if (usuario != null) return usuario;
 
-        usuario = restauranteRepository.buscarPorEmailSenha(email, senhaHash);
-        if (usuario != null) return usuario;
+            usuario = restauranteRepository.buscarPorEmailSenha(email, senhaHash);
+            if (usuario != null) return usuario;
 
-        usuario = clienteRepository.buscarPorEmailSenha(email, senhaHash);
-        if (usuario != null) return usuario;
+            usuario = clienteRepository.buscarPorEmailSenha(email, senhaHash);
+            if (usuario != null) return usuario;
 
-        throw new RuntimeException("Email ou senha inválidos.");
+            throw new RuntimeException("Email ou senha inválidos.");
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 }
