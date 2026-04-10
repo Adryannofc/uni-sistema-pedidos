@@ -65,8 +65,7 @@ WHERE usuario_id = 'u-rest-02';
 
 INSERT INTO enderecos (id, rua, numero, bairro, cidade, estado, cep, cliente_id)
 VALUES ('end-01', 'Rua das Flores',       '100', 'Centro',   'Maringá',  'PR', '87010000', 'u-cli-01'),
-       ('end-02', 'Av. Brasil',           '250', 'Zona Sul', 'Maringá',  'PR', '87020000', 'u-cli-01'),
-       ('end-03', 'Rua Sete de Setembro', '42',  'Jardim',   'Londrina', 'PR', '86010000', 'u-cli-02');
+       ('end-02', 'Rua Sete de Setembro', '42',  'Jardim',   'Londrina', 'PR', '86010000', 'u-cli-02');
 
 SELECT e.id, u.nome AS cliente, e.rua, e.numero, e.cidade
 FROM enderecos e
@@ -148,7 +147,7 @@ WHERE id = 'ip-01';
 
 DELETE FROM itens_pedido        WHERE id         = 'ip-02';
 DELETE FROM pedidos             WHERE id         = 'ped-02';
-DELETE FROM enderecos           WHERE id         = 'end-03';
+DELETE FROM enderecos           WHERE id         = 'end-02';
 DELETE FROM produtos            WHERE id         = 'p-04';
 DELETE FROM produtos            WHERE id         = 'p-05';
 DELETE FROM categorias_cardapio WHERE id         = 'cc-03';

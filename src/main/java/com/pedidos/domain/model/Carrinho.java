@@ -16,17 +16,17 @@ public class Carrinho {
         this.restauranteId = restauranteId;
     }
 
-    public void adicionarItem(Produto produto, String nomeProduto,
+    public void adicionarItem(String produtoId, String nomeProduto,
                               int quantidade, BigDecimal precoUnitario) {
         for (int i = 0; i < itens.size(); i++) {
-            if (itens.get(i).getProdutoId().equals(produto)) {
+            if (itens.get(i).getProdutoId().equals(produtoId)) {
                 ItemPedido existente = itens.get(i);
-                itens.set(i, new ItemPedido(produto, nomeProduto,
+                itens.set(i, new ItemPedido(produtoId, nomeProduto,
                         existente.getQuantidade() + quantidade, precoUnitario));
                 return;
             }
         }
-        itens.add(new ItemPedido(produto, nomeProduto, quantidade, precoUnitario));
+        itens.add(new ItemPedido(produtoId, nomeProduto, quantidade, precoUnitario));
     }
 
     public void removerItem(String produtoId) {

@@ -9,7 +9,6 @@ import com.pedidos.domain.enums.TipoUsuario;
 public abstract class Usuario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
     private String id;
 

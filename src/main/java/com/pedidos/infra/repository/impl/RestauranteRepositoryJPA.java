@@ -88,11 +88,13 @@ public class RestauranteRepositoryJPA implements RestauranteRepository {
             String jpql = "SELECT u FROM Usuario u WHERE u.email = :email AND u.senhaHash = :senha";
 
             return em.createQuery(jpql, Usuario.class)
-                    .setParameter("email", email)
-                    .setParameter("senha", senha)
-                    .getSingleResult();
+                    .setParameter("email", email) // Define o valor do parâmetro :email
+                    .setParameter("senha", senha) // Define o valor do parâmetro :senha
+                    .getSingleResult(); // Busca apenas um resultado
+
 
         } catch (NoResultException e) {
+
             return null;
         }
     }
