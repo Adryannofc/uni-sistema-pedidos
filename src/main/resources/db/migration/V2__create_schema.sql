@@ -91,3 +91,13 @@ CREATE TABLE itens_pedido
     quantidade     INT            NOT NULL,
     preco_unitario DECIMAL(10, 2) NOT NULL
 );
+
+CREATE TABLE cliente_restaurantes_favoritos (
+   cliente_id VARCHAR(36) NOT NULL,
+   restaurante_id VARCHAR(36) NOT NULL,
+   PRIMARY KEY (cliente_id, restaurante_id),
+   CONSTRAINT fk_cliente FOREIGN KEY (cliente_id)
+   REFERENCES clientes(usuario_id) ON DELETE CASCADE,
+   CONSTRAINT fk_restaurante FOREIGN KEY (restaurante_id)
+   REFERENCES restaurantes(usuario_id) ON DELETE CASCADE
+);

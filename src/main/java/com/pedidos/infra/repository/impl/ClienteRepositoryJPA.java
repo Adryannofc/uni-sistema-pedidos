@@ -75,6 +75,8 @@ public class ClienteRepositoryJPA implements ClienteRepository {
         }catch (NoResultException e){
             return null;
         }
+
+
     }
 }
 

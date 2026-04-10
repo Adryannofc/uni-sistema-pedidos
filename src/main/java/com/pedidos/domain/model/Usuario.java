@@ -3,6 +3,8 @@ package com.pedidos.domain.model;
 import jakarta.persistence.*;
 import com.pedidos.domain.enums.TipoUsuario;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "usuarios")
 @Inheritance(strategy = InheritanceType.JOINED)
