@@ -21,7 +21,7 @@ public class Restaurante extends Usuario {
 
     @ManyToOne
     @JoinColumn(name = "categoria_global_id")
-    private String categoriaGlobalId;
+    private CategoriaGlobal categoriaGlobalId;
 
     @OneToMany(mappedBy = "restaurante")
     private List<CategoriaCardapio> categorias;

@@ -26,7 +26,7 @@ public class Pedido {
     private String restauranteId;
 
     @OneToMany
-    @JoinColumn (mappedBy = "pedido")
+    @JoinColumn (name = "itens_pedido")
     private List<ItemPedido> itens;
 
     @Column (name = "status")

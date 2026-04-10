@@ -6,6 +6,10 @@ import jakarta.persistence.*;
 @Table(name = "Enderecos")
 public class Endereco {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column (name = "rua")
     private String rua;
 

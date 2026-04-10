@@ -24,11 +24,11 @@ public class Produto {
 
     @ManyToOne
     @JoinColumn (name = "cateoria_cardapio_Id")
-    private String categoriaCardapioId;
+    private CategoriaCardapio categoriaCardapioId;
 
     @ManyToOne
     @JoinColumn (name = "restaurante_Id")
-    private String restauranteId;
+    private Restaurante restauranteId;
 
     @Column (name = "status_Ativo")
     private boolean statusAtivo;

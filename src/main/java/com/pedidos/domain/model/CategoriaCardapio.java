@@ -21,7 +21,7 @@ public class CategoriaCardapio {
 
     @ManyToOne
     @JoinColumn (name = "restaurante_Id")
-    private String restauranteId;
+    private Restaurante restauranteId;
 
     @OneToMany(mappedBy = "categoria")
     private List<Produto> produtos;
