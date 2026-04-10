@@ -59,13 +59,13 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
 
     @Override
     public List<CategoriaCardapio> buscarPorRestauranteId(String restauranteId){
-        return em.createQuery("select c from categorias_cardapio c where c.restaurante_Id = :restauranteId",CategoriaCardapio.class)
+        return em.createQuery("select c from CategoriaCardapio c where c.restauranteId = :restauranteId",CategoriaCardapio.class)
                     .setParameter("restauranteId", restauranteId)
                     .getResultList();
     }
 
     @Override
     public List<CategoriaCardapio> listarTodos() {
-        return em.createQuery("select u from categorias_cardapio u").getResultList();
+        return em.createQuery("select u from CategoriaCardapio u", CategoriaCardapio.class).getResultList();
     }
 }

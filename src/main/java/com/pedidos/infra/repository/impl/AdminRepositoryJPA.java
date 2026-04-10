@@ -60,7 +60,7 @@ public class AdminRepositoryJPA implements AdminRepository {
     @Override
     public Optional<Usuario> buscarPorEmail(String email){
         try {
-            Usuario usuario = em.createQuery("select u from usuarios u where u.email = :email",Usuario.class)
+            Usuario usuario = em.createQuery("select u from Usuario u where u.email = :email",Usuario.class)
                     .setParameter("email", email)
                     .getSingleResult();
             return Optional.of(usuario);
@@ -71,15 +71,20 @@ public class AdminRepositoryJPA implements AdminRepository {
 
     @Override
     public Usuario buscarPorEmailSenha(String email, String senha) {
-        return em.createQuery("select u from usuarios u where u.email = :email and u.senha = :senha", Usuario.class)
-                .setParameter("email", email)
-                .setParameter("senha", senha)
-                .getSingleResult();
+        try {
+            return em.createQuery("select u from Usuario u where u.email = :email and u.senhaHash = :senha", Usuario.class)
+                    .setParameter("email", email)
+                    .setParameter("senha", senha)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+
     }
 
     @Override
     public List<Usuario> listarTodos() {
-        return em.createQuery("select u from usuarios u").getResultList();
+        return em.createQuery("select u from Usuario u", Usuario.class).getResultList();
     }
 }
 

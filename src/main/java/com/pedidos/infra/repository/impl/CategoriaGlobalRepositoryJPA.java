@@ -4,6 +4,7 @@ import com.pedidos.domain.model.CategoriaCardapio;
 import com.pedidos.domain.model.CategoriaGlobal;
 import com.pedidos.domain.repository.CategoriaGlobalRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 
 import java.util.*;
 
@@ -57,11 +58,17 @@ public class CategoriaGlobalRepositoryJPA implements CategoriaGlobalRepository {
 
     @Override
     public Optional<CategoriaGlobal> buscarPorNome(String nome) {
-        return Optional.ofNullable(em.find(CategoriaGlobal.class, nome));
+        try {
+            return Optional.of(em.createQuery("select c from CategoriaGlobal c where c.nome = :nome", CategoriaGlobal.class)
+                    .setParameter("nome", nome)
+                    .getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
     public List<CategoriaGlobal> listarTodos() {
-        return em.createQuery("select c from categorias_globais c").getResultList();
+        return em.createQuery("select c from CategoriaGlobal c", CategoriaGlobal.class).getResultList();
     }
 }

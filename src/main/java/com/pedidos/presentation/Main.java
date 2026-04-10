@@ -44,13 +44,6 @@ public class Main {
         PedidoService pedidoService = new PedidoService(pedidoRepo);
         CarrinhoService carrinhoService = new CarrinhoService();
 
-        // --- Seed ---
-        DataSeeder seeder = new DataSeeder(
-                adminRepo, clienteRepo, restauranteRepo, authService,
-                produtoRepo, categoriaGlobalRepo, categoriaCardapioRepo
-        );
-        seeder.popular();
-
         // --- Inicia aplicação ---
         new MenuLogin(
                 authService, adminService, clienteService,
