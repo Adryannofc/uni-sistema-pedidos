@@ -45,7 +45,6 @@ public class CarrinhoService {
                 produto.getPreco()
         );
     }
-
     /** Remove um item do carrinho pelo ID do produto.*/
     public void removerItem(String produtoId) {
         validarCarrinhoAtivo();
