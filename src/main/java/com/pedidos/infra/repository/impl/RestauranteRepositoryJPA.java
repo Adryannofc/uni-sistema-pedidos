@@ -37,25 +37,31 @@ public class RestauranteRepositoryJPA implements RestauranteRepository {
 
     @Override
     public Optional<Usuario> buscarPorId(String id){
-
             return Optional.ofNullable(em.find(Usuario.class, id));
     }
 
     @Override
     public Optional<Usuario> buscarPorEmail(String email) {
-        return Optional.empty();
+        try {
+            return Optional.ofNullable(em.createQuery("select r from Restaurante r where r.email = :email", Restaurante.class)
+                    .setParameter("email", email)
+                    .getSingleResult()
+            );
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
     public List<Usuario> listarTodos() {
-        return List.of();
+        return em.createQuery("select r from Restaurante r", Usuario.class).getResultList();
     }
 
     ;
 
     @Override
     public List<Restaurante> listarRestaurantes(){
-        return em.createQuery("SELECT p FROM Restaurantes p", Restaurante.class).getResultList();
+        return em.createQuery("SELECT r FROM Restaurante r", Restaurante.class).getResultList();
     };
 
     @Override

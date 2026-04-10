@@ -4,6 +4,7 @@ import com.pedidos.domain.model.CategoriaGlobal;
 import com.pedidos.domain.model.Endereco;
 import com.pedidos.domain.repository.EnderecoRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 
 import java.util.Optional;
 
@@ -40,8 +41,8 @@ public class EnderecoRepositoryJPA implements EnderecoRepository {
         try {
             em.getTransaction().begin();
             Endereco endereco = em.find(Endereco.class, clienteId);
-            if (clienteId != null) {
-                em.remove(clienteId);
+            if (endereco != null) {
+                em.remove(endereco);
             }
             em.getTransaction().commit();
         }
@@ -53,6 +54,13 @@ public class EnderecoRepositoryJPA implements EnderecoRepository {
 
     @Override
     public Optional<Endereco> buscarPorCliente(String clienteId) {
-        return Optional.ofNullable(em.find(Endereco.class, clienteId));
+        try {
+            return Optional.ofNullable(em.createQuery("select e from Endereco e where e.cliente.id = :cid", Endereco.class)
+                    .setParameter("cid", clienteId)
+                    .getSingleResult()
+            );
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 }
