@@ -83,24 +83,18 @@ public class RestauranteRepositoryJPA implements RestauranteRepository {
     }
 
     @Override
-    public Optional<Usuario> buscarPorEmailSenha(String email, String senha) {
+    public Usuario buscarPorEmailSenha(String email, String senha) {
         try {
-
             String jpql = "SELECT u FROM Usuario u WHERE u.email = :email AND u.senhaHash = :senha";
 
-            Usuario usuario = em.createQuery(jpql, Usuario.class)
-                    .setParameter("email", email) // Define o valor do parâmetro :email
-                    .setParameter("senha", senha) // Define o valor do parâmetro :senha
-                    .getSingleResult(); // Busca apenas um resultado
-
-            return Optional.ofNullable(usuario);
+            return em.createQuery(jpql, Usuario.class)
+                    .setParameter("email", email)
+                    .setParameter("senha", senha)
+                    .getSingleResult();
 
         } catch (NoResultException e) {
-
-            return Optional.empty();
+            return null;
         }
     }
-
-
 }
 
