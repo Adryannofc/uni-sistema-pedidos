@@ -2,16 +2,39 @@ package com.pedidos.domain.model;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+import jakarta.persistence.*;
 
+
+@Entity
+@Table (name = "produtos")
 public class Produto {
 
-    private final String id;
+    @Id
+    @Column(name = "id", updatable = false, nullable = false)
+    private String id;
+
+    @Column (name = "nome")
     private String nome;
+
+    @Column (name = "descricao")
     private String descricao;
+
+    @Column (name = "preco", precision = 10, scale = 2)
     private BigDecimal preco;
+
+    @Column(name = "categoria_cardapio_id")
     private String categoriaCardapioId;
-    private String restauranteId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurante_id", nullable = false)
+    private Restaurante restaurante;
+
+    @Column (name = "status_Ativo")
     private boolean statusAtivo;
+
+    protected Produto() {
+
+    }
 
     // Construtor completo — carregado do banco (UUID já existente)
     public Produto(String nome, String descricao, BigDecimal preco, String categoriaCardapioId, String restauranteId) {
@@ -20,7 +43,6 @@ public class Produto {
         setDescricao(descricao);
         setPreco(preco);
         this.categoriaCardapioId = categoriaCardapioId;
-        this.restauranteId = restauranteId;
         this.statusAtivo = true; // começa ativo por padrão
     }
 
@@ -48,7 +70,7 @@ public class Produto {
     }
 
     public String getRestauranteId() {
-        return restauranteId;
+        return restaurante != null ? restaurante.getId() : null;
     }
 
     public boolean isStatusAtivo() {
@@ -72,10 +94,9 @@ public class Produto {
     }
 
     public void setPreco(BigDecimal preco) {
-        if (preco == null || preco.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Preço não pode ser nulo ou negativo.");
+        if (preco == null || preco.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Preço deve ser maior que zero.");
         }
         this.preco = preco;
     }
 }
-

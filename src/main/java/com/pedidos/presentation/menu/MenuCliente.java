@@ -84,12 +84,13 @@ public class MenuCliente {
             System.out.println(TerminalUtils.linha("  4  \u00bb  Editar CPF"));
             System.out.println(TerminalUtils.linha("  5  \u00bb  Editar Telefone"));
             System.out.println(TerminalUtils.linha("  6  \u00bb  Alterar Senha"));
+            System.out.println(TerminalUtils.linha("  7  \u00bb  Meu Endereco"));
             System.out.println(TerminalUtils.SEPARADOR);
             System.out.println(TerminalUtils.linha("  0  \u00bb  Voltar"));
             System.out.println(TerminalUtils.BASE);
             System.out.print("\n  Escolha uma opcao: ");
 
-            int opcao = EntradaSegura.lerOpcao(scanner, 0, 6);
+            int opcao = EntradaSegura.lerOpcao(scanner, 0, 7);
 
             switch (opcao) {
                 case 1 -> acaoVisualizarPerfil();
@@ -98,7 +99,10 @@ public class MenuCliente {
                 case 4 -> acaoEditarCpf();
                 case 5 -> acaoEditarTelefone();
                 case 6 -> acaoAlterarSenha();
-                case 0 -> { return; }
+                case 7 -> acaoEditarEndereco();
+                case 0 -> {
+                    return;
+                }
             }
         }
     }
@@ -106,11 +110,13 @@ public class MenuCliente {
     private void acaoVisualizarPerfil() {
         TerminalUtils.limparTela();
         TerminalUtils.cabecalho("VISUALIZAR PERFIL");
-        System.out.println("  ID      : " + clienteLogado.getId());
-        System.out.println("  Nome    : " + clienteLogado.getNome());
-        System.out.println("  E-mail  : " + clienteLogado.getEmail());
-        System.out.println("  CPF     : " + clienteLogado.getCpf());
-        System.out.println("  Telefone: " + clienteLogado.getTelefone());
+        System.out.println("  ID       : " + clienteLogado.getId());
+        System.out.println("  Nome     : " + clienteLogado.getNome());
+        System.out.println("  E-mail   : " + clienteLogado.getEmail());
+        System.out.println("  CPF      : " + clienteLogado.getCpf());
+        System.out.println("  Telefone : " + clienteLogado.getTelefone());
+        Endereco end = clienteLogado.getEnderecoEntrega();
+        System.out.println("  Endereco : " + (end != null ? end.toString() : "Nao cadastrado"));
         TerminalUtils.pausar();
     }
 
@@ -190,6 +196,32 @@ public class MenuCliente {
         TerminalUtils.pausar();
     }
 
+    private void acaoEditarEndereco() {
+        TerminalUtils.limparTela();
+        TerminalUtils.cabecalho("MEU ENDERECO");
+        try {
+            Endereco atual = clienteLogado.getEnderecoEntrega();
+            if (atual != null) {
+                System.out.println("  Atual: " + atual);
+            } else {
+                System.out.println("  Nenhum endereco cadastrado.");
+            }
+            System.out.println();
+            System.out.print("  Rua    : "); String rua = scanner.nextLine().trim();
+            System.out.print("  Numero : "); String numero = scanner.nextLine().trim();
+            System.out.print("  Bairro : "); String bairro = scanner.nextLine().trim();
+            System.out.print("  Cidade : "); String cidade = scanner.nextLine().trim();
+            System.out.print("  Estado : "); String estado = scanner.nextLine().trim();
+            System.out.print("  CEP    : "); String cep = scanner.nextLine().trim();
+
+            clienteService.salvarEndereco(clienteLogado, rua, numero, bairro, cidade, estado, cep);
+            TerminalUtils.sucesso("Endereco salvo com sucesso.");
+        } catch (Exception e) {
+            TerminalUtils.erro(e.getMessage());
+        }
+        TerminalUtils.pausar();
+    }
+
     private void acaoAlterarSenha() {
         TerminalUtils.limparTela();
         TerminalUtils.cabecalho("ALTERAR SENHA");
@@ -220,8 +252,28 @@ public class MenuCliente {
             List<Pedido> pedidos = pedidoService.listarPorCliente(clienteLogado.getId());
             if (pedidos.isEmpty()) {
                 TerminalUtils.aviso("Nenhum pedido encontrado.");
-            } else {
-                exibirListaPedidos(pedidos);
+                TerminalUtils.pausar();
+                return;
+            }
+
+            exibirListaPedidos(pedidos);
+
+            Pedido paraConfirmar = null;
+            for (Pedido p : pedidos) {
+                if (p.getStatus() == StatusPedido.SAIU_PARA_ENTREGA) {
+                    paraConfirmar = p;
+                    break;
+                }
+            }
+
+            if (paraConfirmar != null) {
+                System.out.println("  Pedido " + paraConfirmar.getId().substring(0, 8) + " saiu para entrega!");
+                System.out.print("  Digite o codigo de confirmacao (ou Enter para pular): ");
+                String codigo = scanner.nextLine().trim();
+                if (!codigo.isBlank()) {
+                    pedidoService.confirmarEntrega(paraConfirmar.getId(), codigo);
+                    TerminalUtils.sucesso("Entrega confirmada!");
+                }
             }
         } catch (Exception e) {
             TerminalUtils.erro(e.getMessage());
@@ -273,7 +325,9 @@ public class MenuCliente {
                 case 1 -> acaoEscolherRestaurante();
                 case 2 -> acaoVerCarrinho();
                 case 3 -> acaoCheckout();
-                case 0 -> { return; }
+                case 0 -> {
+                    return;
+                }
             }
         }
     }
@@ -444,19 +498,29 @@ public class MenuCliente {
             System.out.println(TerminalUtils.linha("  Subtotal : " + moeda.format(carrinho.calcularSubtotal())));
             System.out.println(TerminalUtils.BASE);
 
+            Endereco endereco = clienteLogado.getEnderecoEntrega();
+            if (endereco == null) {
+                TerminalUtils.erro("Voce nao tem endereco cadastrado. Acesse Perfil > Meu Endereco.");
+                TerminalUtils.pausar();
+                return;
+            }
+            System.out.println(TerminalUtils.linha("  Entregar em: " + endereco));
+
             if (!TerminalUtils.confirmarPerigo("Confirmar pedido?", scanner)) {
                 TerminalUtils.aviso("Pedido cancelado.");
                 TerminalUtils.pausar();
                 return;
             }
 
+            String codigo = clienteLogado.getCpf().substring(0, 4);
             Pedido pedido = pedidoService.criarPedido(
-                    clienteLogado.getId(), carrinho.getRestauranteId(), carrinho);
+                    clienteLogado.getId(), carrinho.getRestauranteId(), carrinho, endereco, codigo);
 
             carrinhoService.encerrarCarrinho();
 
             TerminalUtils.sucesso("Pedido realizado! ID: " + pedido.getId().substring(0, 8)
                     + " | Total: " + moeda.format(pedido.calcularTotal()));
+            System.out.println("  Seu codigo de confirmacao de entrega: [ " + codigo + " ]");
 
         } catch (Exception e) {
             TerminalUtils.erro(e.getMessage());

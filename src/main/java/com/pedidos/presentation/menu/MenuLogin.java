@@ -70,7 +70,7 @@ public class MenuLogin {
                         MenuCategoriasCardapio menuCats = new MenuCategoriasCardapio(categoriaService, scan);
                         new MenuRestaurante(
                                 menuProdutos, menuCats,
-                                restauranteService, categoriaService, scan
+                                restauranteService, categoriaService, pedidoService, scan
                         ).exibir(restauranteLogado);
                     }
                     case CLIENTE -> {

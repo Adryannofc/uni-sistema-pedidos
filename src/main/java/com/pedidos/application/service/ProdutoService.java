@@ -25,7 +25,9 @@ public class ProdutoService {
 
     /** Lista todos os produtos do restaurante, ativos e inativos. */
     public List<Produto> listarPorRestaurante(String restauranteId) {
-        return produtoRepository.listarTodos().stream().filter(p -> p.getRestauranteId().equals(restauranteId)).collect(Collectors.toList());
+        return produtoRepository.listarTodos().stream()
+                .filter(p -> p.getRestauranteId().equals(restauranteId))
+                .collect(Collectors.toList());
     }
 
     /** Lista apenas produtos ativos do restaurante — exibidos para o cliente. */
@@ -94,6 +96,6 @@ public class ProdutoService {
 
     public Produto buscarPorId(String produtoId) {
         return produtoRepository.buscarPorId(produtoId)
-                .orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado."));
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
     }
 }

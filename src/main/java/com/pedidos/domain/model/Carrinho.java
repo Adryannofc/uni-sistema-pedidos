@@ -18,12 +18,11 @@ public class Carrinho {
 
     public void adicionarItem(String produtoId, String nomeProduto,
                               int quantidade, BigDecimal precoUnitario) {
-        // se o produto já está no carrinho, soma a quantidade
-        for (ItemPedido item : itens) {
-            if (item.getProdutoId().equals(produtoId)) {
-                itens.remove(item);
-                itens.add(new ItemPedido(produtoId, nomeProduto,
-                        item.getQuantidade() + quantidade, precoUnitario));
+        for (int i = 0; i < itens.size(); i++) {
+            if (itens.get(i).getProdutoId().equals(produtoId)) {
+                ItemPedido existente = itens.get(i);
+                itens.set(i, new ItemPedido(produtoId, nomeProduto,
+                        existente.getQuantidade() + quantidade, precoUnitario));
                 return;
             }
         }

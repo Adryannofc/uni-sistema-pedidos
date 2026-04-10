@@ -7,5 +7,5 @@ import java.util.List;
 public interface RestauranteRepository extends UsuarioRepository {
     Usuario buscarPorEmailSenha(String email, String senha);
 
-    public List<Restaurante> listarRestaurantes();
+    List<Restaurante> listarRestaurantes();
 }

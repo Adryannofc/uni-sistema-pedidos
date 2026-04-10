@@ -1,12 +1,16 @@
 package com.pedidos.presentation.restaurante;
 
 import com.pedidos.application.service.CategoriaService;
+import com.pedidos.application.service.PedidoService;
 import com.pedidos.application.service.RestauranteService;
+import com.pedidos.domain.enums.StatusPedido;
 import com.pedidos.domain.model.CategoriaGlobal;
+import com.pedidos.domain.model.Pedido;
 import com.pedidos.domain.model.Restaurante;
 import com.pedidos.presentation.util.EntradaSegura;
 import com.pedidos.presentation.util.TerminalUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -15,15 +19,18 @@ public class MenuRestaurante {
     private final MenuCategoriasCardapio menuCategorias;
     private final RestauranteService restauranteService;
     private final CategoriaService categoriaService;
+    private final PedidoService pedidoService;
     private final Scanner scanner;
 
     public MenuRestaurante(MenuProdutos menuProdutos, MenuCategoriasCardapio menuCategorias,
                            RestauranteService restauranteService,
-                           CategoriaService categoriaService, Scanner scanner) {
+                           CategoriaService categoriaService,
+                           PedidoService pedidoService, Scanner scanner) {
         this.menuProdutos = menuProdutos;
         this.menuCategorias = menuCategorias;
         this.restauranteService = restauranteService;
         this.categoriaService = categoriaService;
+        this.pedidoService = pedidoService;
         this.scanner = scanner;
     }
 
@@ -55,22 +62,24 @@ public class MenuRestaurante {
             System.out.println(TerminalUtils.SEPARADOR);
             System.out.println(TerminalUtils.linha("    1  \u00bb  Produtos"));
             System.out.println(TerminalUtils.linha("    2  \u00bb  Categorias do Cardapio"));
+            System.out.println(TerminalUtils.linha("    3  \u00bb  Pedidos"));
             System.out.println(TerminalUtils.SEPARADOR);
             System.out.println(TerminalUtils.linha("  CONTA"));
             System.out.println(TerminalUtils.SEPARADOR);
-            System.out.println(TerminalUtils.linha("    3  \u00bb  Perfil e Configuracoes"));
+            System.out.println(TerminalUtils.linha("    4  \u00bb  Perfil e Configuracoes"));
             System.out.println(TerminalUtils.SEPARADOR);
             System.out.println(TerminalUtils.linha("    0  \u00bb  Sair (Logout)"));
             System.out.println(TerminalUtils.BASE);
             System.out.println();
             System.out.print("  Escolha uma opcao: ");
 
-            int opcao = EntradaSegura.lerOpcao(scanner, 0, 3);
+            int opcao = EntradaSegura.lerOpcao(scanner, 0, 4);
 
             switch (opcao) {
                 case 1 -> menuProdutos.exibir(restauranteLogado);
                 case 2 -> menuCategorias.exibir(restauranteLogado);
-                case 3 -> exibirMenuPerfil(restauranteLogado);
+                case 3 -> menuPedidos(restauranteLogado);
+                case 4 -> exibirMenuPerfil(restauranteLogado);
                 case 0 -> {
                     if (confirmar("Deseja realmente sair da sua conta?")) {
                         return;
@@ -78,6 +87,80 @@ public class MenuRestaurante {
                 }
             }
         }
+    }
+
+    // ─── Menu de pedidos ──────────────────────────────────────────────────────
+
+    private void menuPedidos(Restaurante restauranteLogado) {
+        TerminalUtils.limparTela();
+        TerminalUtils.cabecalho("PEDIDOS", restauranteLogado.getNome());
+
+        List<Pedido> todos = pedidoService.listarPorRestaurante(restauranteLogado.getId());
+        List<Pedido> ativos = new ArrayList<>();
+        for (Pedido p : todos) {
+            if (p.getStatus() != StatusPedido.ENTREGUE && p.getStatus() != StatusPedido.CANCELADO) {
+                ativos.add(p);
+            }
+        }
+
+        if (ativos.isEmpty()) {
+            TerminalUtils.aviso("Nenhum pedido ativo no momento.");
+            TerminalUtils.pausar();
+            return;
+        }
+
+        System.out.println(TerminalUtils.TOPO);
+        System.out.println(TerminalUtils.linha("  #   ID        Status"));
+        System.out.println(TerminalUtils.SEPARADOR);
+        for (int i = 0; i < ativos.size(); i++) {
+            Pedido p = ativos.get(i);
+            System.out.println(TerminalUtils.linha(String.format(
+                    "  %-3d %-8s  %s", (i + 1), p.getId().substring(0, 8), p.getStatus())));
+        }
+        System.out.println(TerminalUtils.SEPARADOR);
+        System.out.println(TerminalUtils.linha("  0  \u00bb  Voltar"));
+        System.out.println(TerminalUtils.BASE);
+        System.out.print("\n  Selecione um pedido (0 para voltar): ");
+
+        int num = EntradaSegura.lerOpcao(scanner, 0, ativos.size());
+        if (num == 0) return;
+
+        Pedido pedido = ativos.get(num - 1);
+        avancarStatus(pedido);
+    }
+
+    private void avancarStatus(Pedido pedido) {
+        TerminalUtils.limparTela();
+        TerminalUtils.cabecalho("PEDIDO " + pedido.getId().substring(0, 8));
+        System.out.println("  Endereco : " + pedido.getEnderecoEntrega());
+        System.out.println("  Status   : " + pedido.getStatus());
+        System.out.println();
+
+        StatusPedido proximo;
+        String acao;
+
+        switch (pedido.getStatus()) {
+            case AGUARDANDO_CONFIRMACAO -> { proximo = StatusPedido.CONFIRMADO;         acao = "Confirmar pedido"; }
+            case CONFIRMADO             -> { proximo = StatusPedido.EM_PREPARO;         acao = "Iniciar preparo"; }
+            case EM_PREPARO             -> { proximo = StatusPedido.SAIU_PARA_ENTREGA;  acao = "Marcar saiu para entrega"; }
+            default -> {
+                TerminalUtils.aviso("Aguardando confirmacao do cliente para concluir.");
+                TerminalUtils.pausar();
+                return;
+            }
+        }
+
+        if (confirmar(acao + "?")) {
+            try {
+                pedidoService.atualizarStatus(pedido.getId(), proximo);
+                TerminalUtils.sucesso("Status atualizado para: " + proximo);
+            } catch (Exception e) {
+                TerminalUtils.erro(e.getMessage());
+            }
+        } else {
+            TerminalUtils.aviso("Nenhuma alteracao realizada.");
+        }
+        TerminalUtils.pausar();
     }
 
     // ─── Menu de perfil ───────────────────────────────────────────────────────

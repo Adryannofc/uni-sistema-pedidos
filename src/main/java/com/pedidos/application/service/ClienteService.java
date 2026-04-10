@@ -1,6 +1,7 @@
 package com.pedidos.application.service;
 
 import com.pedidos.domain.model.Cliente;
+import com.pedidos.domain.model.Endereco;
 import com.pedidos.domain.model.Usuario;
 import com.pedidos.domain.repository.AdminRepository;
 import com.pedidos.domain.repository.ClienteRepository;
@@ -56,6 +57,11 @@ public class ClienteService {
         clienteRepository.salvar(cliente);
     }
 
+    public void salvarEndereco(Cliente cliente, String rua, String numero, String bairro, String cidade, String estado, String cep) {
+        cliente.setEnderecoEntrega(new Endereco(rua, numero, bairro, cidade, estado, cep));
+        clienteRepository.salvar(cliente);
+    }
+
     public void editarTelefone(Cliente cliente, String novoTelefone) {
         // setTelefone() em Cliente já tem a validação de formato com regex.
         cliente.setTelefone(novoTelefone);
@@ -63,17 +69,17 @@ public class ClienteService {
     }
 
     public void alterarSenha(Usuario usuario, String senhaAtual, String novaSenha, String confirmacaoSenha) {
-        String hashAtual = autenticacaoService.hashSenha(senhaAtual);
-        if (!usuario.verificarSenha(hashAtual)) {
-            throw new IllegalArgumentException("Senha atual incorreta.");
+        if (novaSenha.length() < 6) {
+            throw new IllegalArgumentException("A nova senha deve ter pelo menos 6 caracteres.");
         }
 
         if (!novaSenha.equals(confirmacaoSenha)) {
             throw new IllegalArgumentException("Nova senha e confirmação não coincidem.");
         }
 
-        if (novaSenha.length() < 6) {
-            throw new IllegalArgumentException("A nova senha deve ter pelo menos 6 caracteres.");
+        String hashAtual = autenticacaoService.hashSenha(senhaAtual);
+        if (!usuario.verificarSenha(hashAtual)) {
+            throw new IllegalArgumentException("Senha atual incorreta.");
         }
 
         String novoHash = autenticacaoService.hashSenha(novaSenha);

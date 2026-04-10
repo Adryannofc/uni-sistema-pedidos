@@ -1,25 +1,38 @@
 package com.pedidos.presentation;
 
 import com.pedidos.application.service.*;
+import com.pedidos.infra.config.FlyWayconfig;
+import com.pedidos.infra.config.JPAUtil;
 import com.pedidos.infra.repository.impl.*;
 import com.pedidos.infra.seed.DataSeeder;
 import com.pedidos.presentation.menu.MenuLogin;
+import jakarta.persistence.EntityManager;
 
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
 
+
+        // --- Iniciando Flyway ---
+        try {
+            FlyWayconfig.migrate();
+        } catch (Exception e) {
+            System.out.println("Flyway não executado: " + e.getMessage());
+        }
+
+        EntityManager em = JPAUtil.getEntityManager();
+
         Scanner scanner = new Scanner(System.in);
 
         // --- Repositórios ---
-        AdminRepositoryMemoria adminRepo = new AdminRepositoryMemoria();
-        RestauranteRepositoryMemoria restauranteRepo = new RestauranteRepositoryMemoria();
-        ClienteRepositoryMemoria clienteRepo = new ClienteRepositoryMemoria();
-        CategoriaGlobalRepositoryMemoria categoriaGlobalRepo = new CategoriaGlobalRepositoryMemoria();
-        CategoriaCardapioRepositoryMemoria categoriaCardapioRepo = new CategoriaCardapioRepositoryMemoria();
-        ProdutoRepositoryMemoria produtoRepo = new ProdutoRepositoryMemoria();
-        PedidoRepositoryMemoria pedidoRepo = new PedidoRepositoryMemoria();
+        AdminRepositoryJPA adminRepo = new AdminRepositoryJPA(em);
+        RestauranteRepositoryJPA restauranteRepo = new RestauranteRepositoryJPA(em);
+        ClienteRepositoryJPA clienteRepo = new ClienteRepositoryJPA(em);
+        CategoriaGlobalRepositoryJPA categoriaGlobalRepo = new CategoriaGlobalRepositoryJPA(em);
+        CategoriaCardapioRepositoryJPA categoriaCardapioRepo = new CategoriaCardapioRepositoryJPA(em);
+        ProdutoRepositoryJPA produtoRepo = new ProdutoRepositoryJPA(em);
+        PedidoRepositoryJPA pedidoRepo = new PedidoRepositoryJPA(em);
 
         // --- Services ---
         AutenticacaoService authService = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
@@ -31,18 +44,14 @@ public class Main {
         PedidoService pedidoService = new PedidoService(pedidoRepo);
         CarrinhoService carrinhoService = new CarrinhoService();
 
-        // --- Seed ---
-        DataSeeder seeder = new DataSeeder(
-                adminRepo, clienteRepo, restauranteRepo, authService,
-                produtoRepo, categoriaGlobalRepo, categoriaCardapioRepo
-        );
-        seeder.popular();
-
         // --- Inicia aplicação ---
         new MenuLogin(
                 authService, adminService, clienteService,
                 categoriaService, produtoService, restauranteService,
                 pedidoService, carrinhoService, restauranteRepo
         ).iniciar();
+
+        // --- Fecha recursos JPA ---
+        JPAUtil.close();
     }
 }

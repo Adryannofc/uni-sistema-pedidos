@@ -102,7 +102,7 @@ $RECYCLE.BIN/
 # =============================================
 # CLAUDE / ANTHROPIC
 # =============================================
-.claude/
+.idea/.claude/
 CLAUDE.md
 .anthropic/
 

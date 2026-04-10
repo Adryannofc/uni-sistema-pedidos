@@ -15,7 +15,12 @@ public class CarrinhoService {
         return carrinho;
     }
 
-    /** Adiciona produto ao carrinho. Valida quantidade e status ativo. */
+    /**
+     * Valida produto no carrinha e adiciona
+     * @param produto Produto fornecido pelo usuario
+     * @param quantidade Numero de unidades do produto
+     * @throws IllegalArgumentException Produto deve ser maior que zero
+     */
     public void adicionarItem(Produto produto, int quantidade) {
         validarCarrinhoAtivo();
 
@@ -40,8 +45,7 @@ public class CarrinhoService {
                 produto.getPreco()
         );
     }
-
-    /** Remove um item pelo índice (0-based). */
+    /** Remove um item do carrinho pelo ID do produto.*/
     public void removerItem(String produtoId) {
         validarCarrinhoAtivo();
         carrinho.removerItem(produtoId);

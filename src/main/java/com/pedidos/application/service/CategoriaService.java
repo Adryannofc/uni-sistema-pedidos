@@ -25,12 +25,12 @@ public class CategoriaService {
         this.produtoRepository = produtoRepository;
     }
 
+    // -------------------------------------------------------------------------
+    // Categoria Global
+    // -------------------------------------------------------------------------
+
     public void criarCategoriaGlobal(String nome, String descricao) {
-        boolean nomeExiste = categoriaGlobalRepository.listarTodos().stream()
-                .anyMatch(c -> c.getNome().equalsIgnoreCase(nome));
-        if (nomeExiste) {
-            throw new IllegalArgumentException("Já existe uma categoria global com esse nome.");
-        }
+        validarNomeGlobalUnico(nome, null);
         categoriaGlobalRepository.salvar(new CategoriaGlobal(nome, descricao));
     }
 
@@ -42,11 +42,7 @@ public class CategoriaService {
         CategoriaGlobal categoria = categoriaGlobalRepository.buscarPorId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada."));
 
-        boolean nomeExiste = categoriaGlobalRepository.listarTodos().stream()
-                .anyMatch(c -> c.getNome().equalsIgnoreCase(novoNome) && !c.getId().equals(id));
-        if (nomeExiste) {
-            throw new IllegalArgumentException("Já existe uma categoria global com esse nome.");
-        }
+        validarNomeGlobalUnico(novoNome, id);
 
         categoria.setNome(novoNome);
         categoria.setDescricao(novaDescricao);
@@ -57,10 +53,8 @@ public class CategoriaService {
         categoriaGlobalRepository.buscarPorId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada."));
 
-        boolean temRestauranteVinculado = restauranteRepository.listarTodos().stream()
-                .filter(u -> u instanceof com.pedidos.domain.model.Restaurante)
-                .map(u -> (com.pedidos.domain.model.Restaurante) u)
-                .anyMatch(r -> r.getCategoriaGlobalId().equals(id));
+        boolean temRestauranteVinculado = restauranteRepository.listarRestaurantes().stream()
+                .anyMatch(r -> id.equals(r.getCategoriaGlobalId()));
         if (temRestauranteVinculado) {
             throw new IllegalArgumentException("Categoria em uso por um restaurante — remoção bloqueada.");
         }
@@ -68,12 +62,12 @@ public class CategoriaService {
         categoriaGlobalRepository.remover(id);
     }
 
+    // -------------------------------------------------------------------------
+    // Categoria Cardápio
+    // -------------------------------------------------------------------------
+
     public void criarCategoriaCardapio(String nome, String descricao, String restauranteId) {
-        boolean nomeExiste = categoriaCardapioRepository.buscarPorRestauranteId(restauranteId).stream()
-                .anyMatch(c -> c.getNome().equalsIgnoreCase(nome));
-        if (nomeExiste) {
-            throw new IllegalArgumentException("Já existe uma categoria com esse nome neste cardápio.");
-        }
+        validarNomeCardapioUnico(nome, restauranteId, null);
         categoriaCardapioRepository.salvar(new CategoriaCardapio(nome, descricao, restauranteId));
     }
 
@@ -85,11 +79,7 @@ public class CategoriaService {
         CategoriaCardapio categoria = categoriaCardapioRepository.buscarPorId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada."));
 
-        boolean nomeExiste = categoriaCardapioRepository.buscarPorRestauranteId(categoria.getRestauranteId()).stream()
-                .anyMatch(c -> c.getNome().equalsIgnoreCase(novoNome) && !c.getId().equals(id));
-        if (nomeExiste) {
-            throw new IllegalArgumentException("Já existe uma categoria com esse nome neste cardápio.");
-        }
+        validarNomeCardapioUnico(novoNome, categoria.getRestauranteId(), id);
 
         categoria.setNome(novoNome);
         categoria.setDescricao(novaDescricao);
@@ -97,15 +87,37 @@ public class CategoriaService {
     }
 
     public void removerCategoriaCardapio(String id) {
-        CategoriaCardapio categoria = categoriaCardapioRepository.buscarPorId(id)
+        categoriaCardapioRepository.buscarPorId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada."));
 
         boolean temProdutoVinculado = produtoRepository.listarTodos().stream()
-                .anyMatch(p -> p.getCategoriaCardapioId().equals(id));
+                .anyMatch(p -> id.equals(p.getCategoriaCardapioId()));
         if (temProdutoVinculado) {
             throw new IllegalArgumentException("Categoria em uso por um produto — remoção bloqueada.");
         }
 
         categoriaCardapioRepository.remover(id);
+    }
+
+    // -------------------------------------------------------------------------
+    // Validações privadas
+    // -------------------------------------------------------------------------
+
+    private void validarNomeGlobalUnico(String nome, String ignorarId) {
+        boolean nomeExiste = categoriaGlobalRepository.listarTodos().stream()
+                .anyMatch(c -> c.getNome().equalsIgnoreCase(nome)
+                        && !c.getId().equals(ignorarId));
+        if (nomeExiste) {
+            throw new IllegalArgumentException("Já existe uma categoria global com esse nome.");
+        }
+    }
+
+    private void validarNomeCardapioUnico(String nome, String restauranteId, String ignorarId) {
+        boolean nomeExiste = categoriaCardapioRepository.buscarPorRestauranteId(restauranteId).stream()
+                .anyMatch(c -> c.getNome().equalsIgnoreCase(nome)
+                        && !c.getId().equals(ignorarId));
+        if (nomeExiste) {
+            throw new IllegalArgumentException("Já existe uma categoria com esse nome neste cardápio.");
+        }
     }
 }
