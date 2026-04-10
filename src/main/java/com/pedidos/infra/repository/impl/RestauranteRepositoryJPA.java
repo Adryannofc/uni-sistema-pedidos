@@ -79,7 +79,6 @@ public class RestauranteRepositoryJPA implements RestauranteRepository {
             }
             throw new RuntimeException("Erro ao deletar produto", e);
         }
-
     }
 
     @Override
