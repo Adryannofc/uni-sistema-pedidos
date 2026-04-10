@@ -22,6 +22,10 @@ public class Cliente extends Usuario {
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     private Pedido pedido;
 
+    public Cliente() {
+
+    }
+
     public Cliente(String nome, String email, String senhaHash, String cpf, String telefone) {
         super(nome, email, senhaHash, TipoUsuario.CLIENTE);
         this.cpf = cpf;

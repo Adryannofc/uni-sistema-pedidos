@@ -23,9 +23,8 @@ public class CategoriaCardapio {
     @JoinColumn (name = "restaurante_Id")
     private String restauranteId;
 
-    @OneToMany(mappedBy = "categoriaCardapio")
+    @OneToMany(mappedBy = "categoria")
     private List<Produto> produtos;
-
 
     public CategoriaCardapio(String nome, String descricao, String restauranteId) {
         this.id = UUID.randomUUID().toString();

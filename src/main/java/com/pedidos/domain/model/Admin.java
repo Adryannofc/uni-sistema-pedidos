@@ -11,9 +11,13 @@ import jakarta.persistence.Table;
 @PrimaryKeyJoinColumn(name = "usuario_id")
 
 public class Admin extends Usuario {
+
+    public Admin() {
+
+    }
+
     public Admin(String nome, String email, String senhaHash) {
         super(nome, email, senhaHash, TipoUsuario.ADMIN);
-
     }
 
     @Override

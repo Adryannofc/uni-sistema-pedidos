@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
+import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.FetchType.LAZY;
+
 
 @Entity
 @Table(name = "restaurantes")
@@ -15,10 +18,15 @@ public class Restaurante extends Usuario {
     private String cnpj;
     private boolean statusAtivo;
     private String telefone;
+
+    @ManyToOne
+    @JoinColumn(name = "categoria_global_id")
     private String categoriaGlobalId;
 
+    @OneToMany(mappedBy = "restaurante")
+    private List<CategoriaCardapio> categorias;
 
-    @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "restaurante", cascade = ALL, fetch = LAZY)
     private List<Produto> produtos;
 
     public Restaurante(String nome, String email, String senhaHash,String cnpj) {

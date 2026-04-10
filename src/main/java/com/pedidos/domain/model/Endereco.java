@@ -2,7 +2,8 @@ package com.pedidos.domain.model;
 
 import jakarta.persistence.*;
 
-@Embeddable
+@Entity
+@Table(name = "Enderecos")
 public class Endereco {
 
     @Column (name = "rua")
@@ -26,6 +27,10 @@ public class Endereco {
     @ManyToOne
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
+
+    public Endereco() {
+
+    }
 
     public Endereco(String rua, String numero, String bairro, String cidade, String estado, String cep) {
         this.rua = rua;
