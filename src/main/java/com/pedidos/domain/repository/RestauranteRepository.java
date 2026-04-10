@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RestauranteRepository extends UsuarioRepository {
-    Optional<Usuario> buscarPorEmailSenha(String email, String senha);
+    Usuario buscarPorEmailSenha(String email, String senha);
 
     public List<Restaurante> listarRestaurantes();
 
