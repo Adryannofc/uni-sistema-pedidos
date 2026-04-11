@@ -1,18 +1,18 @@
 package com.pedidos.domain.repository;
 
-import com.pedidos.domain.model.CategoriaCardapio;
+import com.pedidos.domain.entities.CategoriaCardapioEntity;
 import java.util.List;
 import java.util.Optional;
 
 public interface CategoriaCardapioRepository {
 
-    void salvar(CategoriaCardapio categoria);
+    void salvar(CategoriaCardapioEntity categoria);
 
-    Optional<CategoriaCardapio> buscarPorId(String id)
+    Optional<CategoriaCardapioEntity> buscarPorId(String id)
             ;
-    List<CategoriaCardapio> buscarPorRestauranteId(String restauranteId);
+    List<CategoriaCardapioEntity> buscarPorRestauranteId(String restauranteId);
 
-    List<CategoriaCardapio> listarTodos();
+    List<CategoriaCardapioEntity> listarTodos();
 
     void remover(String id);
 }

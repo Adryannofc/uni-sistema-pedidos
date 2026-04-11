@@ -1,7 +1,7 @@
 package com.pedidos.application.service;
 
-import com.pedidos.domain.model.CategoriaCardapio;
-import com.pedidos.domain.model.CategoriaGlobal;
+import com.pedidos.domain.entities.CategoriaCardapioEntity;
+import com.pedidos.domain.entities.CategoriaGlobalEntity;
 import com.pedidos.domain.repository.CategoriaCardapioRepository;
 import com.pedidos.domain.repository.CategoriaGlobalRepository;
 import com.pedidos.domain.repository.ProdutoRepository;
@@ -30,13 +30,13 @@ public class CategoriaService {
     public void criarCategoriaGlobal(String nome, String descricao) {
         try {
             validarNomeGlobalUnico(nome, null);
-            categoriaGlobalRepository.salvar(new CategoriaGlobal(nome, descricao));
+            categoriaGlobalRepository.salvar(new CategoriaGlobalEntity(nome, descricao));
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
 
-    public List<CategoriaGlobal> listarCategoriasGlobais() {
+    public List<CategoriaGlobalEntity> listarCategoriasGlobais() {
         try {
             return categoriaGlobalRepository.listarTodos();
         } catch (Exception e) {
@@ -46,7 +46,7 @@ public class CategoriaService {
 
     public void editarCategoriaGlobal(String id, String novoNome, String novaDescricao) {
         try {
-            CategoriaGlobal categoria = categoriaGlobalRepository.buscarPorId(id)
+            CategoriaGlobalEntity categoria = categoriaGlobalRepository.buscarPorId(id)
                     .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada."));
 
             validarNomeGlobalUnico(novoNome, id);
@@ -79,13 +79,13 @@ public class CategoriaService {
     public void criarCategoriaCardapio(String nome, String descricao, String restauranteId) {
         try {
             validarNomeCardapioUnico(nome, restauranteId, null);
-            categoriaCardapioRepository.salvar(new CategoriaCardapio(nome, descricao, restauranteId));
+            categoriaCardapioRepository.salvar(new CategoriaCardapioEntity(nome, descricao, restauranteId));
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
 
-    public List<CategoriaCardapio> listarCategoriasCardapio(String restauranteId) {
+    public List<CategoriaCardapioEntity> listarCategoriasCardapio(String restauranteId) {
         try {
             return categoriaCardapioRepository.buscarPorRestauranteId(restauranteId);
         } catch (Exception e) {
@@ -95,7 +95,7 @@ public class CategoriaService {
 
     public void editarCategoriaCardapio(String id, String novoNome, String novaDescricao) {
         try {
-            CategoriaCardapio categoria = categoriaCardapioRepository.buscarPorId(id)
+            CategoriaCardapioEntity categoria = categoriaCardapioRepository.buscarPorId(id)
                     .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada."));
 
             validarNomeCardapioUnico(novoNome, categoria.getRestauranteId(), id);

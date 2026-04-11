@@ -2,7 +2,7 @@
 -- V5__triggers.sql
 -- =============================================================================
 
--- Bloquear cancelamento de pedido SAIU_PARA_ENTREGA
+-- Bloquear cancelamento de pedidoEntity SAIU_PARA_ENTREGA
 
 CREATE OR REPLACE FUNCTION fn_bloquear_cancelamento()
     RETURNS TRIGGER AS
@@ -17,12 +17,12 @@ $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_bloquear_cancelamento
     BEFORE UPDATE
-    ON pedidos
+    ON pedidoEntities
     FOR EACH ROW
 EXECUTE FUNCTION fn_bloquear_cancelamento();
 
 
--- Impedir item com produto inativo
+-- Impedir item com produtoEntity inativo
 
 CREATE OR REPLACE FUNCTION fn_impedir_produto_inativo()
     RETURNS TRIGGER AS
@@ -32,11 +32,11 @@ DECLARE
 BEGIN
     SELECT status_ativo
     INTO ativo
-    FROM produtos
+    FROM produtoEntities
     WHERE id = NEW.produto_id;
 
     IF ativo IS FALSE THEN
-        RAISE EXCEPTION 'Não é permitido adicionar produto inativo ao pedido';
+        RAISE EXCEPTION 'Não é permitido adicionar produtoEntity inativo ao pedidoEntity';
     END IF;
 
     RETURN NEW;
@@ -81,6 +81,6 @@ $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_log_status_pedido
     AFTER UPDATE
-    ON pedidos
+    ON pedidoEntities
     FOR EACH ROW
 EXECUTE FUNCTION fn_log_status_pedido();

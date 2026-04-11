@@ -2,7 +2,7 @@ package com.pedidos.presentation.menu;
 
 import com.pedidos.application.service.*;
 import com.pedidos.domain.enums.StatusPedido;
-import com.pedidos.domain.model.*;
+import com.pedidos.domain.entities.*;
 import com.pedidos.domain.repository.RestauranteRepository;
 import com.pedidos.presentation.util.EntradaSegura;
 import com.pedidos.presentation.util.TerminalUtils;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class MenuCliente {
 
-    private final Cliente clienteLogado;
+    private final ClienteEntity clienteEntityLogado;
     private final ClienteService clienteService;
     private final PedidoService pedidoService;
     private final CarrinhoService carrinhoService;
@@ -24,14 +24,14 @@ public class MenuCliente {
     private final RestauranteRepository restauranteRepo;
     private final Scanner scanner;
 
-    public MenuCliente(Cliente clienteLogado,
+    public MenuCliente(ClienteEntity clienteEntityLogado,
                        ClienteService clienteService,
                        PedidoService pedidoService,
                        CarrinhoService carrinhoService,
                        ProdutoService produtoService,
                        RestauranteRepository restauranteRepo,
                        Scanner scanner) {
-        this.clienteLogado = clienteLogado;
+        this.clienteEntityLogado = clienteEntityLogado;
         this.clienteService = clienteService;
         this.pedidoService = pedidoService;
         this.carrinhoService = carrinhoService;
@@ -43,7 +43,7 @@ public class MenuCliente {
     public void iniciar() {
         while (true) {
             TerminalUtils.limparTela();
-            TerminalUtils.cabecalho("MENU CLIENTE", "Ola, " + clienteLogado.getNome());
+            TerminalUtils.cabecalho("MENU CLIENTE", "Ola, " + clienteEntityLogado.getNome());
 
             System.out.println(TerminalUtils.TOPO);
             System.out.println(TerminalUtils.linha("  1  \u00bb  Meu Perfil"));
@@ -75,7 +75,7 @@ public class MenuCliente {
     private void menuPerfil() {
         while (true) {
             TerminalUtils.limparTela();
-            TerminalUtils.cabecalho("PERFIL", clienteLogado.getNome());
+            TerminalUtils.cabecalho("PERFIL", clienteEntityLogado.getNome());
 
             System.out.println(TerminalUtils.TOPO);
             System.out.println(TerminalUtils.linha("  1  \u00bb  Visualizar Perfil"));
@@ -111,9 +111,9 @@ public class MenuCliente {
 
     private void menuFavoritos() {
             TerminalUtils.limparTela();
-            TerminalUtils.cabecalho("MEUS FAVORITOS", clienteLogado.getNome());
+            TerminalUtils.cabecalho("MEUS FAVORITOS", clienteEntityLogado.getNome());
 
-            List<Restaurante> favs = clienteLogado.getFavoritos();
+            List<RestauranteEntity> favs = clienteEntityLogado.getFavoritos();
 
             if (favs.isEmpty()) {
                 TerminalUtils.aviso("Sua lista de favoritos esta vazia.");
@@ -137,8 +137,8 @@ public class MenuCliente {
             if (escolha == 0) return;
 
             try {
-                Restaurante selecionado = favs.get(escolha - 1);
-                clienteService.favoritar(clienteLogado, selecionado);
+                RestauranteEntity selecionado = favs.get(escolha - 1);
+                clienteService.favoritar(clienteEntityLogado, selecionado);
                 TerminalUtils.sucesso("Restaurante removido dos favoritos!");
                 TerminalUtils.pausar();
             } catch (Exception e) {
@@ -150,12 +150,12 @@ public class MenuCliente {
     private void acaoVisualizarPerfil() {
         TerminalUtils.limparTela();
         TerminalUtils.cabecalho("VISUALIZAR PERFIL");
-        System.out.println("  ID       : " + clienteLogado.getId());
-        System.out.println("  Nome     : " + clienteLogado.getNome());
-        System.out.println("  E-mail   : " + clienteLogado.getEmail());
-        System.out.println("  CPF      : " + clienteLogado.getCpf());
-        System.out.println("  Telefone : " + clienteLogado.getTelefone());
-        Endereco end = clienteLogado.getEnderecoEntrega();
+        System.out.println("  ID       : " + clienteEntityLogado.getId());
+        System.out.println("  Nome     : " + clienteEntityLogado.getNome());
+        System.out.println("  E-mail   : " + clienteEntityLogado.getEmail());
+        System.out.println("  CPF      : " + clienteEntityLogado.getCpf());
+        System.out.println("  Telefone : " + clienteEntityLogado.getTelefone());
+        EnderecoEntity end = clienteEntityLogado.getEnderecoEntrega();
         System.out.println("  Endereco : " + (end != null ? end.toString() : "Nao cadastrado"));
         TerminalUtils.pausar();
     }
@@ -164,14 +164,14 @@ public class MenuCliente {
         TerminalUtils.limparTela();
         TerminalUtils.cabecalho("EDITAR NOME");
         try {
-            System.out.println("  Atual : " + clienteLogado.getNome());
+            System.out.println("  Atual : " + clienteEntityLogado.getNome());
             System.out.print("  Novo  : ");
             String novo = scanner.nextLine().trim();
             if (novo.isBlank()) {
                 TerminalUtils.aviso("Nenhuma alteracao realizada.");
             } else {
-                clienteService.editarNome(clienteLogado, novo);
-                TerminalUtils.sucesso("Nome atualizado para: " + clienteLogado.getNome());
+                clienteService.editarNome(clienteEntityLogado, novo);
+                TerminalUtils.sucesso("Nome atualizado para: " + clienteEntityLogado.getNome());
             }
         } catch (Exception e) {
             TerminalUtils.erro(e.getMessage());
@@ -183,13 +183,13 @@ public class MenuCliente {
         TerminalUtils.limparTela();
         TerminalUtils.cabecalho("EDITAR E-MAIL");
         try {
-            System.out.println("  Atual : " + clienteLogado.getEmail());
+            System.out.println("  Atual : " + clienteEntityLogado.getEmail());
             System.out.print("  Novo  : ");
             String novo = scanner.nextLine().trim();
             if (novo.isBlank()) {
                 TerminalUtils.aviso("Nenhuma alteracao realizada.");
             } else {
-                clienteService.editarEmail(clienteLogado, novo);
+                clienteService.editarEmail(clienteEntityLogado, novo);
                 TerminalUtils.sucesso("E-mail atualizado.");
             }
         } catch (Exception e) {
@@ -202,13 +202,13 @@ public class MenuCliente {
         TerminalUtils.limparTela();
         TerminalUtils.cabecalho("EDITAR CPF");
         try {
-            System.out.println("  Atual : " + clienteLogado.getCpf());
+            System.out.println("  Atual : " + clienteEntityLogado.getCpf());
             System.out.print("  Novo (11 digitos): ");
             String novo = scanner.nextLine().trim();
             if (novo.isBlank()) {
                 TerminalUtils.aviso("Nenhuma alteracao realizada.");
             } else {
-                clienteService.editarCpf(clienteLogado, novo);
+                clienteService.editarCpf(clienteEntityLogado, novo);
                 TerminalUtils.sucesso("CPF atualizado.");
             }
         } catch (Exception e) {
@@ -221,13 +221,13 @@ public class MenuCliente {
         TerminalUtils.limparTela();
         TerminalUtils.cabecalho("EDITAR TELEFONE");
         try {
-            System.out.println("  Atual : " + clienteLogado.getTelefone());
+            System.out.println("  Atual : " + clienteEntityLogado.getTelefone());
             System.out.print("  Novo  : ");
             String novo = scanner.nextLine().trim();
             if (novo.isBlank()) {
                 TerminalUtils.aviso("Nenhuma alteracao realizada.");
             } else {
-                clienteService.editarTelefone(clienteLogado, novo);
+                clienteService.editarTelefone(clienteEntityLogado, novo);
                 TerminalUtils.sucesso("Telefone atualizado.");
             }
         } catch (Exception e) {
@@ -240,7 +240,7 @@ public class MenuCliente {
         TerminalUtils.limparTela();
         TerminalUtils.cabecalho("MEU ENDERECO");
         try {
-            Endereco atual = clienteLogado.getEnderecoEntrega();
+            EnderecoEntity atual = clienteEntityLogado.getEnderecoEntrega();
             if (atual != null) {
                 System.out.println("  Atual: " + atual);
             } else {
@@ -254,7 +254,7 @@ public class MenuCliente {
             System.out.print("  Estado : "); String estado = scanner.nextLine().trim();
             System.out.print("  CEP    : "); String cep = scanner.nextLine().trim();
 
-            clienteService.salvarEndereco(clienteLogado, rua, numero, bairro, cidade, estado, cep);
+            clienteService.salvarEndereco(clienteEntityLogado, rua, numero, bairro, cidade, estado, cep);
             TerminalUtils.sucesso("Endereco salvo com sucesso.");
         } catch (Exception e) {
             TerminalUtils.erro(e.getMessage());
@@ -273,7 +273,7 @@ public class MenuCliente {
             System.out.print("  Confirmar nova senha: ");
             String confirmacao = scanner.nextLine();
 
-            clienteService.alterarSenha(clienteLogado, atual, nova, confirmacao);
+            clienteService.alterarSenha(clienteEntityLogado, atual, nova, confirmacao);
             TerminalUtils.sucesso("Senha alterada com sucesso.");
         } catch (Exception e) {
             TerminalUtils.erro(e.getMessage());
@@ -287,19 +287,19 @@ public class MenuCliente {
 
     private void menuMeusPedidos() {
         TerminalUtils.limparTela();
-        TerminalUtils.cabecalho("MEUS PEDIDOS", clienteLogado.getNome());
+        TerminalUtils.cabecalho("MEUS PEDIDOS", clienteEntityLogado.getNome());
         try {
-            List<Pedido> pedidos = pedidoService.listarPorCliente(clienteLogado.getId());
-            if (pedidos.isEmpty()) {
+            List<PedidoEntity> pedidoEntities = pedidoService.listarPorCliente(clienteEntityLogado.getId());
+            if (pedidoEntities.isEmpty()) {
                 TerminalUtils.aviso("Nenhum pedido encontrado.");
                 TerminalUtils.pausar();
                 return;
             }
 
-            exibirListaPedidos(pedidos);
+            exibirListaPedidos(pedidoEntities);
 
-            Pedido paraConfirmar = null;
-            for (Pedido p : pedidos) {
+            PedidoEntity paraConfirmar = null;
+            for (PedidoEntity p : pedidoEntities) {
                 if (p.getStatus() == StatusPedido.SAIU_PARA_ENTREGA) {
                     paraConfirmar = p;
                     break;
@@ -321,14 +321,14 @@ public class MenuCliente {
         TerminalUtils.pausar();
     }
 
-    private void exibirListaPedidos(List<Pedido> pedidos) {
+    private void exibirListaPedidos(List<PedidoEntity> pedidoEntities) {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         NumberFormat moeda = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         System.out.println(TerminalUtils.TOPO);
         System.out.println(TerminalUtils.linha("  #   ID        Data              Status         Total"));
         System.out.println(TerminalUtils.SEPARADOR);
-        for (int i = 0; i < pedidos.size(); i++) {
-            Pedido p = pedidos.get(i);
+        for (int i = 0; i < pedidoEntities.size(); i++) {
+            PedidoEntity p = pedidoEntities.get(i);
             System.out.println(TerminalUtils.linha(String.format(
                     "  %-3d %-8s  %-17s %-14s %s",
                     (i + 1),
@@ -348,7 +348,7 @@ public class MenuCliente {
     private void menuFazerPedido() {
         while (true) {
             TerminalUtils.limparTela();
-            TerminalUtils.cabecalho("FAZER PEDIDO", clienteLogado.getNome());
+            TerminalUtils.cabecalho("FAZER PEDIDO", clienteEntityLogado.getNome());
 
             System.out.println(TerminalUtils.TOPO);
             System.out.println(TerminalUtils.linha("  1  \u00bb  Escolher Restaurante"));
@@ -376,8 +376,8 @@ public class MenuCliente {
         TerminalUtils.limparTela();
         TerminalUtils.cabecalho("ESCOLHER RESTAURANTE");
         try {
-            List<Restaurante> ativos = restauranteRepo.listarRestaurantes().stream()
-                    .filter(Restaurante::isStatusAtivo)
+            List<RestauranteEntity> ativos = restauranteRepo.listarRestaurantes().stream()
+                    .filter(RestauranteEntity::isStatusAtivo)
                     .collect(Collectors.toList());
 
             if (ativos.isEmpty()) {
@@ -397,7 +397,7 @@ public class MenuCliente {
             System.out.print("\n  Escolha o numero do restaurante: ");
 
             int escolha = EntradaSegura.lerOpcao(scanner, 0, ativos.size());
-            Restaurante escolhido = ativos.get(escolha - 1);
+            RestauranteEntity escolhido = ativos.get(escolha - 1);
 
             System.out.println("\n  1 \u00bb Ver Cardápio");
             System.out.println("  2 \u00bb Favoritar / Desfavoritar");
@@ -405,10 +405,10 @@ public class MenuCliente {
             int acao = EntradaSegura.lerOpcao(scanner, 1, 2);
 
             if(acao == 2) {
-                clienteService.favoritar(clienteLogado, escolhido);
+                clienteService.favoritar(clienteEntityLogado, escolhido);
                 TerminalUtils.sucesso("Lista de favoritos atualizada!");
             } else {
-                carrinhoService.iniciarCarrinho(clienteLogado.getId(), escolhido.getId());
+                carrinhoService.iniciarCarrinho(clienteEntityLogado.getId(), escolhido.getId());
                 TerminalUtils.sucesso("Restaurante \"" + escolhido.getNome() + "\" selecionado.");
                 acaoNavegarCardapio(escolhido);
             }
@@ -419,14 +419,14 @@ public class MenuCliente {
         TerminalUtils.pausar();
     }
 
-    private void acaoNavegarCardapio(Restaurante restaurante) {
+    private void acaoNavegarCardapio(RestauranteEntity restauranteEntity) {
         while (true) {
             TerminalUtils.limparTela();
-            TerminalUtils.cabecalho("CARDAPIO", restaurante.getNome());
+            TerminalUtils.cabecalho("CARDAPIO", restauranteEntity.getNome());
             try {
-                List<Produto> produtos = produtoService.listarAtivosPorRestaurante(restaurante.getId());
+                List<ProdutoEntity> produtoEntities = produtoService.listarAtivosPorRestaurante(restauranteEntity.getId());
 
-                if (produtos.isEmpty()) {
+                if (produtoEntities.isEmpty()) {
                     TerminalUtils.aviso("Nenhum produto disponivel.");
                     TerminalUtils.pausar();
                     return;
@@ -436,8 +436,8 @@ public class MenuCliente {
                 System.out.println(TerminalUtils.linha("  #   Nome                         Preco"));
                 System.out.println(TerminalUtils.SEPARADOR);
                 NumberFormat moeda = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-                for (int i = 0; i < produtos.size(); i++) {
-                    Produto p = produtos.get(i);
+                for (int i = 0; i < produtoEntities.size(); i++) {
+                    ProdutoEntity p = produtoEntities.get(i);
                     System.out.println(TerminalUtils.linha(String.format(
                             "  %-3d %-28s  %s",
                             (i + 1), p.getNome(), moeda.format(p.getPreco()))));
@@ -447,10 +447,10 @@ public class MenuCliente {
                 System.out.println(TerminalUtils.BASE);
                 System.out.print("\n  Escolha o produto (0 para voltar): ");
 
-                int num = EntradaSegura.lerOpcao(scanner, 0, produtos.size());
+                int num = EntradaSegura.lerOpcao(scanner, 0, produtoEntities.size());
                 if (num == 0) return;
 
-                Produto selecionado = produtos.get(num - 1);
+                ProdutoEntity selecionado = produtoEntities.get(num - 1);
 
                 System.out.print("  Quantidade: ");
                 int qtd;
@@ -483,15 +483,15 @@ public class MenuCliente {
                 return;
             }
 
-            Carrinho carrinho = carrinhoService.getCarrinho();
+            CarrinhoEntity carrinhoEntity = carrinhoService.getCarrinho();
             NumberFormat moeda = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 
             System.out.println(TerminalUtils.TOPO);
             System.out.println(TerminalUtils.linha("  #   Produto                  Qtd   Subtotal"));
             System.out.println(TerminalUtils.SEPARADOR);
-            List<ItemPedido> itens = carrinho.getItens();
+            List<ItemPedidoEntity> itens = carrinhoEntity.getItens();
             for (int i = 0; i < itens.size(); i++) {
-                ItemPedido item = itens.get(i);
+                ItemPedidoEntity item = itens.get(i);
                 System.out.println(TerminalUtils.linha(String.format(
                         "  %-3d %-24s %-5d %s",
                         (i + 1), item.getNomeProduto(),
@@ -499,7 +499,7 @@ public class MenuCliente {
                         moeda.format(item.calcularSubtotal()))));
             }
             System.out.println(TerminalUtils.SEPARADOR);
-            System.out.println(TerminalUtils.linha("  Subtotal: " + moeda.format(carrinho.calcularSubtotal())));
+            System.out.println(TerminalUtils.linha("  Subtotal: " + moeda.format(carrinhoEntity.calcularSubtotal())));
             System.out.println(TerminalUtils.BASE);
 
             System.out.println("\n  1 - Remover item");
@@ -534,27 +534,27 @@ public class MenuCliente {
                 return;
             }
 
-            Carrinho carrinho = carrinhoService.getCarrinho();
+            CarrinhoEntity carrinhoEntity = carrinhoService.getCarrinho();
             NumberFormat moeda = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 
             System.out.println(TerminalUtils.TOPO);
             System.out.println(TerminalUtils.linha("  RESUMO DO PEDIDO"));
             System.out.println(TerminalUtils.SEPARADOR);
-            carrinho.getItens().forEach(item -> System.out.println(TerminalUtils.linha(
+            carrinhoEntity.getItens().forEach(item -> System.out.println(TerminalUtils.linha(
                     String.format("  %-24s x%-3d %s",
                             item.getNomeProduto(), item.getQuantidade(),
                             moeda.format(item.calcularSubtotal())))));
             System.out.println(TerminalUtils.SEPARADOR);
-            System.out.println(TerminalUtils.linha("  Subtotal : " + moeda.format(carrinho.calcularSubtotal())));
+            System.out.println(TerminalUtils.linha("  Subtotal : " + moeda.format(carrinhoEntity.calcularSubtotal())));
             System.out.println(TerminalUtils.BASE);
 
-            Endereco endereco = clienteLogado.getEnderecoEntrega();
-            if (endereco == null) {
+            EnderecoEntity enderecoEntity = clienteEntityLogado.getEnderecoEntrega();
+            if (enderecoEntity == null) {
                 TerminalUtils.erro("Voce nao tem endereco cadastrado. Acesse Perfil > Meu Endereco.");
                 TerminalUtils.pausar();
                 return;
             }
-            System.out.println(TerminalUtils.linha("  Entregar em: " + endereco));
+            System.out.println(TerminalUtils.linha("  Entregar em: " + enderecoEntity));
 
             if (!TerminalUtils.confirmarPerigo("Confirmar pedido?", scanner)) {
                 TerminalUtils.aviso("Pedido cancelado.");
@@ -562,14 +562,14 @@ public class MenuCliente {
                 return;
             }
 
-            String codigo = clienteLogado.getCpf().substring(0, 4);
-            Pedido pedido = pedidoService.criarPedido(
-                    clienteLogado.getId(), carrinho.getRestauranteId(), carrinho, endereco, codigo);
+            String codigo = clienteEntityLogado.getCpf().substring(0, 4);
+            PedidoEntity pedidoEntity = pedidoService.criarPedido(
+                    clienteEntityLogado.getId(), carrinhoEntity.getRestauranteId(), carrinhoEntity, enderecoEntity, codigo);
 
             carrinhoService.encerrarCarrinho();
 
-            TerminalUtils.sucesso("Pedido realizado! ID: " + pedido.getId().substring(0, 8)
-                    + " | Total: " + moeda.format(pedido.calcularTotal()));
+            TerminalUtils.sucesso("Pedido realizado! ID: " + pedidoEntity.getId().substring(0, 8)
+                    + " | Total: " + moeda.format(pedidoEntity.calcularTotal()));
             System.out.println("  Seu codigo de confirmacao de entrega: [ " + codigo + " ]");
 
         } catch (Exception e) {

@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.pedidos</groupId>
+    <groupId>com.pedidoEntities</groupId>
     <artifactId>deliveryapp</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -51,7 +51,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>com.pedidos.apresentation.Main</mainClass>
+                    <mainClass>com.pedidoEntities.apresentation.Main</mainClass>
                 </configuration>
             </plugin>
             <plugin>

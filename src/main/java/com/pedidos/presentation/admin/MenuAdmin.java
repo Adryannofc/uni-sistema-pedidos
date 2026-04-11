@@ -1,8 +1,8 @@
 package com.pedidos.presentation.admin;
 
 import com.pedidos.application.service.AdminService;
-import com.pedidos.domain.model.Admin;
-import com.pedidos.domain.model.Restaurante;
+import com.pedidos.domain.entities.AdminEntity;
+import com.pedidos.domain.entities.RestauranteEntity;
 import com.pedidos.presentation.util.EntradaSegura;
 import com.pedidos.presentation.util.TerminalUtils;
 
@@ -21,10 +21,10 @@ public class MenuAdmin {
         this.menuCategorias = menuCategorias;
     }
 
-    public void exibir(Admin adminLogado) {
+    public void exibir(AdminEntity adminEntityLogado) {
         while (true) {
             TerminalUtils.limparTela();
-            TerminalUtils.cabecalho("MENU ADMIN | Olá, " + adminLogado.getNome());
+            TerminalUtils.cabecalho("MENU ADMIN | Olá, " + adminEntityLogado.getNome());
             System.out.println("1 - Listar Restaurantes");
             System.out.println("2 - Aprovar Restaurante");
             System.out.println("3 - Bloquear Restaurante");
@@ -41,12 +41,12 @@ public class MenuAdmin {
             switch (opcao) {
                 case 1:
                     try {
-                        List<Restaurante> restaurantes = adminService.listarRestaurantes();
-                        if (restaurantes.isEmpty()) {
+                        List<RestauranteEntity> restauranteEntities = adminService.listarRestaurantes();
+                        if (restauranteEntities.isEmpty()) {
                             System.out.println("Nenhum restaurante cadastrado.");
                         } else {
                             int i = 1;
-                            for (Restaurante r : restaurantes) {
+                            for (RestauranteEntity r : restauranteEntities) {
                                 String status = r.isStatusAtivo() ? "ATIVO" : "AGUARDANDO APROVAÇÃO/BLOQUEADO";
                                 System.out.println(i++ + " - " + r.getNome() +
                                         " | Categoria: " + r.getCategoriaGlobalId() +
@@ -61,7 +61,7 @@ public class MenuAdmin {
 
                 case 2: // Aprovar
                     try {
-                        List<Restaurante> pendentes = adminService.listarRestaurantes()
+                        List<RestauranteEntity> pendentes = adminService.listarRestaurantes()
                                 .stream().filter(r -> !r.isStatusAtivo()).collect(Collectors.toList());
 
                         if (pendentes.isEmpty()) {
@@ -69,7 +69,7 @@ public class MenuAdmin {
                         } else {
                             System.out.println("Restaurantes pendentes:");
                             for (int i = 0; i < pendentes.size(); i++) {
-                                Restaurante r = pendentes.get(i);
+                                RestauranteEntity r = pendentes.get(i);
                                 System.out.println((i + 1) + " - " + r.getNome() + " | ID: " + r.getId());
                             }
 
@@ -86,15 +86,15 @@ public class MenuAdmin {
 
                 case 3: // Bloquear
                     try {
-                        List<Restaurante> ativos = adminService.listarRestaurantes()
-                                .stream().filter(Restaurante::isStatusAtivo).collect(Collectors.toList());
+                        List<RestauranteEntity> ativos = adminService.listarRestaurantes()
+                                .stream().filter(RestauranteEntity::isStatusAtivo).collect(Collectors.toList());
 
                         if (ativos.isEmpty()) {
                             System.out.println("Nenhum restaurante ativo para bloquear.");
                         } else {
                             System.out.println("Restaurantes ativos:");
                             for (int i = 0; i < ativos.size(); i++) {
-                                Restaurante r = ativos.get(i);
+                                RestauranteEntity r = ativos.get(i);
                                 System.out.println((i + 1) + " - " + r.getNome() + " | ID: " + r.getId());
                             }
 
@@ -111,13 +111,13 @@ public class MenuAdmin {
 
                 case 4: // Remover
                     try {
-                        List<Restaurante> todos = adminService.listarRestaurantes();
+                        List<RestauranteEntity> todos = adminService.listarRestaurantes();
                         if (todos.isEmpty()) {
                             System.out.println("Nenhum restaurante cadastrado.");
                         } else {
                             System.out.println("Restaurantes cadastrados:");
                             for (int i = 0; i < todos.size(); i++) {
-                                Restaurante r = todos.get(i);
+                                RestauranteEntity r = todos.get(i);
                                 System.out.println((i + 1) + " - " + r.getNome() + " | ID: " + r.getId());
                             }
 
@@ -157,7 +157,7 @@ public class MenuAdmin {
                         System.out.print("Confirmar nova senha: ");
                         String confirmacao = scanner.nextLine();
 
-                        adminService.alterarSenha(adminLogado, senhaAtual, novaSenha, confirmacao);
+                        adminService.alterarSenha(adminEntityLogado, senhaAtual, novaSenha, confirmacao);
                         System.out.println("Senha alterada com sucesso.");
                     } catch (Exception e) {
                         System.out.println("Erro: " + e.getMessage());
@@ -167,9 +167,9 @@ public class MenuAdmin {
 
                 case 7:
                     TerminalUtils.cabecalho("PAINEL DO ADMINISTRADOR");
-                    System.out.println("Id    : " + adminLogado.getId());
-                    System.out.println("Nome  : " + adminLogado.getNome());
-                    System.out.println("E-mail: " + adminLogado.getEmail());
+                    System.out.println("Id    : " + adminEntityLogado.getId());
+                    System.out.println("Nome  : " + adminEntityLogado.getNome());
+                    System.out.println("E-mail: " + adminEntityLogado.getEmail());
                     TerminalUtils.pausar();
                     break;
 

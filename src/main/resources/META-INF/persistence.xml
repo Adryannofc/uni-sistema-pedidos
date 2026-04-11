@@ -10,16 +10,16 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <!-- ENTIDADES -->
-        <class>com.pedidos.domain.model.Usuario</class>
-        <class>com.pedidos.domain.model.Admin</class>
-        <class>com.pedidos.domain.model.Cliente</class>
-        <class>com.pedidos.domain.model.Restaurante</class>
-        <class>com.pedidos.domain.model.Endereco</class>
-        <class>com.pedidos.domain.model.CategoriaGlobal</class>
-        <class>com.pedidos.domain.model.CategoriaCardapio</class>
-        <class>com.pedidos.domain.model.Produto</class>
-        <class>com.pedidos.domain.model.Pedido</class>
-        <class>com.pedidos.domain.model.ItemPedido</class>
+        <class>com.pedidoEntities.domain.entities.Usuario</class>
+        <class>com.pedidoEntities.domain.entities.AdminEntity</class>
+        <class>com.pedidoEntities.domain.entities.ClienteEntity</class>
+        <class>com.pedidoEntities.domain.entities.Restaurante</class>
+        <class>com.pedidoEntities.domain.entities.EnderecoEntity</class>
+        <class>com.pedidoEntities.domain.entities.CategoriaGlobalEntity</class>
+        <class>com.pedidoEntities.domain.entities.CategoriaCardapioEntity</class>
+        <class>com.pedidoEntities.domain.entities.Produto</class>
+        <class>com.pedidoEntities.domain.entities.PedidoEntity</class>
+        <class>com.pedidoEntities.domain.entities.ItemPedidoEntity</class>
         <properties>
 
             <!-- JDBC LOCAL -->

@@ -1,7 +1,6 @@
 package com.pedidos.infra.repository.impl;
 
-import com.pedidos.domain.model.CategoriaGlobal;
-import com.pedidos.domain.model.Endereco;
+import com.pedidos.domain.entities.EnderecoEntity;
 import com.pedidos.domain.repository.EnderecoRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -14,10 +13,10 @@ public class EnderecoRepositoryJPA implements EnderecoRepository {
 
     public EnderecoRepositoryJPA (EntityManager em) { this.em = em; }
 
-    public void salvar(Endereco endereco) {
+    public void salvar(EnderecoEntity enderecoEntity) {
         try {
             em.getTransaction().begin();
-            em.persist(endereco);
+            em.persist(enderecoEntity);
             em.getTransaction().commit();
         } catch (Exception e){
             em.getTransaction().rollback();
@@ -25,10 +24,10 @@ public class EnderecoRepositoryJPA implements EnderecoRepository {
         }
     }
 
-    public void atualizar(Endereco endereco) {
+    public void atualizar(EnderecoEntity enderecoEntity) {
         try {
             em.getTransaction().begin();
-            em.merge(endereco);
+            em.merge(enderecoEntity);
             em.getTransaction().commit();
         } catch (Exception e){
             em.getTransaction().rollback();
@@ -40,9 +39,9 @@ public class EnderecoRepositoryJPA implements EnderecoRepository {
     public void remover(String clienteId) {
         try {
             em.getTransaction().begin();
-            Endereco endereco = em.find(Endereco.class, clienteId);
-            if (endereco != null) {
-                em.remove(endereco);
+            EnderecoEntity enderecoEntity = em.find(EnderecoEntity.class, clienteId);
+            if (enderecoEntity != null) {
+                em.remove(enderecoEntity);
             }
             em.getTransaction().commit();
         }
@@ -53,9 +52,9 @@ public class EnderecoRepositoryJPA implements EnderecoRepository {
     }
 
     @Override
-    public Optional<Endereco> buscarPorCliente(String clienteId) {
+    public Optional<EnderecoEntity> buscarPorCliente(String clienteId) {
         try {
-            return Optional.ofNullable(em.createQuery("select e from Endereco e where e.cliente.id = :cid", Endereco.class)
+            return Optional.ofNullable(em.createQuery("select e from Endereco e where e.cliente.id = :cid", EnderecoEntity.class)
                     .setParameter("cid", clienteId)
                     .getSingleResult()
             );

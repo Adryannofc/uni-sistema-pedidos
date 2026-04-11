@@ -1,4 +1,4 @@
-package com.pedidos.domain.model;
+package com.pedidos.domain.entities;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -6,7 +6,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "itens_pedido")
-public class ItemPedido {
+public class ItemPedidoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -15,7 +15,7 @@ public class ItemPedido {
 
     @ManyToOne
     @JoinColumn(name = "pedido_id", nullable = false)
-    private Pedido pedido;                    // lado proprietário da relação
+    private PedidoEntity pedidoEntity;                    // lado proprietário da relação
 
     @Column(name = "produto_id")
     private String produtoId;
@@ -29,9 +29,9 @@ public class ItemPedido {
     @Column(name = "preco_unitario", nullable = false, precision = 10, scale = 2)
     private BigDecimal precoUnitario;
 
-    protected ItemPedido() {}   // construtor no-arg para o JPA
+    protected ItemPedidoEntity() {}   // construtor no-arg para o JPA
 
-    public ItemPedido(String produtoId, String nomeProduto, int quantidade, BigDecimal precoUnitario) {
+    public ItemPedidoEntity(String produtoId, String nomeProduto, int quantidade, BigDecimal precoUnitario) {
         this.id = UUID.randomUUID().toString();
         this.produtoId = produtoId;
         this.nomeProduto = nomeProduto;
@@ -40,7 +40,7 @@ public class ItemPedido {
     }
 
     // setter para o JPA fechar o relacionamento bidirecional
-    public void setPedido(Pedido pedido) { this.pedido = pedido; }
+    public void setPedido(PedidoEntity pedidoEntity) { this.pedidoEntity = pedidoEntity; }
 
     public String getId() { return id; }
     public String getProdutoId() { return produtoId; }

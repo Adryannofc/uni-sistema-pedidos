@@ -1,10 +1,8 @@
 package com.pedidos.infra.repository.impl;
 
-import com.pedidos.domain.model.CategoriaCardapio;
-import com.pedidos.domain.model.Usuario;
+import com.pedidos.domain.entities.CategoriaCardapioEntity;
 import com.pedidos.domain.repository.CategoriaCardapioRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceException;
 
 import java.util.*;
@@ -15,7 +13,7 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
 
     public CategoriaCardapioRepositoryJPA (EntityManager em) { this.em = em; }
 
-    public void salvar(CategoriaCardapio categoria) {
+    public void salvar(CategoriaCardapioEntity categoria) {
         try {
             em.getTransaction().begin();
             em.persist(categoria);
@@ -26,7 +24,7 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
         }
     }
 
-    public void atualizar(CategoriaCardapio categoria) {
+    public void atualizar(CategoriaCardapioEntity categoria) {
         try {
             em.getTransaction().begin();
             em.merge(categoria);
@@ -41,7 +39,7 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
     public void remover(String id) {
         try {
             em.getTransaction().begin();
-            CategoriaCardapio categoria = em.find(CategoriaCardapio.class, id);
+            CategoriaCardapioEntity categoria = em.find(CategoriaCardapioEntity.class, id);
             if (categoria != null) {
                 em.remove(categoria);
             }
@@ -54,9 +52,9 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
     }
 
     @Override
-    public Optional<CategoriaCardapio> buscarPorId(String id) {
+    public Optional<CategoriaCardapioEntity> buscarPorId(String id) {
         try {
-            return Optional.ofNullable(em.find(CategoriaCardapio.class, id));
+            return Optional.ofNullable(em.find(CategoriaCardapioEntity.class, id));
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("ID inválido para busca: " + id, e);
         } catch (PersistenceException e) {
@@ -65,11 +63,11 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
     }
 
     @Override
-    public List<CategoriaCardapio> buscarPorRestauranteId(String restauranteId) {
+    public List<CategoriaCardapioEntity> buscarPorRestauranteId(String restauranteId) {
         try {
             return em.createQuery(
                             "select c from CategoriaCardapio c where c.restaurante.id = :restauranteId",
-                            CategoriaCardapio.class)
+                            CategoriaCardapioEntity.class)
                     .setParameter("restauranteId", restauranteId)
                     .getResultList();
         } catch (Exception e) {
@@ -78,9 +76,9 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
     }
 
     @Override
-    public List<CategoriaCardapio> listarTodos() {
+    public List<CategoriaCardapioEntity> listarTodos() {
         try {
-            return em.createQuery("select u from CategoriaCardapio u", CategoriaCardapio.class)
+            return em.createQuery("select u from CategoriaCardapio u", CategoriaCardapioEntity.class)
                     .getResultList();
         } catch (PersistenceException e) {
             throw new RuntimeException("Erro ao listar categorias do cardápio", e);

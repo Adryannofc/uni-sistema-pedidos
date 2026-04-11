@@ -1,4 +1,4 @@
-package com.pedidos.domain.model;
+package com.pedidos.domain.entities;
 
 import com.pedidos.domain.enums.StatusPedido;
 import jakarta.persistence.*;
@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "pedidos")
-public class Pedido {
+public class PedidoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -20,14 +20,14 @@ public class Pedido {
 
     @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
-    private Cliente cliente;                   // tipo mudou de String para Cliente
+    private ClienteEntity clienteEntity;                   // tipo mudou de String para Cliente
 
     @ManyToOne
     @JoinColumn(name = "restaurante_id", nullable = false)
-    private Restaurante restaurante;           // tipo mudou de String para Restaurante
+    private RestauranteEntity restauranteEntity;           // tipo mudou de String para Restaurante
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ItemPedido> itens = new ArrayList<>();
+    private List<ItemPedidoEntity> itens = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -47,11 +47,11 @@ public class Pedido {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "endereco_id", nullable = false)
-    private Endereco enderecoEntrega;
+    private EnderecoEntity enderecoEntityEntrega;
 
-    protected Pedido() {} // no-arg para o JPA
+    protected PedidoEntity() {} // no-arg para o JPA
 
-    public Pedido(String id, String clienteId, String restauranteId, BigDecimal taxaEntrega) {
+    public PedidoEntity(String id, String clienteId, String restauranteId, BigDecimal taxaEntrega) {
         this.id = (id != null) ? id : UUID.randomUUID().toString();
         this.taxaEntrega = (taxaEntrega != null) ? taxaEntrega : BigDecimal.ZERO;
         this.dataPedido = LocalDateTime.now();
@@ -60,33 +60,33 @@ public class Pedido {
 
     public String getId() { return id; }
 
-    public Cliente getCliente() { return cliente; }
-    public void setCliente(Cliente cliente) { this.cliente = cliente; }
+    public ClienteEntity getCliente() { return clienteEntity; }
+    public void setCliente(ClienteEntity clienteEntity) { this.clienteEntity = clienteEntity; }
 
     // mantém compatibilidade com services que usam clienteId como String
-    public String getClienteId() { return cliente != null ? cliente.getId() : null; }
+    public String getClienteId() { return clienteEntity != null ? clienteEntity.getId() : null; }
 
-    public Restaurante getRestaurante() { return restaurante; }
-    public void setRestaurante(Restaurante restaurante) { this.restaurante = restaurante; }
+    public RestauranteEntity getRestaurante() { return restauranteEntity; }
+    public void setRestaurante(RestauranteEntity restauranteEntity) { this.restauranteEntity = restauranteEntity; }
 
-    public String getRestauranteId() { return restaurante != null ? restaurante.getId() : null; }
+    public String getRestauranteId() { return restauranteEntity != null ? restauranteEntity.getId() : null; }
 
-    public List<ItemPedido> getItens() { return itens; }
+    public List<ItemPedidoEntity> getItens() { return itens; }
     public StatusPedido getStatus() { return status; }
     public void setStatus(StatusPedido status) { this.status = status; }
     public BigDecimal getTaxaEntrega() { return taxaEntrega; }
     public BigDecimal getTotal() { return total; }
     public LocalDateTime getDataPedido() { return dataPedido; }
-    public Endereco getEnderecoEntrega() { return enderecoEntrega; }
-    public void setEnderecoEntrega(Endereco e) { this.enderecoEntrega = e; }
+    public EnderecoEntity getEnderecoEntrega() { return enderecoEntityEntrega; }
+    public void setEnderecoEntrega(EnderecoEntity e) { this.enderecoEntityEntrega = e; }
     public String getCodigoConfirmacao() { return codigoConfirmacao; }
     public void setCodigoConfirmacao(String c) { this.codigoConfirmacao = c; }
 
-    public void adicionarItem(ItemPedido item) { itens.add(item); }
+    public void adicionarItem(ItemPedidoEntity item) { itens.add(item); }
 
     public BigDecimal calcularTotal() {
         return itens.stream()
-                .map(ItemPedido::calcularSubtotal)
+                .map(ItemPedidoEntity::calcularSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .add(taxaEntrega);
     }

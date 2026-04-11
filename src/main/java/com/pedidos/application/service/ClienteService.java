@@ -1,14 +1,12 @@
 package com.pedidos.application.service;
 
-import com.pedidos.domain.model.Cliente;
-import com.pedidos.domain.model.Endereco;
-import com.pedidos.domain.model.Restaurante;
-import com.pedidos.domain.model.Usuario;
+import com.pedidos.domain.entities.ClienteEntity;
+import com.pedidos.domain.entities.EnderecoEntity;
+import com.pedidos.domain.entities.RestauranteEntity;
+import com.pedidos.domain.entities.UsuarioEntity;
 import com.pedidos.domain.repository.AdminRepository;
 import com.pedidos.domain.repository.ClienteRepository;
 import com.pedidos.domain.repository.RestauranteRepository;
-
-import java.util.List;
 
 public class ClienteService {
     private final ClienteRepository clienteRepository;
@@ -23,13 +21,13 @@ public class ClienteService {
         this.restauranteRepository = restauranteRepository;
     }
 
-    public void favoritar(Cliente cliente, Restaurante restaurante) {
-        if (cliente.getFavoritos().contains(restaurante)) {
-            cliente.removerFavorito(restaurante);
+    public void favoritar(ClienteEntity clienteEntity, RestauranteEntity restauranteEntity) {
+        if (clienteEntity.getFavoritos().contains(restauranteEntity)) {
+            clienteEntity.removerFavorito(restauranteEntity);
         } else {
-            cliente.adicionarFavorito(restaurante);
+            clienteEntity.adicionarFavorito(restauranteEntity);
         }
-        clienteRepository.salvar(cliente);
+        clienteRepository.salvar(clienteEntity);
     }
 
     // Cadastro
@@ -42,63 +40,63 @@ public class ClienteService {
             }
 
             String hash = autenticacaoService.hashSenha(senha);
-            Cliente cliente = new Cliente(nome, email, hash, cpf, telefone);
-            clienteRepository.salvar(cliente);
+            ClienteEntity clienteEntity = new ClienteEntity(nome, email, hash, cpf, telefone);
+            clienteRepository.salvar(clienteEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
 
-    public void editarNome(Cliente cliente, String novoNome) {
+    public void editarNome(ClienteEntity clienteEntity, String novoNome) {
         try {
-            cliente.setNome(novoNome);
-            clienteRepository.salvar(cliente);
+            clienteEntity.setNome(novoNome);
+            clienteRepository.salvar(clienteEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
 
-    public void editarEmail(Cliente cliente, String novoEmail) {
+    public void editarEmail(ClienteEntity clienteEntity, String novoEmail) {
         try {
-            if (!cliente.getEmail().equalsIgnoreCase(novoEmail) && emailCadastrado(novoEmail)) {
+            if (!clienteEntity.getEmail().equalsIgnoreCase(novoEmail) && emailCadastrado(novoEmail)) {
                 throw new IllegalArgumentException("E-mail já cadastrado no sistema.");
             }
-            cliente.setEmail(novoEmail);
-            clienteRepository.salvar(cliente);
+            clienteEntity.setEmail(novoEmail);
+            clienteRepository.salvar(clienteEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
 
-    public void editarCpf(Cliente cliente, String novoCpf) {
+    public void editarCpf(ClienteEntity clienteEntity, String novoCpf) {
         try {
             validarCpf(novoCpf);
-            cliente.setCpf(novoCpf);
-            clienteRepository.salvar(cliente);
+            clienteEntity.setCpf(novoCpf);
+            clienteRepository.salvar(clienteEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
 
-    public void salvarEndereco(Cliente cliente, String rua, String numero, String bairro, String cidade, String estado, String cep) {
+    public void salvarEndereco(ClienteEntity clienteEntity, String rua, String numero, String bairro, String cidade, String estado, String cep) {
         try {
-            cliente.setEnderecoEntrega(new Endereco(rua, numero, bairro, cidade, estado, cep));
-            clienteRepository.salvar(cliente);
+            clienteEntity.setEnderecoEntrega(new EnderecoEntity(rua, numero, bairro, cidade, estado, cep));
+            clienteRepository.salvar(clienteEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
 
-    public void editarTelefone(Cliente cliente, String novoTelefone) {
+    public void editarTelefone(ClienteEntity clienteEntity, String novoTelefone) {
         try {
-            cliente.setTelefone(novoTelefone);
-            clienteRepository.salvar(cliente);
+            clienteEntity.setTelefone(novoTelefone);
+            clienteRepository.salvar(clienteEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
 
-    public void alterarSenha(Usuario usuario, String senhaAtual, String novaSenha, String confirmacaoSenha) {
+    public void alterarSenha(UsuarioEntity usuarioEntity, String senhaAtual, String novaSenha, String confirmacaoSenha) {
         try {
             if (novaSenha.length() < 6) {
                 throw new IllegalArgumentException("A nova senha deve ter pelo menos 6 caracteres.");
@@ -109,13 +107,13 @@ public class ClienteService {
             }
 
             String hashAtual = autenticacaoService.hashSenha(senhaAtual);
-            if (!usuario.verificarSenha(hashAtual)) {
+            if (!usuarioEntity.verificarSenha(hashAtual)) {
                 throw new IllegalArgumentException("Senha atual incorreta.");
             }
 
             String novoHash = autenticacaoService.hashSenha(novaSenha);
-            usuario.setSenhaHash(novoHash);
-            clienteRepository.salvar(usuario);
+            usuarioEntity.setSenhaHash(novoHash);
+            clienteRepository.salvar(usuarioEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }

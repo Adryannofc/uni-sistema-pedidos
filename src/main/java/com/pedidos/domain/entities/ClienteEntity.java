@@ -1,4 +1,4 @@
-package com.pedidos.domain.model;
+package com.pedidos.domain.entities;
 
 import com.pedidos.domain.enums.TipoUsuario;
 import jakarta.persistence.*;
@@ -8,7 +8,7 @@ import java.util.List;
 @Entity
 @Table(name = "clientes")
 @PrimaryKeyJoinColumn(name = "usuario_id")
-public class Cliente extends Usuario {
+public class ClienteEntity extends UsuarioEntity {
 
     @Column(name = "cpf", unique = true)
     private String cpf;
@@ -17,7 +17,7 @@ public class Cliente extends Usuario {
     private String telefone;
 
     @OneToOne(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Endereco enderecoEntrega;
+    private EnderecoEntity enderecoEntityEntrega;
 
     @ManyToMany
     @JoinTable(
@@ -25,25 +25,25 @@ public class Cliente extends Usuario {
             joinColumns = @JoinColumn(name = "cliente_id"),
             inverseJoinColumns = @JoinColumn(name = "restaurante_id")
     )
-    private List<Restaurante> favoritos = new ArrayList<>();
+    private List<RestauranteEntity> favoritos = new ArrayList<>();
 
-    public void adicionarFavorito(Restaurante restaurante) {
-        this.favoritos.add(restaurante);
+    public void adicionarFavorito(RestauranteEntity restauranteEntity) {
+        this.favoritos.add(restauranteEntity);
     }
 
-    public void removerFavorito(Restaurante restaurante) {
-        this.favoritos.remove(restaurante);
+    public void removerFavorito(RestauranteEntity restauranteEntity) {
+        this.favoritos.remove(restauranteEntity);
     }
 
-    protected Cliente() {}
+    protected ClienteEntity() {}
 
-    public Cliente(String nome, String email, String senhaHash, String cpf, String telefone) {
+    public ClienteEntity(String nome, String email, String senhaHash, String cpf, String telefone) {
         super(nome, email, senhaHash, TipoUsuario.CLIENTE);
         this.cpf = cpf;
         this.telefone = telefone;
     }
 
-    public List<Restaurante> getFavoritos() { return favoritos; }
+    public List<RestauranteEntity> getFavoritos() { return favoritos; }
 
     public String getCpf() { return cpf; }
 
@@ -63,17 +63,17 @@ public class Cliente extends Usuario {
         this.telefone = telefone;
     }
 
-    public Endereco getEnderecoEntrega() { return enderecoEntrega; }
+    public EnderecoEntity getEnderecoEntrega() { return enderecoEntityEntrega; }
 
-    public void setEnderecoEntrega(Endereco endereco) {
-        this.enderecoEntrega = endereco;
-        if (endereco != null) {
-            endereco.setCliente(this);
+    public void setEnderecoEntrega(EnderecoEntity enderecoEntity) {
+        this.enderecoEntityEntrega = enderecoEntity;
+        if (enderecoEntity != null) {
+            enderecoEntity.setCliente(this);
         }
     }
 
-    public List<Restaurante> listarFavoritos(Cliente cliente) {
-        return cliente.getFavoritos();
+    public List<RestauranteEntity> listarFavoritos(ClienteEntity clienteEntity) {
+        return clienteEntity.getFavoritos();
     }
 
     @Override

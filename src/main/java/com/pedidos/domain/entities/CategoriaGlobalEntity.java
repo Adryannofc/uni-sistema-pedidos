@@ -1,4 +1,4 @@
-package com.pedidos.domain.model;
+package com.pedidos.domain.entities;
 
 import jakarta.persistence.*;
 
@@ -6,7 +6,7 @@ import java.util.UUID;
 
 @Entity
 @Table (name = "categorias_globais")
-public class CategoriaGlobal {
+public class CategoriaGlobalEntity {
 
     @Id
     @Column(name = "id", updatable = false, nullable = false)
@@ -18,9 +18,9 @@ public class CategoriaGlobal {
     @Column(name = "descricao")
     private String descricao;
 
-    protected CategoriaGlobal() {}
+    protected CategoriaGlobalEntity() {}
 
-    public CategoriaGlobal(String nome, String descricao) {
+    public CategoriaGlobalEntity(String nome, String descricao) {
         this.id = UUID.randomUUID().toString();
         this.nome = nome;
         this.descricao = descricao;

@@ -1,7 +1,6 @@
 package com.pedidos.infra.repository.impl;
 
-import com.pedidos.domain.model.CategoriaCardapio;
-import com.pedidos.domain.model.CategoriaGlobal;
+import com.pedidos.domain.entities.CategoriaGlobalEntity;
 import com.pedidos.domain.repository.CategoriaGlobalRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -13,7 +12,7 @@ public class CategoriaGlobalRepositoryJPA implements CategoriaGlobalRepository {
 
     public CategoriaGlobalRepositoryJPA (EntityManager em) { this.em = em; }
 
-    public void salvar(CategoriaGlobal categoria) {
+    public void salvar(CategoriaGlobalEntity categoria) {
         try {
             em.getTransaction().begin();
             em.persist(categoria);
@@ -24,7 +23,7 @@ public class CategoriaGlobalRepositoryJPA implements CategoriaGlobalRepository {
         }
     }
 
-    public void atualizar(CategoriaGlobal categoria) {
+    public void atualizar(CategoriaGlobalEntity categoria) {
         try {
             em.getTransaction().begin();
             em.merge(categoria);
@@ -39,7 +38,7 @@ public class CategoriaGlobalRepositoryJPA implements CategoriaGlobalRepository {
     public void remover(String id) {
         try {
             em.getTransaction().begin();
-            CategoriaGlobal categoria = em.find(CategoriaGlobal.class, id);
+            CategoriaGlobalEntity categoria = em.find(CategoriaGlobalEntity.class, id);
             if (categoria != null) {
                 em.remove(categoria);
             }
@@ -52,14 +51,14 @@ public class CategoriaGlobalRepositoryJPA implements CategoriaGlobalRepository {
     }
 
     @Override
-    public Optional<CategoriaGlobal> buscarPorId(String id) {
-        return Optional.ofNullable(em.find(CategoriaGlobal.class, id));
+    public Optional<CategoriaGlobalEntity> buscarPorId(String id) {
+        return Optional.ofNullable(em.find(CategoriaGlobalEntity.class, id));
     }
 
     @Override
-    public Optional<CategoriaGlobal> buscarPorNome(String nome) {
+    public Optional<CategoriaGlobalEntity> buscarPorNome(String nome) {
         try {
-            return Optional.of(em.createQuery("select c from CategoriaGlobal c where c.nome = :nome", CategoriaGlobal.class)
+            return Optional.of(em.createQuery("select c from CategoriaGlobal c where c.nome = :nome", CategoriaGlobalEntity.class)
                     .setParameter("nome", nome)
                     .getSingleResult());
         } catch (NoResultException e) {
@@ -68,7 +67,7 @@ public class CategoriaGlobalRepositoryJPA implements CategoriaGlobalRepository {
     }
 
     @Override
-    public List<CategoriaGlobal> listarTodos() {
-        return em.createQuery("select c from CategoriaGlobal c", CategoriaGlobal.class).getResultList();
+    public List<CategoriaGlobalEntity> listarTodos() {
+        return em.createQuery("select c from CategoriaGlobal c", CategoriaGlobalEntity.class).getResultList();
     }
 }

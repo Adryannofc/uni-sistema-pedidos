@@ -2,9 +2,9 @@ package com.pedidos.presentation.restaurante;
 
 import com.pedidos.application.service.CategoriaService;
 import com.pedidos.application.service.ProdutoService;
-import com.pedidos.domain.model.CategoriaCardapio;
-import com.pedidos.domain.model.Produto;
-import com.pedidos.domain.model.Restaurante;
+import com.pedidos.domain.entities.CategoriaCardapioEntity;
+import com.pedidos.domain.entities.ProdutoEntity;
+import com.pedidos.domain.entities.RestauranteEntity;
 import com.pedidos.presentation.util.EntradaSegura;
 import com.pedidos.presentation.util.TerminalUtils;
 
@@ -48,7 +48,7 @@ public class MenuProdutos {
      * Exibe cada produto como um card completo.
      * Usado na listagem de visualizacao.
      */
-    private void exibirCardProduto(int indice, Produto p) {
+    private void exibirCardProduto(int indice, ProdutoEntity p) {
         String status = p.isStatusAtivo() ? "[ ATIVO ]" : "[ INATIVO ]";
         String preco  = MOEDA.format(p.getPreco());
         String desc   = p.getDescricao().isBlank() ? "-" : p.getDescricao();
@@ -65,12 +65,12 @@ public class MenuProdutos {
     /**
      * Exibe lista resumida (numero, nome, status) para fluxos de selecao.
      */
-    private void exibirListaResumida(List<Produto> produtos) {
+    private void exibirListaResumida(List<ProdutoEntity> produtoEntities) {
         System.out.println(TerminalUtils.TOPO);
         System.out.println(TerminalUtils.linha("  #    Nome                         Status"));
         System.out.println(TerminalUtils.SEPARADOR);
-        for (int i = 0; i < produtos.size(); i++) {
-            Produto p      = produtos.get(i);
+        for (int i = 0; i < produtoEntities.size(); i++) {
+            ProdutoEntity p      = produtoEntities.get(i);
             String  status = p.isStatusAtivo() ? "ATIVO" : "INATIVO";
             System.out.println(TerminalUtils.linha(
                     String.format("  %-3d  %-28s  %s", (i + 1), p.getNome(), status)));
@@ -94,7 +94,7 @@ public class MenuProdutos {
      * Exibe categorias em caixa e retorna o ID da escolhida.
      * Retorna null se a lista estiver vazia.
      */
-    private String selecionarCategoria(List<CategoriaCardapio> categorias) {
+    private String selecionarCategoria(List<CategoriaCardapioEntity> categorias) {
         if (categorias.isEmpty()) {
             TerminalUtils.aviso("Nenhuma categoria disponivel.");
             return null;
@@ -116,10 +116,10 @@ public class MenuProdutos {
 
     // ─── Menu principal ───────────────────────────────────────────────────────
 
-    public void exibir(Restaurante restauranteLogado) {
+    public void exibir(RestauranteEntity restauranteEntityLogado) {
         while (true) {
             TerminalUtils.limparTela();
-            TerminalUtils.cabecalho("PRODUTOS", "Restaurante: " + restauranteLogado.getNome());
+            TerminalUtils.cabecalho("PRODUTOS", "Restaurante: " + restauranteEntityLogado.getNome());
 
             System.out.println(TerminalUtils.SEPARADOR);
             System.out.println(TerminalUtils.linha("  ACOES"));
@@ -138,11 +138,11 @@ public class MenuProdutos {
             int opcao = EntradaSegura.lerOpcao(scanner, 0, 5);
 
             switch (opcao) {
-                case 1 -> acaoListar(restauranteLogado);
-                case 2 -> acaoAdicionar(restauranteLogado);
-                case 3 -> acaoEditar(restauranteLogado);
-                case 4 -> acaoAtivarInativar(restauranteLogado);
-                case 5 -> acaoRemover(restauranteLogado);
+                case 1 -> acaoListar(restauranteEntityLogado);
+                case 2 -> acaoAdicionar(restauranteEntityLogado);
+                case 3 -> acaoEditar(restauranteEntityLogado);
+                case 4 -> acaoAtivarInativar(restauranteEntityLogado);
+                case 5 -> acaoRemover(restauranteEntityLogado);
                 case 0 -> { return; }
             }
         }
@@ -150,16 +150,16 @@ public class MenuProdutos {
 
     // ─── Acoes ────────────────────────────────────────────────────────────────
 
-    private void acaoListar(Restaurante restauranteLogado) {
+    private void acaoListar(RestauranteEntity restauranteEntityLogado) {
         TerminalUtils.limparTela();
-        TerminalUtils.cabecalho("LISTA DE PRODUTOS", "Restaurante: " + restauranteLogado.getNome());
+        TerminalUtils.cabecalho("LISTA DE PRODUTOS", "Restaurante: " + restauranteEntityLogado.getNome());
         try {
-            List<Produto> produtos = produtoService.listarPorRestaurante(restauranteLogado.getId());
-            if (produtos.isEmpty()) {
+            List<ProdutoEntity> produtoEntities = produtoService.listarPorRestaurante(restauranteEntityLogado.getId());
+            if (produtoEntities.isEmpty()) {
                 TerminalUtils.aviso("Nenhum produto cadastrado ainda.");
             } else {
-                for (int i = 0; i < produtos.size(); i++) {
-                    exibirCardProduto(i + 1, produtos.get(i));
+                for (int i = 0; i < produtoEntities.size(); i++) {
+                    exibirCardProduto(i + 1, produtoEntities.get(i));
                     System.out.println();
                 }
             }
@@ -169,12 +169,12 @@ public class MenuProdutos {
         TerminalUtils.pausar();
     }
 
-    private void acaoAdicionar(Restaurante restauranteLogado) {
+    private void acaoAdicionar(RestauranteEntity restauranteEntityLogado) {
         TerminalUtils.limparTela();
-        TerminalUtils.cabecalho("ADICIONAR PRODUTO", "Restaurante: " + restauranteLogado.getNome());
+        TerminalUtils.cabecalho("ADICIONAR PRODUTO", "Restaurante: " + restauranteEntityLogado.getNome());
         try {
-            List<CategoriaCardapio> categorias =
-                    categoriaService.listarCategoriasCardapio(restauranteLogado.getId());
+            List<CategoriaCardapioEntity> categorias =
+                    categoriaService.listarCategoriasCardapio(restauranteEntityLogado.getId());
             if (categorias.isEmpty()) {
                 TerminalUtils.aviso("Cadastre ao menos uma categoria antes de adicionar produtos.");
                 TerminalUtils.pausar();
@@ -203,7 +203,7 @@ public class MenuProdutos {
             System.out.println(TerminalUtils.BASE);
 
             if (confirmar("Cadastrar este produto?")) {
-                produtoService.criarProduto(nome, descricao, preco, categoriaId, restauranteLogado.getId());
+                produtoService.criarProduto(nome, descricao, preco, categoriaId, restauranteEntityLogado.getId());
                 TerminalUtils.sucesso("Produto \"" + nome + "\" cadastrado com sucesso!");
             } else {
                 TerminalUtils.aviso("Cadastro cancelado.");
@@ -214,22 +214,22 @@ public class MenuProdutos {
         TerminalUtils.pausar();
     }
 
-    private void acaoEditar(Restaurante restauranteLogado) {
+    private void acaoEditar(RestauranteEntity restauranteEntityLogado) {
         TerminalUtils.limparTela();
-        TerminalUtils.cabecalho("EDITAR PRODUTO", "Restaurante: " + restauranteLogado.getNome());
+        TerminalUtils.cabecalho("EDITAR PRODUTO", "Restaurante: " + restauranteEntityLogado.getNome());
         try {
-            List<Produto> produtos = produtoService.listarPorRestaurante(restauranteLogado.getId());
-            if (produtos.isEmpty()) {
+            List<ProdutoEntity> produtoEntities = produtoService.listarPorRestaurante(restauranteEntityLogado.getId());
+            if (produtoEntities.isEmpty()) {
                 TerminalUtils.aviso("Nenhum produto cadastrado para editar.");
                 TerminalUtils.pausar();
                 return;
             }
 
-            exibirListaResumida(produtos);
+            exibirListaResumida(produtoEntities);
             System.out.println();
             System.out.print("  Escolha o numero do produto: ");
-            int num = EntradaSegura.lerOpcao(scanner, 1, produtos.size());
-            Produto selecionado = produtos.get(num - 1);
+            int num = EntradaSegura.lerOpcao(scanner, 1, produtoEntities.size());
+            ProdutoEntity selecionado = produtoEntities.get(num - 1);
 
             System.out.println();
             System.out.println("  Preencha os campos abaixo.");
@@ -254,14 +254,14 @@ public class MenuProdutos {
                 }
             }
 
-            List<CategoriaCardapio> categorias =
-                    categoriaService.listarCategoriasCardapio(restauranteLogado.getId());
+            List<CategoriaCardapioEntity> categorias =
+                    categoriaService.listarCategoriasCardapio(restauranteEntityLogado.getId());
             String novaCategoriaId = selecionarCategoria(categorias);
             if (novaCategoriaId == null) { TerminalUtils.pausar(); return; }
 
             if (confirmar("Salvar alteracoes em \"" + selecionado.getNome() + "\"?")) {
                 produtoService.editarProduto(
-                        selecionado.getId(), restauranteLogado.getId(),
+                        selecionado.getId(), restauranteEntityLogado.getId(),
                         novoNome, novaDescricao, novoPreco, novaCategoriaId);
                 TerminalUtils.sucesso("Produto atualizado com sucesso!");
             } else {
@@ -273,28 +273,28 @@ public class MenuProdutos {
         TerminalUtils.pausar();
     }
 
-    private void acaoAtivarInativar(Restaurante restauranteLogado) {
+    private void acaoAtivarInativar(RestauranteEntity restauranteEntityLogado) {
         TerminalUtils.limparTela();
-        TerminalUtils.cabecalho("ATIVAR / INATIVAR PRODUTO", "Restaurante: " + restauranteLogado.getNome());
+        TerminalUtils.cabecalho("ATIVAR / INATIVAR PRODUTO", "Restaurante: " + restauranteEntityLogado.getNome());
         try {
-            List<Produto> produtos = produtoService.listarPorRestaurante(restauranteLogado.getId());
-            if (produtos.isEmpty()) {
+            List<ProdutoEntity> produtoEntities = produtoService.listarPorRestaurante(restauranteEntityLogado.getId());
+            if (produtoEntities.isEmpty()) {
                 TerminalUtils.aviso("Nenhum produto cadastrado.");
                 TerminalUtils.pausar();
                 return;
             }
 
-            exibirListaResumida(produtos);
+            exibirListaResumida(produtoEntities);
             System.out.println();
             System.out.print("  Escolha o numero do produto: ");
-            int num = EntradaSegura.lerOpcao(scanner, 1, produtos.size());
-            Produto selecionado = produtos.get(num - 1);
+            int num = EntradaSegura.lerOpcao(scanner, 1, produtoEntities.size());
+            ProdutoEntity selecionado = produtoEntities.get(num - 1);
 
             String statusAtual = selecionado.isStatusAtivo() ? "ATIVO" : "INATIVO";
             String acao        = selecionado.isStatusAtivo() ? "INATIVAR" : "ATIVAR";
 
             if (confirmar("Produto esta " + statusAtual + ". Deseja " + acao + "?")) {
-                produtoService.ativarInativar(selecionado.getId(), restauranteLogado.getId());
+                produtoService.ativarInativar(selecionado.getId(), restauranteEntityLogado.getId());
                 TerminalUtils.sucesso("Status alterado com sucesso!");
             } else {
                 TerminalUtils.aviso("Operacao cancelada.");
@@ -305,26 +305,26 @@ public class MenuProdutos {
         TerminalUtils.pausar();
     }
 
-    private void acaoRemover(Restaurante restauranteLogado) {
+    private void acaoRemover(RestauranteEntity restauranteEntityLogado) {
         TerminalUtils.limparTela();
-        TerminalUtils.cabecalho("REMOVER PRODUTO", "Restaurante: " + restauranteLogado.getNome());
+        TerminalUtils.cabecalho("REMOVER PRODUTO", "Restaurante: " + restauranteEntityLogado.getNome());
         try {
-            List<Produto> produtos = produtoService.listarPorRestaurante(restauranteLogado.getId());
-            if (produtos.isEmpty()) {
+            List<ProdutoEntity> produtoEntities = produtoService.listarPorRestaurante(restauranteEntityLogado.getId());
+            if (produtoEntities.isEmpty()) {
                 TerminalUtils.aviso("Nenhum produto cadastrado.");
                 TerminalUtils.pausar();
                 return;
             }
 
-            exibirListaResumida(produtos);
+            exibirListaResumida(produtoEntities);
             System.out.println();
             System.out.print("  Escolha o numero do produto: ");
-            int num = EntradaSegura.lerOpcao(scanner, 1, produtos.size());
-            Produto selecionado = produtos.get(num - 1);
+            int num = EntradaSegura.lerOpcao(scanner, 1, produtoEntities.size());
+            ProdutoEntity selecionado = produtoEntities.get(num - 1);
 
             if (TerminalUtils.confirmarPerigo(
                     "Remover permanentemente \"" + selecionado.getNome() + "\"?", scanner)) {
-                produtoService.removerProduto(selecionado.getId(), restauranteLogado.getId());
+                produtoService.removerProduto(selecionado.getId(), restauranteEntityLogado.getId());
                 TerminalUtils.sucesso("Produto removido permanentemente.");
             } else {
                 TerminalUtils.aviso("Remocao cancelada.");

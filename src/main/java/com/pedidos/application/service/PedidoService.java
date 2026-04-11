@@ -1,7 +1,7 @@
 package com.pedidos.application.service;
 
 import com.pedidos.domain.enums.StatusPedido;
-import com.pedidos.domain.model.*;
+import com.pedidos.domain.entities.*;
 import com.pedidos.domain.repository.PedidoRepository;
 
 import java.math.BigDecimal;
@@ -20,24 +20,24 @@ public class PedidoService {
      *
      * @param clienteId         id do cliente que realizou o pedido
      * @param restauranteId     id do restaurante do pedido
-     * @param carrinho          itens selecionados pelo cliente
-     * @param enderecoEntrega   endereço de entrega
+     * @param carrinhoEntity          itens selecionados pelo cliente
+     * @param enderecoEntityEntrega   endereço de entrega
      * @param codigoConfirmacao código para confirmar a entrega
      * @return pedido criado
      */
-    public Pedido criarPedido(String clienteId, String restauranteId, Carrinho carrinho, Endereco enderecoEntrega, String codigoConfirmacao) {
+    public PedidoEntity criarPedido(String clienteId, String restauranteId, CarrinhoEntity carrinhoEntity, EnderecoEntity enderecoEntityEntrega, String codigoConfirmacao) {
         try {
-            if (enderecoEntrega == null) {
+            if (enderecoEntityEntrega == null) {
                 throw new IllegalArgumentException("Informe um endereço de entrega antes de finalizar o pedido.");
             }
 
-            Pedido pedido = new Pedido(null, clienteId, restauranteId, BigDecimal.ZERO);
-            pedido.setEnderecoEntrega(enderecoEntrega);
-            pedido.setCodigoConfirmacao(codigoConfirmacao);
-            carrinho.getItens().forEach(pedido::adicionarItem);
-            pedido.calcularTotal();
-            pedidoRepository.salvar(pedido);
-            return pedido;
+            PedidoEntity pedidoEntity = new PedidoEntity(null, clienteId, restauranteId, BigDecimal.ZERO);
+            pedidoEntity.setEnderecoEntrega(enderecoEntityEntrega);
+            pedidoEntity.setCodigoConfirmacao(codigoConfirmacao);
+            carrinhoEntity.getItens().forEach(pedidoEntity::adicionarItem);
+            pedidoEntity.calcularTotal();
+            pedidoRepository.salvar(pedidoEntity);
+            return pedidoEntity;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -53,18 +53,18 @@ public class PedidoService {
      */
     public void confirmarEntrega(String pedidoId, String codigoDigitado) {
         try {
-            Pedido pedido = pedidoRepository.buscarPorId(pedidoId)
+            PedidoEntity pedidoEntity = pedidoRepository.buscarPorId(pedidoId)
                     .orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado."));
 
-            if (pedido.getStatus() != StatusPedido.SAIU_PARA_ENTREGA) {
+            if (pedidoEntity.getStatus() != StatusPedido.SAIU_PARA_ENTREGA) {
                 throw new IllegalStateException("Pedido nao esta em status de entrega.");
             }
-            if (!pedido.getCodigoConfirmacao().equals(codigoDigitado)) {
+            if (!pedidoEntity.getCodigoConfirmacao().equals(codigoDigitado)) {
                 throw new IllegalArgumentException("Codigo incorreto.");
             }
 
-            pedido.setStatus(StatusPedido.ENTREGUE);
-            pedidoRepository.salvar(pedido);
+            pedidoEntity.setStatus(StatusPedido.ENTREGUE);
+            pedidoRepository.salvar(pedidoEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -80,12 +80,12 @@ public class PedidoService {
      */
     public void atualizarStatus(String pedidoId, StatusPedido novoStatus) {
         try {
-            Pedido pedido = pedidoRepository.buscarPorId(pedidoId)
+            PedidoEntity pedidoEntity = pedidoRepository.buscarPorId(pedidoId)
                     .orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado."));
 
-            validarTransicao(pedido.getStatus(), novoStatus);
-            pedido.setStatus(novoStatus);
-            pedidoRepository.salvar(pedido);
+            validarTransicao(pedidoEntity.getStatus(), novoStatus);
+            pedidoEntity.setStatus(novoStatus);
+            pedidoRepository.salvar(pedidoEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -131,7 +131,7 @@ public class PedidoService {
      * @return pedido encontrado
      * @throws IllegalArgumentException se o pedido não for encontrado
      */
-    public Pedido buscarPorId(String pedidoId) {
+    public PedidoEntity buscarPorId(String pedidoId) {
         try {
             return pedidoRepository.buscarPorId(pedidoId)
                     .orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado."));
@@ -146,7 +146,7 @@ public class PedidoService {
      * @param clienteId id do cliente
      * @return lista de pedidos do cliente
      */
-    public List<Pedido> listarPorCliente(String clienteId) {
+    public List<PedidoEntity> listarPorCliente(String clienteId) {
         try {
             return pedidoRepository.buscarPorCliente(clienteId);
         } catch (Exception e) {
@@ -160,7 +160,7 @@ public class PedidoService {
      * @param restauranteId id do restaurante
      * @return lista de pedidos do restaurante
      */
-    public List<Pedido> listarPorRestaurante(String restauranteId) {
+    public List<PedidoEntity> listarPorRestaurante(String restauranteId) {
         try {
             return pedidoRepository.buscarPorRestaurante(restauranteId);
         } catch (Exception e) {

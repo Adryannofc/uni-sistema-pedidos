@@ -1,6 +1,6 @@
 package com.pedidos.application.service;
 
-import com.pedidos.domain.model.Produto;
+import com.pedidos.domain.entities.ProdutoEntity;
 import com.pedidos.domain.repository.ProdutoRepository;
 
 import java.math.BigDecimal;
@@ -17,13 +17,13 @@ public class ProdutoService {
     /**
      * Cria e persiste um novo produto. Lança exceção se preço for zero ou negativo.
      */
-    public Produto criarProduto(String nome, String descricao, BigDecimal preco, String categoriaCardapioId, String restauranteId) {
+    public ProdutoEntity criarProduto(String nome, String descricao, BigDecimal preco, String categoriaCardapioId, String restauranteId) {
         try {
             validarPreco(preco);
 
-            Produto produto = new Produto(nome, descricao, preco, categoriaCardapioId, restauranteId);
-            produtoRepository.salvar(produto);
-            return produto;
+            ProdutoEntity produtoEntity = new ProdutoEntity(nome, descricao, preco, categoriaCardapioId, restauranteId);
+            produtoRepository.salvar(produtoEntity);
+            return produtoEntity;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -32,7 +32,7 @@ public class ProdutoService {
     /**
      * Lista todos os produtos do restaurante, ativos e inativos.
      */
-    public List<Produto> listarPorRestaurante(String restauranteId) {
+    public List<ProdutoEntity> listarPorRestaurante(String restauranteId) {
         try {
             return produtoRepository.listarTodos().stream()
                     .filter(p -> p.getRestauranteId().equals(restauranteId))
@@ -45,7 +45,7 @@ public class ProdutoService {
     /**
      * Lista apenas produtos ativos do restaurante — exibidos para o cliente.
      */
-    public List<Produto> listarAtivosPorRestaurante(String restauranteId) {
+    public List<ProdutoEntity> listarAtivosPorRestaurante(String restauranteId) {
         try {
             return produtoRepository.listarTodos().stream()
                     .filter(p -> p.getRestauranteId().equals(restauranteId) && p.isStatusAtivo())
@@ -60,26 +60,26 @@ public class ProdutoService {
      */
     public void editarProduto(String produtoId, String restauranteId, String novoNome, String novaDescricao, BigDecimal novoPreco, String novaCategoriaCardapioId) {
         try {
-            Produto produto = buscarProdutoDono(produtoId, restauranteId);
+            ProdutoEntity produtoEntity = buscarProdutoDono(produtoId, restauranteId);
 
             if (novoNome != null && !novoNome.isBlank()) {
-                produto.setNome(novoNome);
+                produtoEntity.setNome(novoNome);
             }
 
             if (novaDescricao != null && !novaDescricao.isBlank()) {
-                produto.setDescricao(novaDescricao);
+                produtoEntity.setDescricao(novaDescricao);
             }
 
             if (novoPreco != null) {
                 validarPreco(novoPreco);
-                produto.setPreco(novoPreco);
+                produtoEntity.setPreco(novoPreco);
             }
 
             if (novaCategoriaCardapioId != null && !novaCategoriaCardapioId.isBlank()) {
-                produto.setCategoriaCardapioId(novaCategoriaCardapioId);
+                produtoEntity.setCategoriaCardapioId(novaCategoriaCardapioId);
             }
 
-            produtoRepository.salvar(produto);
+            produtoRepository.salvar(produtoEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -90,9 +90,9 @@ public class ProdutoService {
      */
     public void ativarInativar(String produtoId, String restauranteId) {
         try {
-            Produto produto = buscarProdutoDono(produtoId, restauranteId);
-            produto.setStatusAtivo(!produto.isStatusAtivo()); // toggle
-            produtoRepository.salvar(produto);
+            ProdutoEntity produtoEntity = buscarProdutoDono(produtoId, restauranteId);
+            produtoEntity.setStatusAtivo(!produtoEntity.isStatusAtivo()); // toggle
+            produtoRepository.salvar(produtoEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -113,16 +113,16 @@ public class ProdutoService {
     /**
      * Busca produto e valida que pertence ao restaurante informado.
      */
-    private Produto buscarProdutoDono(String produtoId, String restauranteId) {
+    private ProdutoEntity buscarProdutoDono(String produtoId, String restauranteId) {
         try {
-            Produto produto = produtoRepository.buscarPorId(produtoId)
+            ProdutoEntity produtoEntity = produtoRepository.buscarPorId(produtoId)
                     .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
 
-            if (!produto.getRestauranteId().equals(restauranteId)) {
+            if (!produtoEntity.getRestauranteId().equals(restauranteId)) {
                 throw new IllegalArgumentException("Produto não pertence a este restaurante.");
             }
 
-            return produto;
+            return produtoEntity;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -141,7 +141,7 @@ public class ProdutoService {
         }
     }
 
-    public Produto buscarPorId(String produtoId) {
+    public ProdutoEntity buscarPorId(String produtoId) {
         try {
             return produtoRepository.buscarPorId(produtoId)
                     .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));

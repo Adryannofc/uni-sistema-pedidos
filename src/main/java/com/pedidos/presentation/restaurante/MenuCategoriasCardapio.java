@@ -1,8 +1,8 @@
 package com.pedidos.presentation.restaurante;
 
 import com.pedidos.application.service.CategoriaService;
-import com.pedidos.domain.model.CategoriaCardapio;
-import com.pedidos.domain.model.Restaurante;
+import com.pedidos.domain.entities.CategoriaCardapioEntity;
+import com.pedidos.domain.entities.RestauranteEntity;
 import com.pedidos.presentation.util.EntradaSegura;
 import com.pedidos.presentation.util.TerminalUtils;
 
@@ -18,7 +18,7 @@ public class MenuCategoriasCardapio {
         this.scanner = scanner;
     }
 
-    public void exibir(Restaurante restauranteLogado) {
+    public void exibir(RestauranteEntity restauranteEntityLogado) {
         while (true) {
             TerminalUtils.limparTela();
             TerminalUtils.cabecalho("RESTAURANTE | CATEGORIAS DO CARDÁPIO");
@@ -35,12 +35,12 @@ public class MenuCategoriasCardapio {
             switch (opcao) {
                 case 1:
                     try {
-                        List<CategoriaCardapio> categorias = categoriaService.listarCategoriasCardapio(restauranteLogado.getId());
+                        List<CategoriaCardapioEntity> categorias = categoriaService.listarCategoriasCardapio(restauranteEntityLogado.getId());
                         if (categorias.isEmpty()) {
                             System.out.println("Nenhuma categoria cadastrada.");
                         } else {
                             for (int i = 0; i < categorias.size(); i++) {
-                                CategoriaCardapio c = categorias.get(i);
+                                CategoriaCardapioEntity c = categorias.get(i);
                                 System.out.println((i + 1) + " - " + c.getNome() + " | ID: " + c.getId());
                             }
                         }
@@ -61,7 +61,7 @@ public class MenuCategoriasCardapio {
                             System.out.print("Descrição (opcional): ");
                             String descricao = scanner.nextLine();
 
-                            categoriaService.criarCategoriaCardapio(nome, descricao, restauranteLogado.getId());
+                            categoriaService.criarCategoriaCardapio(nome, descricao, restauranteEntityLogado.getId());
                             System.out.println("Categoria " + nome + " criada com sucesso.");
                         }
                     } catch (Exception e) {
@@ -72,7 +72,7 @@ public class MenuCategoriasCardapio {
 
                 case 3:
                     try {
-                        List<CategoriaCardapio> categorias = categoriaService.listarCategoriasCardapio(restauranteLogado.getId());
+                        List<CategoriaCardapioEntity> categorias = categoriaService.listarCategoriasCardapio(restauranteEntityLogado.getId());
                         if (categorias.isEmpty()) {
                             System.out.println("Nenhuma categoria para editar.");
                             TerminalUtils.pausar();
@@ -80,12 +80,12 @@ public class MenuCategoriasCardapio {
                         }
 
                         for (int i = 0; i < categorias.size(); i++) {
-                            CategoriaCardapio c = categorias.get(i);
+                            CategoriaCardapioEntity c = categorias.get(i);
                             System.out.println((i + 1) + " - " + c.getNome());
                         }
                         System.out.print("Escolha o número da categoria: ");
                         int num = EntradaSegura.lerOpcao(scanner, 1, categorias.size());
-                        CategoriaCardapio selecionada = categorias.get(num - 1);
+                        CategoriaCardapioEntity selecionada = categorias.get(num - 1);
 
                         System.out.print("Nome atual: " + selecionada.getNome() + ". Novo nome: ");
                         String novoNome = scanner.nextLine();
@@ -103,7 +103,7 @@ public class MenuCategoriasCardapio {
 
                 case 4:
                     try {
-                        List<CategoriaCardapio> categorias = categoriaService.listarCategoriasCardapio(restauranteLogado.getId());
+                        List<CategoriaCardapioEntity> categorias = categoriaService.listarCategoriasCardapio(restauranteEntityLogado.getId());
                         if (categorias.isEmpty()) {
                             System.out.println("Nenhuma categoria cadastrada.");
                             TerminalUtils.pausar();
@@ -111,12 +111,12 @@ public class MenuCategoriasCardapio {
                         }
 
                         for (int i = 0; i < categorias.size(); i++) {
-                            CategoriaCardapio c = categorias.get(i);
+                            CategoriaCardapioEntity c = categorias.get(i);
                             System.out.println((i + 1) + " - " + c.getNome());
                         }
                         System.out.print("Escolha o número da categoria: ");
                         int num = EntradaSegura.lerOpcao(scanner, 1, categorias.size());
-                        CategoriaCardapio selecionada = categorias.get(num - 1);
+                        CategoriaCardapioEntity selecionada = categorias.get(num - 1);
 
                         System.out.print("Tem certeza? Produtos vinculados perderão a categoria. (S/N): ");
                         String confirmacao = scanner.nextLine();

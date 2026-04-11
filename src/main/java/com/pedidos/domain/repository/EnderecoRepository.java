@@ -1,15 +1,14 @@
 package com.pedidos.domain.repository;
 
-import com.pedidos.domain.model.Endereco;
+import com.pedidos.domain.entities.EnderecoEntity;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface EnderecoRepository {
 
-    void salvar(Endereco endereco);
+    void salvar(EnderecoEntity enderecoEntity);
 
-    Optional<Endereco> buscarPorCliente(String clienteId);
+    Optional<EnderecoEntity> buscarPorCliente(String clienteId);
 
     void remover(String clienteId);
 }

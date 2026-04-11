@@ -1,6 +1,6 @@
 package com.pedidos.infra.repository.impl;
 
-import com.pedidos.domain.model.Produto;
+import com.pedidos.domain.entities.ProdutoEntity;
 import com.pedidos.domain.repository.ProdutoRepository;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -16,11 +16,11 @@ public class ProdutoRepositoryJPA implements ProdutoRepository {
     }
 
     @Override
-    public void salvar(Produto produto) {
+    public void salvar(ProdutoEntity produtoEntity) {
         try {
             em.getTransaction().begin();
 
-            em.persist(produto);
+            em.persist(produtoEntity);
             em.getTransaction().commit();
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
@@ -31,13 +31,13 @@ public class ProdutoRepositoryJPA implements ProdutoRepository {
     }
 
     @Override
-    public Optional<Produto> buscarPorId(String id) {
-        return Optional.ofNullable(em.find(Produto.class, id));
+    public Optional<ProdutoEntity> buscarPorId(String id) {
+        return Optional.ofNullable(em.find(ProdutoEntity.class, id));
     }
 
     @Override
-    public List<Produto> listarTodos() {
-        return em.createQuery("SELECT p FROM Produto p", Produto.class)
+    public List<ProdutoEntity> listarTodos() {
+        return em.createQuery("SELECT p FROM Produto p", ProdutoEntity.class)
                 .getResultList();
     }
 
@@ -45,9 +45,9 @@ public class ProdutoRepositoryJPA implements ProdutoRepository {
     public void deletar(String id) {
         try {
             em.getTransaction().begin();
-            Produto produto = em.find(Produto.class, id);
-            if (produto != null) {
-                em.remove(produto);
+            ProdutoEntity produtoEntity = em.find(ProdutoEntity.class, id);
+            if (produtoEntity != null) {
+                em.remove(produtoEntity);
             }
             em.getTransaction().commit();
         } catch (Exception e) {

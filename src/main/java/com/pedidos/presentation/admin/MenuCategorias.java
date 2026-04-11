@@ -2,7 +2,7 @@ package com.pedidos.presentation.admin;
 
 import com.pedidos.application.service.AdminService;
 import com.pedidos.application.service.CategoriaService;
-import com.pedidos.domain.model.CategoriaGlobal;
+import com.pedidos.domain.entities.CategoriaGlobalEntity;
 import com.pedidos.presentation.util.EntradaSegura;
 import com.pedidos.presentation.util.TerminalUtils;
 
@@ -38,12 +38,12 @@ public class MenuCategorias {
             switch (opcao) {
                 case 1:
                     try {
-                        List<CategoriaGlobal> categorias = categoriaService.listarCategoriasGlobais();
+                        List<CategoriaGlobalEntity> categorias = categoriaService.listarCategoriasGlobais();
                         if (categorias.isEmpty()) {
                             System.out.println("Nenhuma categoria cadastrada.");
                         } else {
                             for (int i = 0; i < categorias.size(); i++) {
-                                CategoriaGlobal c = categorias.get(i);
+                                CategoriaGlobalEntity c = categorias.get(i);
                                 System.out.println((i + 1) + " - " + c.getNome() + " | ID: " + c.getId());
                             }
                         }
@@ -74,17 +74,17 @@ public class MenuCategorias {
 
                 case 3:
                     try {
-                        List<CategoriaGlobal> categorias = categoriaService.listarCategoriasGlobais();
+                        List<CategoriaGlobalEntity> categorias = categoriaService.listarCategoriasGlobais();
                         if (categorias.isEmpty()) {
                             System.out.println("Nenhuma categoria cadastrada.");
                         } else {
                             for (int i = 0; i < categorias.size(); i++) {
-                                CategoriaGlobal c = categorias.get(i);
+                                CategoriaGlobalEntity c = categorias.get(i);
                                 System.out.println((i + 1) + " - " + c.getNome() + " | ID: " + c.getId());
                             }
                             System.out.print("Digite o número da categoria: ");
                             int numero = EntradaSegura.lerOpcao(scanner, 1, categorias.size());
-                            CategoriaGlobal selecionada = categorias.get(numero - 1);
+                            CategoriaGlobalEntity selecionada = categorias.get(numero - 1);
 
                             System.out.print("Novo nome: ");
                             String novoNome = scanner.nextLine();
@@ -102,17 +102,17 @@ public class MenuCategorias {
 
                 case 4:
                     try {
-                        List<CategoriaGlobal> categorias = categoriaService.listarCategoriasGlobais();
+                        List<CategoriaGlobalEntity> categorias = categoriaService.listarCategoriasGlobais();
                         if (categorias.isEmpty()) {
                             System.out.println("Nenhuma categoria cadastrada.");
                         } else {
                             for (int i = 0; i < categorias.size(); i++) {
-                                CategoriaGlobal c = categorias.get(i);
+                                CategoriaGlobalEntity c = categorias.get(i);
                                 System.out.println((i + 1) + " - " + c.getNome() + " | ID: " + c.getId());
                             }
                             System.out.print("Digite o número da categoria: ");
                             int numero = EntradaSegura.lerOpcao(scanner, 1, categorias.size());
-                            CategoriaGlobal selecionada = categorias.get(numero - 1);
+                            CategoriaGlobalEntity selecionada = categorias.get(numero - 1);
 
                             System.out.print("Tem certeza? (S/N): ");
                             String confirmacao = scanner.nextLine();

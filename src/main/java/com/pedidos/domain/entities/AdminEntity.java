@@ -1,4 +1,4 @@
-package com.pedidos.domain.model;
+package com.pedidos.domain.entities;
 
 import com.pedidos.domain.enums.TipoUsuario;
 import jakarta.persistence.Entity;
@@ -10,13 +10,13 @@ import jakarta.persistence.Table;
 @Table (name = "admins")
 @PrimaryKeyJoinColumn(name = "usuario_id")
 
-public class Admin extends Usuario {
+public class AdminEntity extends UsuarioEntity {
 
-    public Admin() {
+    public AdminEntity() {
 
     }
 
-    public Admin(String nome, String email, String senhaHash) {
+    public AdminEntity(String nome, String email, String senhaHash) {
         super(nome, email, senhaHash, TipoUsuario.ADMIN);
     }
 

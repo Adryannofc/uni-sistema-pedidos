@@ -1,8 +1,7 @@
 package com.pedidos.infra.repository.impl;
 
-import com.pedidos.domain.model.Usuario;
+import com.pedidos.domain.entities.UsuarioEntity;
 import com.pedidos.domain.repository.AdminRepository;
-import com.pedidos.domain.repository.UsuarioRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 
@@ -14,10 +13,10 @@ public class AdminRepositoryJPA implements AdminRepository {
 
     public AdminRepositoryJPA (EntityManager em) { this.em = em; }
 
-    public void salvar(Usuario usuario) {
+    public void salvar(UsuarioEntity usuarioEntity) {
         try {
             em.getTransaction().begin();
-            em.merge(usuario);
+            em.merge(usuarioEntity);
             em.getTransaction().commit();
         } catch (Exception e){
             em.getTransaction().rollback();
@@ -25,10 +24,10 @@ public class AdminRepositoryJPA implements AdminRepository {
         }
     }
 
-    public void atualizar(Usuario usuario) {
+    public void atualizar(UsuarioEntity usuarioEntity) {
         try {
             em.getTransaction().begin();
-            em.merge(usuario);
+            em.merge(usuarioEntity);
             em.getTransaction().commit();
         } catch (Exception e){
             em.getTransaction().rollback();
@@ -40,9 +39,9 @@ public class AdminRepositoryJPA implements AdminRepository {
     public void deletar(String id) {
         try {
             em.getTransaction().begin();
-            Usuario usuario = em.find(Usuario.class, id);
-            if (usuario != null) {
-                em.remove(usuario);
+            UsuarioEntity usuarioEntity = em.find(UsuarioEntity.class, id);
+            if (usuarioEntity != null) {
+                em.remove(usuarioEntity);
             }
             em.getTransaction().commit();
         }
@@ -53,26 +52,26 @@ public class AdminRepositoryJPA implements AdminRepository {
     }
 
     @Override
-    public Optional<Usuario> buscarPorId(String id) {
-        return Optional.ofNullable(em.find(Usuario.class, id));
+    public Optional<UsuarioEntity> buscarPorId(String id) {
+        return Optional.ofNullable(em.find(UsuarioEntity.class, id));
     }
 
     @Override
-    public Optional<Usuario> buscarPorEmail(String email){
+    public Optional<UsuarioEntity> buscarPorEmail(String email){
         try {
-            Usuario usuario = em.createQuery("select u from Usuario u where u.email = :email",Usuario.class)
+            UsuarioEntity usuarioEntity = em.createQuery("select u from Usuario u where u.email = :email", UsuarioEntity.class)
                     .setParameter("email", email)
                     .getSingleResult();
-            return Optional.of(usuario);
+            return Optional.of(usuarioEntity);
         } catch (NoResultException e){
             return Optional.empty();
         }
     }
 
     @Override
-    public Usuario buscarPorEmailSenha(String email, String senha) {
+    public UsuarioEntity buscarPorEmailSenha(String email, String senha) {
         try {
-            return em.createQuery("select u from Usuario u where u.email = :email and u.senhaHash = :senha", Usuario.class)
+            return em.createQuery("select u from Usuario u where u.email = :email and u.senhaHash = :senha", UsuarioEntity.class)
                     .setParameter("email", email)
                     .setParameter("senha", senha)
                     .getSingleResult();
@@ -83,8 +82,8 @@ public class AdminRepositoryJPA implements AdminRepository {
     }
 
     @Override
-    public List<Usuario> listarTodos() {
-        return em.createQuery("select u from Usuario u", Usuario.class).getResultList();
+    public List<UsuarioEntity> listarTodos() {
+        return em.createQuery("select u from Usuario u", UsuarioEntity.class).getResultList();
     }
 }
 

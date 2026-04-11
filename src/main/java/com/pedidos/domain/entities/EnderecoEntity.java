@@ -1,4 +1,4 @@
-package com.pedidos.domain.model;
+package com.pedidos.domain.entities;
 
 import jakarta.persistence.*;
 
@@ -6,7 +6,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "Enderecos")
-public class Endereco {
+public class EnderecoEntity {
 
     @Id
     @Column(name = "id", updatable = false, nullable = false)
@@ -32,11 +32,11 @@ public class Endereco {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id", nullable = false)
-    private Cliente cliente;
+    private ClienteEntity clienteEntity;
 
-    protected Endereco() {}  // adicionar antes do construtor existente
+    protected EnderecoEntity() {}  // adicionar antes do construtor existente
 
-    public Endereco(String rua, String numero, String bairro, String cidade, String estado, String cep) {
+    public EnderecoEntity(String rua, String numero, String bairro, String cidade, String estado, String cep) {
         this.id = UUID.randomUUID().toString();
         this.rua = rua;
         this.numero = numero;
@@ -60,8 +60,8 @@ public class Endereco {
     public void setCidade(String cidade) { this.cidade = cidade; }
     public void setEstado(String estado) { this.estado = estado; }
     public void setCep(String cep) { this.cep = cep; }
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
+    public void setCliente(ClienteEntity clienteEntity) {
+        this.clienteEntity = clienteEntity;
     }
 
     @Override

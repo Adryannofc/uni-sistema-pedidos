@@ -1,14 +1,12 @@
-package com.pedidos.domain.model;
+package com.pedidos.domain.entities;
 
 import jakarta.persistence.*;
 import com.pedidos.domain.enums.TipoUsuario;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "usuarios")
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Usuario {
+public abstract class UsuarioEntity {
 
     @Id
     @Column(name = "id", updatable = false, nullable = false)
@@ -27,9 +25,9 @@ public abstract class Usuario {
     @Column(name = "tipo_usuario", nullable = false)
     private TipoUsuario tipoUsuario;
 
-    protected Usuario() {}
+    protected UsuarioEntity() {}
 
-    public Usuario(String nome, String email, String senhaHash, TipoUsuario tipoUsuario) {
+    public UsuarioEntity(String nome, String email, String senhaHash, TipoUsuario tipoUsuario) {
         this.nome = nome;
         this.email = email;
         this.senhaHash = senhaHash;

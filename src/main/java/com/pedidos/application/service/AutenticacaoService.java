@@ -1,6 +1,6 @@
 package com.pedidos.application.service;
 
-import com.pedidos.domain.model.Usuario;
+import com.pedidos.domain.entities.UsuarioEntity;
 import com.pedidos.domain.repository.AdminRepository;
 import com.pedidos.domain.repository.ClienteRepository;
 import com.pedidos.domain.repository.RestauranteRepository;
@@ -52,18 +52,18 @@ public class AutenticacaoService {
      * @return usuario
      * @throw tratamento de erro na autenticação
      */
-    public Usuario autenticar(String email, String senha) {
+    public UsuarioEntity autenticar(String email, String senha) {
         try {
             String senhaHash = hashSenha(senha);
 
-            Usuario usuario = adminRepository.buscarPorEmailSenha(email, senhaHash);
-            if (usuario != null) return usuario;
+            UsuarioEntity usuarioEntity = adminRepository.buscarPorEmailSenha(email, senhaHash);
+            if (usuarioEntity != null) return usuarioEntity;
 
-            usuario = restauranteRepository.buscarPorEmailSenha(email, senhaHash);
-            if (usuario != null) return usuario;
+            usuarioEntity = restauranteRepository.buscarPorEmailSenha(email, senhaHash);
+            if (usuarioEntity != null) return usuarioEntity;
 
-            usuario = clienteRepository.buscarPorEmailSenha(email, senhaHash);
-            if (usuario != null) return usuario;
+            usuarioEntity = clienteRepository.buscarPorEmailSenha(email, senhaHash);
+            if (usuarioEntity != null) return usuarioEntity;
 
             throw new RuntimeException("Email ou senha inválidos.");
         } catch (Exception e) {

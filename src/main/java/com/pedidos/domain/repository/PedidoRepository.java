@@ -1,29 +1,28 @@
 package com.pedidos.domain.repository;
 
+import com.pedidos.domain.entities.PedidoEntity;
 import com.pedidos.domain.enums.StatusPedido;
-import com.pedidos.domain.model.Usuario;
-import com.pedidos.domain.model.Pedido;
+
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface PedidoRepository {
 
-    void salvar(Pedido pedido);
+    void salvar(PedidoEntity pedidoEntity);
 
-    Optional<Pedido> buscarPorId(String id);
+    Optional<PedidoEntity> buscarPorId(String id);
 
-    List<Pedido> listarTodos();
+    List<PedidoEntity> listarTodos();
 
-    List<Pedido> buscarPorCliente(String clienteId);
+    List<PedidoEntity> buscarPorCliente(String clienteId);
 
-    List<Pedido> buscarPorRestaurante(String restauranteId);
+    List<PedidoEntity> buscarPorRestaurante(String restauranteId);
 
-    List<Pedido> listarAtivosPorRestaurante(String restauranteId);
+    List<PedidoEntity> listarAtivosPorRestaurante(String restauranteId);
 
-    List<Pedido> filtrarPorStatus(String restauranteId, StatusPedido status);
+    List<PedidoEntity> filtrarPorStatus(String restauranteId, StatusPedido status);
 
     void deletar(String id);
 
-    List<Pedido> buscarPorStatus(StatusPedido status);
+    List<PedidoEntity> buscarPorStatus(StatusPedido status);
 }

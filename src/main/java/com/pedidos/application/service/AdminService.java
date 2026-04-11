@@ -1,8 +1,8 @@
 package com.pedidos.application.service;
 
-import com.pedidos.domain.model.Admin;
-import com.pedidos.domain.model.Restaurante;
-import com.pedidos.domain.model.Usuario;
+import com.pedidos.domain.entities.AdminEntity;
+import com.pedidos.domain.entities.RestauranteEntity;
+import com.pedidos.domain.entities.UsuarioEntity;
 import com.pedidos.domain.repository.AdminRepository;
 import com.pedidos.domain.repository.RestauranteRepository;
 
@@ -40,8 +40,8 @@ public class AdminService {
                 throw new IllegalArgumentException("E-mail já cadastrado.");
             }
             String hash = autenticacaoService.hashSenha(senha);
-            Admin admin = new Admin(nome, email, hash);
-            adminRepository.salvar(admin);
+            AdminEntity adminEntity = new AdminEntity(nome, email, hash);
+            adminRepository.salvar(adminEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -50,17 +50,17 @@ public class AdminService {
     /**
      * Altera senha atual de um administrador
      *
-     * @param usuario          administrador que tera senha alterada
+     * @param usuarioEntity          administrador que tera senha alterada
      * @param senhaAtual       senha atual informada pelo usuario
      * @param novaSenha        nova senha que sera aplicada
      * @param confirmacaoSenha confirmacao da nova senha
      * @throws IllegalArgumentException se a senha atual fornecida for incorreta
      * @throws IllegalArgumentException se a nova senha for diferente da confirmacao
      */
-    public void alterarSenha(Usuario usuario, String senhaAtual, String novaSenha, String confirmacaoSenha) {
+    public void alterarSenha(UsuarioEntity usuarioEntity, String senhaAtual, String novaSenha, String confirmacaoSenha) {
         try {
             String hashAtual = autenticacaoService.hashSenha(senhaAtual);
-            if (!usuario.verificarSenha(hashAtual)) {
+            if (!usuarioEntity.verificarSenha(hashAtual)) {
                 throw new IllegalArgumentException("Senha atual incorreta.");
             }
 
@@ -69,8 +69,8 @@ public class AdminService {
             }
 
             String novoHash = autenticacaoService.hashSenha(novaSenha);
-            usuario.setSenhaHash(novoHash);
-            adminRepository.salvar(usuario);
+            usuarioEntity.setSenhaHash(novoHash);
+            adminRepository.salvar(usuarioEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -82,7 +82,7 @@ public class AdminService {
      *
      * @return lista de restaurantes
      */
-    public List<Restaurante> listarRestaurantes() {
+    public List<RestauranteEntity> listarRestaurantes() {
         try {
             return restauranteRepository.listarRestaurantes();
         } catch (Exception e) {
@@ -98,9 +98,9 @@ public class AdminService {
      */
     public void aprovarRestaurante(String id) {
         try {
-            Restaurante restaurante = buscarRestaurantePorId(id);
-            restaurante.setStatusAtivo(true);
-            restauranteRepository.salvar(restaurante);
+            RestauranteEntity restauranteEntity = buscarRestaurantePorId(id);
+            restauranteEntity.setStatusAtivo(true);
+            restauranteRepository.salvar(restauranteEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -115,9 +115,9 @@ public class AdminService {
      */
     public void bloquearRestaurante(String id) {
         try {
-            Restaurante restaurante = buscarRestaurantePorId(id);
-            restaurante.setStatusAtivo(false);
-            restauranteRepository.salvar(restaurante);
+            RestauranteEntity restauranteEntity = buscarRestaurantePorId(id);
+            restauranteEntity.setStatusAtivo(false);
+            restauranteRepository.salvar(restauranteEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -146,7 +146,7 @@ public class AdminService {
      * @return o restaurante correspondente ao id informado
      * @throws IllegalArgumentException se nenhum restaurante foi encontrado com id informado.
      */
-    private Restaurante buscarRestaurantePorId(String id) {
+    private RestauranteEntity buscarRestaurantePorId(String id) {
         try {
             return restauranteRepository.listarRestaurantes().stream()
                     .filter(r -> r.getId().equals(id)).findFirst()

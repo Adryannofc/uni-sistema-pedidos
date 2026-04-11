@@ -1,11 +1,11 @@
 package com.pedidos.domain.repository;
 
-import com.pedidos.domain.model.Restaurante;
-import com.pedidos.domain.model.Usuario;
+import com.pedidos.domain.entities.RestauranteEntity;
+import com.pedidos.domain.entities.UsuarioEntity;
 import java.util.List;
 
 public interface RestauranteRepository extends UsuarioRepository {
-    Usuario buscarPorEmailSenha(String email, String senha);
+    UsuarioEntity buscarPorEmailSenha(String email, String senha);
 
-    List<Restaurante> listarRestaurantes();
+    List<RestauranteEntity> listarRestaurantes();
 }

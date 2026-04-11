@@ -1,4 +1,4 @@
-package com.pedidos.domain.model;
+package com.pedidos.domain.entities;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table (name = "produtos")
-public class Produto {
+public class ProdutoEntity {
 
     @Id
     @Column(name = "id", updatable = false, nullable = false)
@@ -27,17 +27,17 @@ public class Produto {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurante_id", nullable = false)
-    private Restaurante restaurante;
+    private RestauranteEntity restauranteEntity;
 
     @Column (name = "status_Ativo")
     private boolean statusAtivo;
 
-    protected Produto() {
+    protected ProdutoEntity() {
 
     }
 
     // Construtor completo — carregado do banco (UUID já existente)
-    public Produto(String nome, String descricao, BigDecimal preco, String categoriaCardapioId, String restauranteId) {
+    public ProdutoEntity(String nome, String descricao, BigDecimal preco, String categoriaCardapioId, String restauranteId) {
         this.id = UUID.randomUUID().toString();
         setNome(nome);
         setDescricao(descricao);
@@ -70,7 +70,7 @@ public class Produto {
     }
 
     public String getRestauranteId() {
-        return restaurante != null ? restaurante.getId() : null;
+        return restauranteEntity != null ? restauranteEntity.getId() : null;
     }
 
     public boolean isStatusAtivo() {

@@ -1,6 +1,6 @@
 package com.pedidos.application.service;
 
-import com.pedidos.domain.model.Endereco;
+import com.pedidos.domain.entities.EnderecoEntity;
 import com.pedidos.domain.repository.EnderecoRepository;
 
 public class EnderecoService {
@@ -24,7 +24,7 @@ public class EnderecoService {
      * @return endereço criado e salvo
      * @throws IllegalArgumentException se rua, bairro ou cidade forem nulos ou vazios
      */
-    public Endereco criarEndereco(String clienteId, String rua, String numero, String bairro, String cidade, String estado, String cep) {
+    public EnderecoEntity criarEndereco(String clienteId, String rua, String numero, String bairro, String cidade, String estado, String cep) {
         try {
             if (rua == null || rua.isBlank()) {
                 throw new IllegalArgumentException("Rua é obrigatória.");
@@ -36,9 +36,9 @@ public class EnderecoService {
                 throw new IllegalArgumentException("Cidade é obrigatória.");
             }
 
-            Endereco endereco = new Endereco(rua, numero, bairro, cidade, estado, cep);
-            enderecoRepository.salvar(endereco);
-            return endereco;
+            EnderecoEntity enderecoEntity = new EnderecoEntity(rua, numero, bairro, cidade, estado, cep);
+            enderecoRepository.salvar(enderecoEntity);
+            return enderecoEntity;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -51,7 +51,7 @@ public class EnderecoService {
      * @return endereço encontrado
      * @throws IllegalArgumentException se nenhum endereço for encontrado para o cliente
      */
-    public Endereco buscarPorCliente(String clienteId) {
+    public EnderecoEntity buscarPorCliente(String clienteId) {
         try {
             return enderecoRepository.buscarPorCliente(clienteId)
                     .orElseThrow(() -> new IllegalArgumentException("Endereço não encontrado."));
@@ -78,10 +78,10 @@ public class EnderecoService {
                 throw new IllegalArgumentException("Bairro é obrigatório.");
             }
 
-            Endereco endereco = buscarPorCliente(clienteId);
-            endereco.setRua(novaRua);
-            endereco.setBairro(novoBairro);
-            enderecoRepository.salvar(endereco);
+            EnderecoEntity enderecoEntity = buscarPorCliente(clienteId);
+            enderecoEntity.setRua(novaRua);
+            enderecoEntity.setBairro(novoBairro);
+            enderecoRepository.salvar(enderecoEntity);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }

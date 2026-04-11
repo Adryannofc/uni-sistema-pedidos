@@ -1,7 +1,7 @@
 package com.pedidos.presentation.menu;
 
 import com.pedidos.application.service.*;
-import com.pedidos.domain.model.*;
+import com.pedidos.domain.entities.*;
 import com.pedidos.domain.repository.RestauranteRepository;
 import com.pedidos.presentation.admin.MenuCategorias;
 import com.pedidos.presentation.restaurante.*;
@@ -54,29 +54,29 @@ public class MenuLogin {
             String senha = EntradaSegura.lerString(scan, "SENHA : ");
 
             try {
-                Usuario usuario = autenticacaoService.autenticar(email, senha);
-                System.out.println("Bem-vindo, " + usuario.getNome() + "!");
+                UsuarioEntity usuarioEntity = autenticacaoService.autenticar(email, senha);
+                System.out.println("Bem-vindo, " + usuarioEntity.getNome() + "!");
 
-                switch (usuario.getTipoUsuario()) {
+                switch (usuarioEntity.getTipoUsuario()) {
                     case ADMIN -> {
-                        Admin adminLogado = (Admin) usuario;
+                        AdminEntity adminEntityLogado = (AdminEntity) usuarioEntity;
                         MenuCategorias menuCategorias = new MenuCategorias(adminService, categoriaService, scan);
                         new com.pedidos.presentation.admin.MenuAdmin(adminService, scan, menuCategorias)
-                                .exibir(adminLogado);
+                                .exibir(adminEntityLogado);
                     }
                     case RESTAURANTE -> {
-                        Restaurante restauranteLogado = (Restaurante) usuario;
+                        RestauranteEntity restauranteEntityLogado = (RestauranteEntity) usuarioEntity;
                         MenuProdutos menuProdutos = new MenuProdutos(produtoService, categoriaService, scan);
                         MenuCategoriasCardapio menuCats = new MenuCategoriasCardapio(categoriaService, scan);
                         new MenuRestaurante(
                                 menuProdutos, menuCats,
                                 restauranteService, categoriaService, pedidoService, scan
-                        ).exibir(restauranteLogado);
+                        ).exibir(restauranteEntityLogado);
                     }
                     case CLIENTE -> {
-                        Cliente clienteLogado = (Cliente) usuario;
+                        ClienteEntity clienteEntityLogado = (ClienteEntity) usuarioEntity;
                         new MenuCliente(
-                                clienteLogado,
+                                clienteEntityLogado,
                                 clienteService,
                                 pedidoService,
                                 carrinhoService,

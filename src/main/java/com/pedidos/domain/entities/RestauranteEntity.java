@@ -1,4 +1,4 @@
-package com.pedidos.domain.model;
+package com.pedidos.domain.entities;
 
 import com.pedidos.domain.enums.TipoUsuario;
 import jakarta.persistence.*;
@@ -7,7 +7,7 @@ import java.util.List;
 @Entity
 @Table(name = "restaurantes")
 @PrimaryKeyJoinColumn(name = "usuario_id")
-public class Restaurante extends Usuario {
+public class RestauranteEntity extends UsuarioEntity {
 
     @Column(name = "cnpj", unique = true)
     private String cnpj;
@@ -20,17 +20,17 @@ public class Restaurante extends Usuario {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_global_id")
-    private CategoriaGlobal categoriaGlobal;
+    private CategoriaGlobalEntity categoriaGlobalEntity;
 
     @OneToMany(mappedBy = "restaurante")
-    private List<CategoriaCardapio> categorias;
+    private List<CategoriaCardapioEntity> categorias;
 
     @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Produto> produtos;
+    private List<ProdutoEntity> produtoEntities;
 
-    protected Restaurante() {}
+    protected RestauranteEntity() {}
 
-    public Restaurante(String nome, String email, String senhaHash, String cnpj) {
+    public RestauranteEntity(String nome, String email, String senhaHash, String cnpj) {
         super(nome, email, senhaHash, TipoUsuario.RESTAURANTE);
         this.cnpj = cnpj;
         this.statusAtivo = false;
@@ -57,15 +57,15 @@ public class Restaurante extends Usuario {
         this.telefone = telefone;
     }
 
-    public CategoriaGlobal getCategoriaGlobal() { return categoriaGlobal; }
+    public CategoriaGlobalEntity getCategoriaGlobal() { return categoriaGlobalEntity; }
 
-    public void setCategoriaGlobal(CategoriaGlobal categoriaGlobal) {
-        this.categoriaGlobal = categoriaGlobal;
+    public void setCategoriaGlobal(CategoriaGlobalEntity categoriaGlobalEntity) {
+        this.categoriaGlobalEntity = categoriaGlobalEntity;
     }
 
     // Mantido para não quebrar RestauranteService e camada de apresentação
     public String getCategoriaGlobalId() {
-        return categoriaGlobal != null ? categoriaGlobal.getId() : null;
+        return categoriaGlobalEntity != null ? categoriaGlobalEntity.getId() : null;
     }
 
     @Deprecated

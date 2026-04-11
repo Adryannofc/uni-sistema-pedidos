@@ -1,7 +1,7 @@
 package com.pedidos.infra.repository.impl;
 
-import com.pedidos.domain.model.Cliente;
-import com.pedidos.domain.model.Usuario;
+import com.pedidos.domain.entities.ClienteEntity;
+import com.pedidos.domain.entities.UsuarioEntity;
 import com.pedidos.domain.repository.ClienteRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -15,10 +15,10 @@ public class ClienteRepositoryJPA implements ClienteRepository {
     public ClienteRepositoryJPA(EntityManager em){this.em = em;}
 
     @Override
-    public void salvar(Usuario usuario){
+    public void salvar(UsuarioEntity usuarioEntity){
         try {
             em.getTransaction().begin();
-            em.persist(usuario);
+            em.persist(usuarioEntity);
             em.getTransaction().commit();
         } catch (Exception e) {
             em.getTransaction().rollback();
@@ -27,17 +27,17 @@ public class ClienteRepositoryJPA implements ClienteRepository {
     }
 
     @Override
-    public Optional<Usuario> buscarPorId (String id){
-        return Optional.ofNullable(em.find(Usuario.class, id));
+    public Optional<UsuarioEntity> buscarPorId (String id){
+        return Optional.ofNullable(em.find(UsuarioEntity.class, id));
     }
 
     @Override
-    public Optional<Usuario> buscarPorEmail (String email){
+    public Optional<UsuarioEntity> buscarPorEmail (String email){
         try {
-            Usuario usuario = em.createQuery("SELECT u FROM Cliente u WHERE LOWER(u.email) = LOWER(:email)", Usuario.class)
+            UsuarioEntity usuarioEntity = em.createQuery("SELECT u FROM Cliente u WHERE LOWER(u.email) = LOWER(:email)", UsuarioEntity.class)
                     .setParameter("email", email)
                     .getSingleResult();
-                return  Optional.of(usuario);
+                return  Optional.of(usuarioEntity);
         } catch (NoResultException e) {
             return Optional.empty();
 
@@ -45,17 +45,17 @@ public class ClienteRepositoryJPA implements ClienteRepository {
     }
 
     @Override
-    public List<Usuario> listarTodos(){
-        return em.createQuery("SELECT u FROM Cliente u", Usuario.class).getResultList();
+    public List<UsuarioEntity> listarTodos(){
+        return em.createQuery("SELECT u FROM Cliente u", UsuarioEntity.class).getResultList();
     }
 
     @Override
     public void deletar (String id){
         try {
             em.getTransaction().begin();
-            Usuario usuario = em.find(Cliente.class, id);
-            if (usuario != null){
-                em.remove(usuario);
+            UsuarioEntity usuarioEntity = em.find(ClienteEntity.class, id);
+            if (usuarioEntity != null){
+                em.remove(usuarioEntity);
             }
             em.getTransaction().commit();
         }catch (Exception e){
@@ -65,9 +65,9 @@ public class ClienteRepositoryJPA implements ClienteRepository {
     }
 
     @Override
-    public Usuario buscarPorEmailSenha(String email, String senhaHash){
+    public UsuarioEntity buscarPorEmailSenha(String email, String senhaHash){
         try {
-            return em.createQuery("SELECT u FROM Cliente u WHERE LOWER(u.email) = LOWER(:email) AND u.senhaHash = :senha", Usuario.class)
+            return em.createQuery("SELECT u FROM Cliente u WHERE LOWER(u.email) = LOWER(:email) AND u.senhaHash = :senha", UsuarioEntity.class)
                     .setParameter("email", email)
                     .setParameter("senha", senhaHash)
                     .getSingleResult();

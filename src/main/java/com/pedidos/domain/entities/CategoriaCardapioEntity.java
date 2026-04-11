@@ -1,11 +1,11 @@
-package com.pedidos.domain.model;
+package com.pedidos.domain.entities;
 
 import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
 @Table(name = "categorias_cardapio")
-public class CategoriaCardapio {
+public class CategoriaCardapioEntity {
 
     @Id
     @Column(name = "id", updatable = false, nullable = false)
@@ -19,11 +19,11 @@ public class CategoriaCardapio {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurante_id", nullable = false)
-    private Restaurante restaurante;
+    private RestauranteEntity restauranteEntity;
 
-    protected CategoriaCardapio() {}
+    protected CategoriaCardapioEntity() {}
 
-    public CategoriaCardapio(String nome, String descricao, String restauranteId) {
+    public CategoriaCardapioEntity(String nome, String descricao, String restauranteId) {
         this.id = UUID.randomUUID().toString();
         this.nome = nome;
         this.descricao = descricao;
@@ -33,12 +33,12 @@ public class CategoriaCardapio {
     public String getNome()      { return nome; }
     public String getDescricao() { return descricao; }
 
-    public Restaurante getRestaurante() { return restaurante; }
-    public void setRestaurante(Restaurante restaurante) { this.restaurante = restaurante; }
+    public RestauranteEntity getRestaurante() { return restauranteEntity; }
+    public void setRestaurante(RestauranteEntity restauranteEntity) { this.restauranteEntity = restauranteEntity; }
 
     // Mantido para compatibilidade com CategoriaService e apresentação
     public String getRestauranteId() {
-        return restaurante != null ? restaurante.getId() : null;
+        return restauranteEntity != null ? restauranteEntity.getId() : null;
     }
 
     @Deprecated

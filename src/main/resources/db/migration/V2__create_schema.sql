@@ -29,7 +29,7 @@ CREATE TABLE categorias_globais
     descricao VARCHAR(255)
 );
 
-CREATE TABLE restaurantes
+CREATE TABLE restauranteEntities
 (
     usuario_id          VARCHAR(36) PRIMARY KEY REFERENCES usuarios (id),
     cnpj                VARCHAR(18) UNIQUE,
@@ -55,25 +55,25 @@ CREATE TABLE categorias_cardapio
     id             VARCHAR(36) PRIMARY KEY,
     nome           VARCHAR(100) NOT NULL,
     descricao      VARCHAR(255),
-    restaurante_id VARCHAR(36)  NOT NULL REFERENCES restaurantes (usuario_id)
+    restaurante_id VARCHAR(36)  NOT NULL REFERENCES restauranteEntities (usuario_id)
 );
 
-CREATE TABLE produtos
+CREATE TABLE produtoEntities
 (
     id                    VARCHAR(36) PRIMARY KEY,
     nome                  VARCHAR(100)   NOT NULL,
     descricao             VARCHAR(255),
     preco                 DECIMAL(10, 2) NOT NULL,
     status_ativo          BOOLEAN        NOT NULL DEFAULT TRUE,
-    restaurante_id        VARCHAR(36)    NOT NULL REFERENCES restaurantes (usuario_id),
+    restaurante_id        VARCHAR(36)    NOT NULL REFERENCES restauranteEntities (usuario_id),
     categoria_cardapio_id VARCHAR(36) REFERENCES categorias_cardapio (id)
 );
 
-CREATE TABLE pedidos
+CREATE TABLE pedidoEntities
 (
     id                 VARCHAR(36) PRIMARY KEY,
     cliente_id         VARCHAR(36)    NOT NULL REFERENCES clientes (usuario_id),
-    restaurante_id     VARCHAR(36)    NOT NULL REFERENCES restaurantes (usuario_id),
+    restaurante_id     VARCHAR(36)    NOT NULL REFERENCES restauranteEntities (usuario_id),
     status             VARCHAR(30)    NOT NULL,
     taxa_entrega       DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     total              DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
@@ -85,7 +85,7 @@ CREATE TABLE pedidos
 CREATE TABLE itens_pedido
 (
     id             VARCHAR(36) PRIMARY KEY,
-    pedido_id      VARCHAR(36)    NOT NULL REFERENCES pedidos (id),
+    pedido_id      VARCHAR(36)    NOT NULL REFERENCES pedidoEntities (id),
     produto_id     VARCHAR(36),
     nome_produto   VARCHAR(100)   NOT NULL,
     quantidade     INT            NOT NULL,
@@ -99,5 +99,5 @@ CREATE TABLE cliente_restaurantes_favoritos (
    CONSTRAINT fk_cliente FOREIGN KEY (cliente_id)
    REFERENCES clientes(usuario_id) ON DELETE CASCADE,
    CONSTRAINT fk_restaurante FOREIGN KEY (restaurante_id)
-   REFERENCES restaurantes(usuario_id) ON DELETE CASCADE
+   REFERENCES restauranteEntities(usuario_id) ON DELETE CASCADE
 );

@@ -1,17 +1,17 @@
 package com.pedidos.domain.repository;
-import com.pedidos.domain.model.CategoriaGlobal;
+import com.pedidos.domain.entities.CategoriaGlobalEntity;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface CategoriaGlobalRepository {
-    void salvar(CategoriaGlobal categoria);
+    void salvar(CategoriaGlobalEntity categoria);
 
-    Optional<CategoriaGlobal> buscarPorId(String id);
+    Optional<CategoriaGlobalEntity> buscarPorId(String id);
 
-    Optional<CategoriaGlobal> buscarPorNome(String nome);
+    Optional<CategoriaGlobalEntity> buscarPorNome(String nome);
 
-    List<CategoriaGlobal> listarTodos();
+    List<CategoriaGlobalEntity> listarTodos();
 
     void remover(String id);
 

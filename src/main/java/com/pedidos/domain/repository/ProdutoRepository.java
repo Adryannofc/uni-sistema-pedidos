@@ -1,16 +1,16 @@
 package com.pedidos.domain.repository;
-import com.pedidos.domain.model.Produto;
+import com.pedidos.domain.entities.ProdutoEntity;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ProdutoRepository {
 
-    void salvar(Produto produto);
+    void salvar(ProdutoEntity produtoEntity);
 
-    Optional<Produto> buscarPorId(String id);
+    Optional<ProdutoEntity> buscarPorId(String id);
 
-    List<Produto> listarTodos();
+    List<ProdutoEntity> listarTodos();
 
     void deletar(String id);
 }
