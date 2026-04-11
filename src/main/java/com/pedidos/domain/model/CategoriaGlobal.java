@@ -18,6 +18,8 @@ public class CategoriaGlobal {
     @Column(name = "descricao")
     private String descricao;
 
+    protected CategoriaGlobal() {}
+
     public CategoriaGlobal(String nome, String descricao) {
         this.id = UUID.randomUUID().toString();
         this.nome = nome;

@@ -16,104 +16,155 @@ public class PedidoService {
     }
 
     /**
-     * Monstando o pedido final
-     * @param clienteId cliente que pediu
-     * @param restauranteId restaurante que foi pedido
-     * @param carrinho itens do pedido
-     * @return o pedido como um todo
+     * Cria e persiste um novo pedido.
+     *
+     * @param clienteId         id do cliente que realizou o pedido
+     * @param restauranteId     id do restaurante do pedido
+     * @param carrinho          itens selecionados pelo cliente
+     * @param enderecoEntrega   endereço de entrega
+     * @param codigoConfirmacao código para confirmar a entrega
+     * @return pedido criado
      */
     public Pedido criarPedido(String clienteId, String restauranteId, Carrinho carrinho, Endereco enderecoEntrega, String codigoConfirmacao) {
-        if (enderecoEntrega == null) {
-            throw new IllegalArgumentException("Informe um endereço de entrega antes de finalizar o pedido.");
-        }
-        Pedido pedido = new Pedido(null, clienteId, restauranteId, BigDecimal.ZERO);
-        pedido.setEnderecoEntrega(enderecoEntrega);
-        pedido.setCodigoConfirmacao(codigoConfirmacao);
-        carrinho.getItens().forEach(pedido::adicionarItem);
-        pedido.calcularTotal();
-        pedidoRepository.salvar(pedido);
-        return pedido;
-    }
+        try {
+            if (enderecoEntrega == null) {
+                throw new IllegalArgumentException("Informe um endereço de entrega antes de finalizar o pedido.");
+            }
 
-    public void confirmarEntrega(String pedidoId, String codigoDigitado) {
-        Pedido pedido = pedidoRepository.buscarPorId(pedidoId)
-                .orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado."));
-        if (pedido.getStatus() != StatusPedido.SAIU_PARA_ENTREGA) {
-            throw new IllegalStateException("Pedido nao esta em status de entrega.");
+            Pedido pedido = new Pedido(null, clienteId, restauranteId, BigDecimal.ZERO);
+            pedido.setEnderecoEntrega(enderecoEntrega);
+            pedido.setCodigoConfirmacao(codigoConfirmacao);
+            carrinho.getItens().forEach(pedido::adicionarItem);
+            pedido.calcularTotal();
+            pedidoRepository.salvar(pedido);
+            return pedido;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
-        if (!pedido.getCodigoConfirmacao().equals(codigoDigitado)) {
-            throw new IllegalArgumentException("Codigo incorreto.");
-        }
-        pedido.setStatus(StatusPedido.ENTREGUE);
-        pedidoRepository.salvar(pedido);
     }
 
     /**
-     * Atualiza o status do pedido por parte do restaurante(ex: se já saiu para entrega)
-     * @param pedidoId
-     * @param novoStatus
+     * Confirma a entrega do pedido via código informado pelo cliente.
+     *
+     * @param pedidoId       id do pedido
+     * @param codigoDigitado código informado pelo cliente
+     * @throws IllegalArgumentException se o pedido não for encontrado ou o código estiver incorreto
+     * @throws IllegalStateException    se o pedido não estiver no status SAIU_PARA_ENTREGA
+     */
+    public void confirmarEntrega(String pedidoId, String codigoDigitado) {
+        try {
+            Pedido pedido = pedidoRepository.buscarPorId(pedidoId)
+                    .orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado."));
+
+            if (pedido.getStatus() != StatusPedido.SAIU_PARA_ENTREGA) {
+                throw new IllegalStateException("Pedido nao esta em status de entrega.");
+            }
+            if (!pedido.getCodigoConfirmacao().equals(codigoDigitado)) {
+                throw new IllegalArgumentException("Codigo incorreto.");
+            }
+
+            pedido.setStatus(StatusPedido.ENTREGUE);
+            pedidoRepository.salvar(pedido);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Atualiza o status do pedido por parte do restaurante.
+     *
+     * @param pedidoId   id do pedido
+     * @param novoStatus novo status a ser aplicado
+     * @throws IllegalArgumentException se o pedido não for encontrado
+     * @throws IllegalStateException    se a transição de status for inválida
      */
     public void atualizarStatus(String pedidoId, StatusPedido novoStatus) {
-        Pedido pedido = pedidoRepository.buscarPorId(pedidoId)
-                .orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado"));
+        try {
+            Pedido pedido = pedidoRepository.buscarPorId(pedidoId)
+                    .orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado."));
 
-        validarTransicao(pedido.getStatus(), novoStatus);
-        pedido.setStatus(novoStatus);
-        pedidoRepository.salvar(pedido);
+            validarTransicao(pedido.getStatus(), novoStatus);
+            pedido.setStatus(novoStatus);
+            pedidoRepository.salvar(pedido);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     /**
-     * Recebe o estado atual para fazer tratamentos
-     * @param atual
-     * @param novo
+     * Valida se a transição de status é permitida.
+     *
+     * @param atual status atual do pedido
+     * @param novo  novo status solicitado
+     * @throws IllegalStateException se a transição for inválida
      */
     private void validarTransicao(StatusPedido atual, StatusPedido novo) {
-        switch (atual) {
-            case AGUARDANDO_CONFIRMACAO:
-                if (novo == StatusPedido.CONFIRMADO || novo == StatusPedido.CANCELADO) return;
-                break;
-
-            case CONFIRMADO:
-                if (novo == StatusPedido.EM_PREPARO || novo == StatusPedido.CANCELADO) return;
-                break;
-
-            case EM_PREPARO:
-                if (novo == StatusPedido.SAIU_PARA_ENTREGA || novo == StatusPedido.CANCELADO) return;
-                break;
-
-            case SAIU_PARA_ENTREGA:
-                if (novo == StatusPedido.ENTREGUE) return;
-                break;
-
-            case ENTREGUE:
-                throw new IllegalStateException("Pedido já entregue — status não pode ser alterado.");
-
-            case CANCELADO:
-                throw new IllegalStateException("Pedido cancelado — status não pode ser alterado.");
+        try {
+            switch (atual) {
+                case AGUARDANDO_CONFIRMACAO:
+                    if (novo == StatusPedido.CONFIRMADO || novo == StatusPedido.CANCELADO) return;
+                    break;
+                case CONFIRMADO:
+                    if (novo == StatusPedido.EM_PREPARO || novo == StatusPedido.CANCELADO) return;
+                    break;
+                case EM_PREPARO:
+                    if (novo == StatusPedido.SAIU_PARA_ENTREGA || novo == StatusPedido.CANCELADO) return;
+                    break;
+                case SAIU_PARA_ENTREGA:
+                    if (novo == StatusPedido.ENTREGUE) return;
+                    break;
+                case ENTREGUE:
+                    throw new IllegalStateException("Pedido já entregue — status não pode ser alterado.");
+                case CANCELADO:
+                    throw new IllegalStateException("Pedido cancelado — status não pode ser alterado.");
+            }
+            throw new IllegalStateException("Transição de status inválida.");
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
-        throw new IllegalStateException("Transição de status inválida.");
     }
 
     /**
-     * Metodo para pegar o pedido(usado geralmente para realizar alterações)
-     * @param pedidoId
-     * @return pedido pelo id
+     * Busca um pedido pelo ID.
+     *
+     * @param pedidoId id do pedido
+     * @return pedido encontrado
+     * @throws IllegalArgumentException se o pedido não for encontrado
      */
     public Pedido buscarPorId(String pedidoId) {
-        return pedidoRepository.buscarPorId(pedidoId)
-                .orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado"));
+        try {
+            return pedidoRepository.buscarPorId(pedidoId)
+                    .orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado."));
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     /**
-     * Usado para listar pedidos por cliente no menu do restaurante
-     * @param clienteId
-     * @return um pedido relacionado a tal cliente pelo id
+     * Lista todos os pedidos de um cliente.
+     *
+     * @param clienteId id do cliente
+     * @return lista de pedidos do cliente
      */
     public List<Pedido> listarPorCliente(String clienteId) {
-        return pedidoRepository.buscarPorCliente(clienteId);
+        try {
+            return pedidoRepository.buscarPorCliente(clienteId);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
+    /**
+     * Lista todos os pedidos de um restaurante.
+     *
+     * @param restauranteId id do restaurante
+     * @return lista de pedidos do restaurante
+     */
     public List<Pedido> listarPorRestaurante(String restauranteId) {
-        return pedidoRepository.buscarPorRestaurante(restauranteId);
+        try {
+            return pedidoRepository.buscarPorRestaurante(restauranteId);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 }

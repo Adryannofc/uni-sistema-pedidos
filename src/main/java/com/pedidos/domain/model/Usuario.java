@@ -3,13 +3,14 @@ package com.pedidos.domain.model;
 import jakarta.persistence.*;
 import com.pedidos.domain.enums.TipoUsuario;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "usuarios")
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Usuario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
     private String id;
 

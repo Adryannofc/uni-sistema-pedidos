@@ -2,16 +2,17 @@ package com.pedidos.application.service;
 
 import com.pedidos.domain.model.Cliente;
 import com.pedidos.domain.model.Endereco;
+import com.pedidos.domain.model.Restaurante;
 import com.pedidos.domain.model.Usuario;
 import com.pedidos.domain.repository.AdminRepository;
 import com.pedidos.domain.repository.ClienteRepository;
 import com.pedidos.domain.repository.RestauranteRepository;
 
+import java.util.List;
+
 public class ClienteService {
     private final ClienteRepository clienteRepository;
     private final AutenticacaoService autenticacaoService;
-
-    // checar unicidade de e-mail no sistema inteiro.
     private final AdminRepository adminRepository;
     private final RestauranteRepository restauranteRepository;
 
@@ -22,80 +23,121 @@ public class ClienteService {
         this.restauranteRepository = restauranteRepository;
     }
 
+    public void favoritar(Cliente cliente, Restaurante restaurante) {
+        if (cliente.getFavoritos().contains(restaurante)) {
+            cliente.removerFavorito(restaurante);
+        } else {
+            cliente.adicionarFavorito(restaurante);
+        }
+        clienteRepository.salvar(cliente);
+    }
+
     // Cadastro
     public void cadastrarCliente(String nome, String email, String senha, String cpf, String telefone) {
-        validarCpf(cpf);
+        try {
+            validarCpf(cpf);
 
-        if (emailCadastrado(email)) {
-            throw new IllegalArgumentException("E-mail já cadastrado no sistema.");
+            if (emailCadastrado(email)) {
+                throw new IllegalArgumentException("E-mail já cadastrado no sistema.");
+            }
+
+            String hash = autenticacaoService.hashSenha(senha);
+            Cliente cliente = new Cliente(nome, email, hash, cpf, telefone);
+            clienteRepository.salvar(cliente);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
-
-        String hash = autenticacaoService.hashSenha(senha);
-        Cliente cliente = new Cliente(nome, email, hash, cpf, telefone);
-        clienteRepository.salvar(cliente);
-
     }
 
     public void editarNome(Cliente cliente, String novoNome) {
-        cliente.setNome(novoNome);
-        clienteRepository.salvar(cliente);
+        try {
+            cliente.setNome(novoNome);
+            clienteRepository.salvar(cliente);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     public void editarEmail(Cliente cliente, String novoEmail) {
-        // Se o novo e-mail é o mesmo que já tem, não faz sentido bloquear.
-        // Sem esse cheque, o próprio cliente ficaria bloqueado de "salvar sem mudança".
-        if (!cliente.getEmail().equalsIgnoreCase(novoEmail) && emailCadastrado(novoEmail)) {
-            throw new IllegalArgumentException("E-mail já cadastrado no sistema.");
+        try {
+            if (!cliente.getEmail().equalsIgnoreCase(novoEmail) && emailCadastrado(novoEmail)) {
+                throw new IllegalArgumentException("E-mail já cadastrado no sistema.");
+            }
+            cliente.setEmail(novoEmail);
+            clienteRepository.salvar(cliente);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
-        cliente.setEmail(novoEmail);
-        clienteRepository.salvar(cliente);
     }
 
     public void editarCpf(Cliente cliente, String novoCpf) {
-        validarCpf(novoCpf);
-        cliente.setCpf(novoCpf);
-        clienteRepository.salvar(cliente);
+        try {
+            validarCpf(novoCpf);
+            cliente.setCpf(novoCpf);
+            clienteRepository.salvar(cliente);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     public void salvarEndereco(Cliente cliente, String rua, String numero, String bairro, String cidade, String estado, String cep) {
-        cliente.setEnderecoEntrega(new Endereco(rua, numero, bairro, cidade, estado, cep));
-        clienteRepository.salvar(cliente);
+        try {
+            cliente.setEnderecoEntrega(new Endereco(rua, numero, bairro, cidade, estado, cep));
+            clienteRepository.salvar(cliente);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     public void editarTelefone(Cliente cliente, String novoTelefone) {
-        // setTelefone() em Cliente já tem a validação de formato com regex.
-        cliente.setTelefone(novoTelefone);
-        clienteRepository.salvar(cliente);
+        try {
+            cliente.setTelefone(novoTelefone);
+            clienteRepository.salvar(cliente);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     public void alterarSenha(Usuario usuario, String senhaAtual, String novaSenha, String confirmacaoSenha) {
-        if (novaSenha.length() < 6) {
-            throw new IllegalArgumentException("A nova senha deve ter pelo menos 6 caracteres.");
-        }
+        try {
+            if (novaSenha.length() < 6) {
+                throw new IllegalArgumentException("A nova senha deve ter pelo menos 6 caracteres.");
+            }
 
-        if (!novaSenha.equals(confirmacaoSenha)) {
-            throw new IllegalArgumentException("Nova senha e confirmação não coincidem.");
-        }
+            if (!novaSenha.equals(confirmacaoSenha)) {
+                throw new IllegalArgumentException("Nova senha e confirmação não coincidem.");
+            }
 
-        String hashAtual = autenticacaoService.hashSenha(senhaAtual);
-        if (!usuario.verificarSenha(hashAtual)) {
-            throw new IllegalArgumentException("Senha atual incorreta.");
-        }
+            String hashAtual = autenticacaoService.hashSenha(senhaAtual);
+            if (!usuario.verificarSenha(hashAtual)) {
+                throw new IllegalArgumentException("Senha atual incorreta.");
+            }
 
-        String novoHash = autenticacaoService.hashSenha(novaSenha);
-        usuario.setSenhaHash(novoHash);
-        clienteRepository.salvar(usuario);
+            String novoHash = autenticacaoService.hashSenha(novaSenha);
+            usuario.setSenhaHash(novoHash);
+            clienteRepository.salvar(usuario);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     private void validarCpf(String cpf) {
-        if (cpf == null || !cpf.matches("\\d{11}")) {
-            throw new IllegalArgumentException("CPF inválido. Informe 11 dígitos numéricos.");
+        try {
+            if (cpf == null || !cpf.matches("\\d{11}")) {
+                throw new IllegalArgumentException("CPF inválido. Informe 11 dígitos numéricos.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
     private boolean emailCadastrado(String email) {
-        return adminRepository.buscarPorEmail(email).isPresent()
-                || restauranteRepository.buscarPorEmail(email).isPresent()
-                || clienteRepository.buscarPorEmail(email).isPresent();
+        try {
+            return adminRepository.buscarPorEmail(email).isPresent()
+                    || restauranteRepository.buscarPorEmail(email).isPresent()
+                    || clienteRepository.buscarPorEmail(email).isPresent();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 }

@@ -10,8 +10,8 @@ import jakarta.persistence.*;
 public class Produto {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private final String id;
+    @Column(name = "id", updatable = false, nullable = false)
+    private String id;
 
     @Column (name = "nome")
     private String nome;
@@ -22,18 +22,17 @@ public class Produto {
     @Column (name = "preco", precision = 10, scale = 2)
     private BigDecimal preco;
 
-    @ManyToOne
-    @JoinColumn (name = "cateoria_cardapio_Id")
+    @Column(name = "categoria_cardapio_id")
     private String categoriaCardapioId;
 
-    @ManyToOne
-    @JoinColumn (name = "restaurante_Id")
-    private String restauranteId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurante_id", nullable = false)
+    private Restaurante restaurante;
 
     @Column (name = "status_Ativo")
     private boolean statusAtivo;
 
-    public Produto() {
+    protected Produto() {
 
     }
 
@@ -44,7 +43,6 @@ public class Produto {
         setDescricao(descricao);
         setPreco(preco);
         this.categoriaCardapioId = categoriaCardapioId;
-        this.restauranteId = restauranteId;
         this.statusAtivo = true; // começa ativo por padrão
     }
 
@@ -72,7 +70,7 @@ public class Produto {
     }
 
     public String getRestauranteId() {
-        return restauranteId;
+        return restaurante != null ? restaurante.getId() : null;
     }
 
     public boolean isStatusAtivo() {
@@ -102,4 +100,3 @@ public class Produto {
         this.preco = preco;
     }
 }
-
