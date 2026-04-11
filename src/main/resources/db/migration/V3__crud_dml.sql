@@ -1,9 +1,9 @@
 INSERT INTO usuarios (id, nome, email, senha_hash, tipo_usuario)
-VALUES ('u-adminEntity-01', 'Administrador',  'adminEntity@delivery.com',   'hash_admin',  'ADMIN'),
-       ('u-cli-01',   'João Silva',     'joao@email.com',       'hash_joao',   'CLIENTE'),
-       ('u-cli-02',   'Maria Souza',    'maria@email.com',      'hash_maria',  'CLIENTE'),
-       ('u-rest-01',  'Burguer House',  'burguer@delivery.com', 'hash_rest1',  'RESTAURANTE'),
-       ('u-rest-02',  'Pizzaria Bella', 'pizza@delivery.com',   'hash_rest2',  'RESTAURANTE');
+VALUES ('u-admin-01', 'Administrador',  'admin@delivery.com',   '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',  'ADMIN'),
+       ('u-cli-01',   'João Silva',     'joao@email.com',       '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',   'CLIENTE'),
+       ('u-cli-02',   'Maria Souza',    'maria@email.com',      '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',  'CLIENTE'),
+       ('u-rest-01',  'Burguer House',  'burguer@delivery.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',  'RESTAURANTE'),
+       ('u-rest-02',  'Pizzaria Bella', 'pizza@delivery.com',   '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',  'RESTAURANTE');
 
 SELECT id, nome, email, tipo_usuario FROM usuarios;
 
