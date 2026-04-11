@@ -5,6 +5,7 @@ import com.pedidos.domain.model.Usuario;
 import com.pedidos.domain.repository.CategoriaCardapioRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceException;
 
 import java.util.*;
 
@@ -54,18 +55,35 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
 
     @Override
     public Optional<CategoriaCardapio> buscarPorId(String id) {
-        return Optional.ofNullable(em.find(CategoriaCardapio.class, id));
+        try {
+            return Optional.ofNullable(em.find(CategoriaCardapio.class, id));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("ID inválido para busca: " + id, e);
+        } catch (PersistenceException e) {
+            throw new RuntimeException("Erro ao buscar categoria com id: " + id, e);
+        }
     }
 
     @Override
-    public List<CategoriaCardapio> buscarPorRestauranteId(String restauranteId){
-        return em.createQuery("select c from CategoriaCardapio c where c.restauranteId = :restauranteId",CategoriaCardapio.class)
+    public List<CategoriaCardapio> buscarPorRestauranteId(String restauranteId) {
+        try {
+            return em.createQuery(
+                            "select c from CategoriaCardapio c where c.restaurante.id = :restauranteId",
+                            CategoriaCardapio.class)
                     .setParameter("restauranteId", restauranteId)
                     .getResultList();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     @Override
     public List<CategoriaCardapio> listarTodos() {
-        return em.createQuery("select u from CategoriaCardapio u", CategoriaCardapio.class).getResultList();
+        try {
+            return em.createQuery("select u from CategoriaCardapio u", CategoriaCardapio.class)
+                    .getResultList();
+        } catch (PersistenceException e) {
+            throw new RuntimeException("Erro ao listar categorias do cardápio", e);
+        }
     }
 }
