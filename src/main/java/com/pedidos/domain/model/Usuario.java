@@ -30,6 +30,7 @@ public abstract class Usuario {
     protected Usuario() {}
 
     public Usuario(String nome, String email, String senhaHash, TipoUsuario tipoUsuario) {
+        this.id = UUID.randomUUID().toString();
         this.nome = nome;
         this.email = email;
         this.senhaHash = senhaHash;
