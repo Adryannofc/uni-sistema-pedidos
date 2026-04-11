@@ -1,8 +1,4 @@
--- =============================================================================
 -- V7__fulljoin.sql
--- =============================================================================
-
-
 
 -- FULL JOIN: Todos os restaurantes e pedidos, incluindo aqueles sem correspondência
 SELECT
