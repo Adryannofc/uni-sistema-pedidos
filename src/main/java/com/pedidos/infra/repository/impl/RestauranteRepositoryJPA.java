@@ -25,9 +25,7 @@ public class RestauranteRepositoryJPA implements RestauranteRepository {
         try {
             em.getTransaction().begin();
             em.persist(usuario);
-
             em.getTransaction().commit();
-
         }catch (Exception e){
             em.getTransaction().rollback();
             throw new RuntimeException("Erro ao salvar restaurante", e);
