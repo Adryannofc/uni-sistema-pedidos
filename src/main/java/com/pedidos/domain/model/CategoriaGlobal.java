@@ -9,8 +9,8 @@ import java.util.UUID;
 public class CategoriaGlobal {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private final String id;
+    @Column(name = "id", updatable = false, nullable = false)
+    private String id;
 
     @Column(name = "nome")
     private String nome;
