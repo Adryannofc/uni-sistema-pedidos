@@ -332,7 +332,7 @@ public class MenuCliente {
             System.out.println(TerminalUtils.linha(String.format(
                     "  %-3d %-8s  %-17s %-14s %s",
                     (i + 1),
-                    p.getId().substring(0, 8),
+                    p.getId().substring(0, Math.min(8, p.getId().length())),
                     p.getDataPedido().format(fmt),
                     p.getStatus(),
                     moeda.format(p.calcularTotal()))));
