@@ -1,7 +1,7 @@
 package com.pedidos.application.service;
 
 import com.pedidos.domain.enums.StatusPedido;
-import com.pedidos.domain.model.*;
+import com.pedidos.domain.entities.*;
 import com.pedidos.domain.repository.PedidoRepository;
 
 import java.math.BigDecimal;
@@ -25,13 +25,15 @@ public class PedidoService {
      * @param codigoConfirmacao código para confirmar a entrega
      * @return pedido criado
      */
-    public Pedido criarPedido(String clienteId, String restauranteId, Carrinho carrinho, Endereco enderecoEntrega, String codigoConfirmacao) {
+    public Pedido criarPedido(Cliente cliente, Restaurante restaurante, Carrinho carrinho, Endereco enderecoEntrega, String codigoConfirmacao) {
         try {
             if (enderecoEntrega == null) {
                 throw new IllegalArgumentException("Informe um endereço de entrega antes de finalizar o pedido.");
             }
 
-            Pedido pedido = new Pedido(null, clienteId, restauranteId, BigDecimal.ZERO);
+            Pedido pedido = new Pedido();
+            pedido.setCliente(cliente);
+            pedido.setRestaurante(restaurante);
             pedido.setEnderecoEntrega(enderecoEntrega);
             pedido.setCodigoConfirmacao(codigoConfirmacao);
             carrinho.getItens().forEach(pedido::adicionarItem);

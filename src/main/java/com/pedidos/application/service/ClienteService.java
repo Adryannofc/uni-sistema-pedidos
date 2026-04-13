@@ -1,14 +1,12 @@
 package com.pedidos.application.service;
 
-import com.pedidos.domain.model.Cliente;
-import com.pedidos.domain.model.Endereco;
-import com.pedidos.domain.model.Restaurante;
-import com.pedidos.domain.model.Usuario;
+import com.pedidos.domain.entities.Cliente;
+import com.pedidos.domain.entities.Endereco;
+import com.pedidos.domain.entities.Restaurante;
+import com.pedidos.domain.entities.Usuario;
 import com.pedidos.domain.repository.AdminRepository;
 import com.pedidos.domain.repository.ClienteRepository;
 import com.pedidos.domain.repository.RestauranteRepository;
-
-import java.util.List;
 
 public class ClienteService {
     private final ClienteRepository clienteRepository;

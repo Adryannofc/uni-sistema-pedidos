@@ -1,11 +1,9 @@
 package com.pedidos.domain.repository;
 
 import com.pedidos.domain.enums.StatusPedido;
-import com.pedidos.domain.model.Usuario;
-import com.pedidos.domain.model.Pedido;
+import com.pedidos.domain.entities.Pedido;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface PedidoRepository {
 

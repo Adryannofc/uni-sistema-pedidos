@@ -1,7 +1,7 @@
 package com.pedidos.infra.seed;
 
 import com.pedidos.application.service.AutenticacaoService;
-import com.pedidos.domain.model.*;
+import com.pedidos.domain.entities.*;
 import com.pedidos.domain.repository.*;
 
 import java.math.BigDecimal;

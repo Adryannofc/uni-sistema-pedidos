@@ -2,7 +2,7 @@ package com.pedidos.presentation.admin;
 
 import com.pedidos.application.service.AdminService;
 import com.pedidos.application.service.CategoriaService;
-import com.pedidos.domain.model.CategoriaGlobal;
+import com.pedidos.domain.entities.CategoriaGlobal;
 import com.pedidos.presentation.util.EntradaSegura;
 import com.pedidos.presentation.util.TerminalUtils;
 

@@ -1,8 +1,8 @@
 package com.pedidos.application.service;
 
-import com.pedidos.domain.model.Admin;
-import com.pedidos.domain.model.Restaurante;
-import com.pedidos.domain.model.Usuario;
+import com.pedidos.domain.entities.Admin;
+import com.pedidos.domain.entities.Restaurante;
+import com.pedidos.domain.entities.Usuario;
 import com.pedidos.domain.repository.AdminRepository;
 import com.pedidos.domain.repository.RestauranteRepository;
 

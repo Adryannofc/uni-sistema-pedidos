@@ -1,4 +1,4 @@
-package com.pedidos.domain.model;
+package com.pedidos.domain.entities;
 
 import jakarta.persistence.*;
 import com.pedidos.domain.enums.TipoUsuario;

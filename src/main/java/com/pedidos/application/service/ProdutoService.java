@@ -1,6 +1,6 @@
 package com.pedidos.application.service;
 
-import com.pedidos.domain.model.Produto;
+import com.pedidos.domain.entities.Produto;
 import com.pedidos.domain.repository.ProdutoRepository;
 
 import java.math.BigDecimal;

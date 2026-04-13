@@ -1,9 +1,7 @@
 package com.pedidos.application.service;
 
-import com.pedidos.domain.model.Carrinho;
-import com.pedidos.domain.model.Produto;
-
-import java.math.BigDecimal;
+import com.pedidos.domain.entities.Carrinho;
+import com.pedidos.domain.entities.Produto;
 
 public class CarrinhoService {
 

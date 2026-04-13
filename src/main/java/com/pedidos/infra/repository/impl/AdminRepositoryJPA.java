@@ -1,8 +1,7 @@
 package com.pedidos.infra.repository.impl;
 
-import com.pedidos.domain.model.Usuario;
+import com.pedidos.domain.entities.Usuario;
 import com.pedidos.domain.repository.AdminRepository;
-import com.pedidos.domain.repository.UsuarioRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 

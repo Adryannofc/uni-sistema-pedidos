@@ -1,11 +1,9 @@
 package com.pedidos.application.service;
 
-import com.pedidos.domain.model.Restaurante;
-import com.pedidos.domain.model.Usuario;
+import com.pedidos.domain.entities.Restaurante;
+import com.pedidos.domain.entities.Usuario;
 import com.pedidos.domain.repository.CategoriaGlobalRepository;
 import com.pedidos.domain.repository.RestauranteRepository;
-
-import java.util.Optional;
 
 public class RestauranteService {
 

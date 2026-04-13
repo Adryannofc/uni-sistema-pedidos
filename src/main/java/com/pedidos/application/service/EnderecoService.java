@@ -1,6 +1,6 @@
 package com.pedidos.application.service;
 
-import com.pedidos.domain.model.Endereco;
+import com.pedidos.domain.entities.Endereco;
 import com.pedidos.domain.repository.EnderecoRepository;
 
 public class EnderecoService {

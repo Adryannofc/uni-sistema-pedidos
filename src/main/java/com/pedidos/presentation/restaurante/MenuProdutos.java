@@ -2,9 +2,9 @@ package com.pedidos.presentation.restaurante;
 
 import com.pedidos.application.service.CategoriaService;
 import com.pedidos.application.service.ProdutoService;
-import com.pedidos.domain.model.CategoriaCardapio;
-import com.pedidos.domain.model.Produto;
-import com.pedidos.domain.model.Restaurante;
+import com.pedidos.domain.entities.CategoriaCardapio;
+import com.pedidos.domain.entities.Produto;
+import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.presentation.util.EntradaSegura;
 import com.pedidos.presentation.util.TerminalUtils;
 

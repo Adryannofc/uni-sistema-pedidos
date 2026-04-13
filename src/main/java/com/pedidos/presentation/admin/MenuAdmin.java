@@ -1,8 +1,8 @@
 package com.pedidos.presentation.admin;
 
 import com.pedidos.application.service.AdminService;
-import com.pedidos.domain.model.Admin;
-import com.pedidos.domain.model.Restaurante;
+import com.pedidos.domain.entities.Admin;
+import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.presentation.util.EntradaSegura;
 import com.pedidos.presentation.util.TerminalUtils;
 

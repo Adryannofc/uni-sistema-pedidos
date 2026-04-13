@@ -1,7 +1,7 @@
 package com.pedidos.presentation.menu;
 
 import com.pedidos.application.service.*;
-import com.pedidos.domain.model.*;
+import com.pedidos.domain.entities.*;
 import com.pedidos.domain.repository.RestauranteRepository;
 import com.pedidos.presentation.admin.MenuCategorias;
 import com.pedidos.presentation.restaurante.*;

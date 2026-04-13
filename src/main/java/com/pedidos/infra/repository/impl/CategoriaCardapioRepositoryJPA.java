@@ -1,10 +1,8 @@
 package com.pedidos.infra.repository.impl;
 
-import com.pedidos.domain.model.CategoriaCardapio;
-import com.pedidos.domain.model.Usuario;
+import com.pedidos.domain.entities.CategoriaCardapio;
 import com.pedidos.domain.repository.CategoriaCardapioRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
 
 import java.util.*;
 

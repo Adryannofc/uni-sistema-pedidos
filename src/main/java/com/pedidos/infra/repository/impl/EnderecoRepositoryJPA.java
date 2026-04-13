@@ -1,7 +1,6 @@
 package com.pedidos.infra.repository.impl;
 
-import com.pedidos.domain.model.CategoriaGlobal;
-import com.pedidos.domain.model.Endereco;
+import com.pedidos.domain.entities.Endereco;
 import com.pedidos.domain.repository.EnderecoRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;

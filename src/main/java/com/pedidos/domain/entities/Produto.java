@@ -1,4 +1,4 @@
-package com.pedidos.domain.model;
+package com.pedidos.domain.entities;
 
 import java.math.BigDecimal;
 import java.util.UUID;

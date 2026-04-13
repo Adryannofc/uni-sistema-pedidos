@@ -1,8 +1,7 @@
 package com.pedidos.domain.repository;
 
-import com.pedidos.domain.model.Endereco;
+import com.pedidos.domain.entities.Endereco;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface EnderecoRepository {
