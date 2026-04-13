@@ -2,7 +2,7 @@ package com.pedidos.presentation.menu;
 
 import com.pedidos.application.service.*;
 import com.pedidos.domain.enums.StatusPedido;
-import com.pedidos.domain.model.*;
+import com.pedidos.domain.entities.*;
 import com.pedidos.domain.repository.RestauranteRepository;
 import com.pedidos.presentation.util.EntradaSegura;
 import com.pedidos.presentation.util.TerminalUtils;
@@ -563,8 +563,10 @@ public class MenuCliente {
             }
 
             String codigo = clienteLogado.getCpf().substring(0, 4);
+            Restaurante restaurante = (Restaurante) restauranteRepo.buscarPorId(carrinho.getRestauranteId()).get();
+
             Pedido pedido = pedidoService.criarPedido(
-                    clienteLogado.getId(), carrinho.getRestauranteId(), carrinho, endereco, codigo);
+                    clienteLogado, restaurante, carrinho, endereco, codigo);
 
             carrinhoService.encerrarCarrinho();
 

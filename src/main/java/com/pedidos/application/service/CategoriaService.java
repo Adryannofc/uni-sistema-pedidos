@@ -1,7 +1,7 @@
 package com.pedidos.application.service;
 
-import com.pedidos.domain.model.CategoriaCardapio;
-import com.pedidos.domain.model.CategoriaGlobal;
+import com.pedidos.domain.entities.CategoriaCardapio;
+import com.pedidos.domain.entities.CategoriaGlobal;
 import com.pedidos.domain.repository.CategoriaCardapioRepository;
 import com.pedidos.domain.repository.CategoriaGlobalRepository;
 import com.pedidos.domain.repository.ProdutoRepository;

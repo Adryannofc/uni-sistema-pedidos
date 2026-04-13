@@ -1,6 +1,6 @@
 package com.pedidos.domain.repository;
 
-import com.pedidos.domain.model.CategoriaCardapio;
+import com.pedidos.domain.entities.CategoriaCardapio;
 import java.util.List;
 import java.util.Optional;
 

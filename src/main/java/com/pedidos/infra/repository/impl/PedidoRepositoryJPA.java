@@ -1,10 +1,10 @@
 package com.pedidos.infra.repository.impl;
 
-import com.pedidos.domain.model.Pedido;
+import com.pedidos.domain.entities.Pedido;
 import com.pedidos.domain.enums.StatusPedido;
 import com.pedidos.domain.repository.PedidoRepository;
 import jakarta.persistence.EntityManager;
-import java.util.*;
+
 import java.util.Optional;
 import java.util.List;
 
@@ -16,14 +16,14 @@ public class PedidoRepositoryJPA implements PedidoRepository {
     public PedidoRepositoryJPA(EntityManager em){this.em = em;}
 
     @Override
-    public void salvar(Pedido pedido){
+    public void salvar(Pedido pedido) {
         try {
             em.getTransaction().begin();
-            em.persist(pedido);
+            em.merge(pedido);
             em.getTransaction().commit();
-        }catch (Exception e){
+        } catch (Exception e) {
             em.getTransaction().rollback();
-            throw new RuntimeException("Erro ao salvar pedido", e);
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -39,14 +39,14 @@ public class PedidoRepositoryJPA implements PedidoRepository {
 
     @Override
     public List<Pedido> buscarPorCliente(String clienteId) {
-        return em.createQuery("SELECT p FROM Pedido p WHERE p.clienteId = :cid", Pedido.class)
+        return em.createQuery("SELECT p FROM Pedido p WHERE p.cliente.id = :cid", Pedido.class)
                 .setParameter("cid", clienteId).getResultList();
     }
 
     @Override
     public List<Pedido> listarAtivosPorRestaurante(String restauranteId) {
         return em.createQuery(
-                        "SELECT p FROM Pedido p WHERE p.restauranteId = :rid AND p.status NOT IN (:s1, :s2)", Pedido.class)
+                        "SELECT p FROM Pedido p WHERE p.restaurante.id = :rid AND p.status NOT IN (:s1, :s2)", Pedido.class)
                 .setParameter("rid", restauranteId)
                 .setParameter("s1", StatusPedido.ENTREGUE)
                 .setParameter("s2", StatusPedido.CANCELADO)
@@ -56,7 +56,7 @@ public class PedidoRepositoryJPA implements PedidoRepository {
     @Override
     public List<Pedido> filtrarPorStatus(String restauranteId, StatusPedido status) {
         return em.createQuery(
-                        "SELECT p FROM Pedido p WHERE p.restauranteId = :rid AND p.status = :status", Pedido.class)
+                        "SELECT p FROM Pedido p WHERE p.restaurante.id = :rid AND p.status = :status", Pedido.class)
                 .setParameter("rid", restauranteId)
                 .setParameter("status", status)
                 .getResultList();
@@ -64,7 +64,7 @@ public class PedidoRepositoryJPA implements PedidoRepository {
 
     @Override
     public List<Pedido> buscarPorRestaurante(String restauranteId) {
-        return em.createQuery("SELECT p FROM Pedido p WHERE p.restauranteId = :rid", Pedido.class)
+        return em.createQuery("SELECT p FROM Pedido p WHERE p.restaurante.id = :rid", Pedido.class)
                 .setParameter("rid", restauranteId)
                 .getResultList();
     }

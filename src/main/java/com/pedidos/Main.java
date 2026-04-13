@@ -1,10 +1,9 @@
-package com.pedidos.presentation;
+package com.pedidos;
 
 import com.pedidos.application.service.*;
 import com.pedidos.infra.config.FlyWayconfig;
 import com.pedidos.infra.config.JPAUtil;
 import com.pedidos.infra.repository.impl.*;
-import com.pedidos.infra.seed.DataSeeder;
 import com.pedidos.presentation.menu.MenuLogin;
 import jakarta.persistence.EntityManager;
 

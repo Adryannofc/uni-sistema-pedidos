@@ -1,6 +1,6 @@
 package com.pedidos.infra.repository.impl;
 
-import com.pedidos.domain.model.Produto;
+import com.pedidos.domain.entities.Produto;
 import com.pedidos.domain.repository.ProdutoRepository;
 import jakarta.persistence.EntityManager;
 import java.util.List;

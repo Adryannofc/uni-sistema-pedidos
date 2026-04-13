@@ -1,4 +1,4 @@
-package com.pedidos.domain.model;
+package com.pedidos.domain.entities;
 
 import com.pedidos.domain.enums.StatusPedido;
 import jakarta.persistence.*;
@@ -49,13 +49,11 @@ public class Pedido {
     @JoinColumn(name = "endereco_id", nullable = false)
     private Endereco enderecoEntrega;
 
-    protected Pedido() {} // no-arg para o JPA
-
-    public Pedido(String id, String clienteId, String restauranteId, BigDecimal taxaEntrega) {
-        this.id = (id != null) ? id : UUID.randomUUID().toString();
-        this.taxaEntrega = (taxaEntrega != null) ? taxaEntrega : BigDecimal.ZERO;
+    public Pedido() {
+        this.id = UUID.randomUUID().toString();
         this.dataPedido = LocalDateTime.now();
         this.total = BigDecimal.ZERO;
+        this.taxaEntrega = BigDecimal.ZERO;
     }
 
     public String getId() { return id; }
@@ -82,7 +80,10 @@ public class Pedido {
     public String getCodigoConfirmacao() { return codigoConfirmacao; }
     public void setCodigoConfirmacao(String c) { this.codigoConfirmacao = c; }
 
-    public void adicionarItem(ItemPedido item) { itens.add(item); }
+    public void adicionarItem(ItemPedido item) {
+        item.setPedido(this);
+        itens.add(item);
+    }
 
     public BigDecimal calcularTotal() {
         return itens.stream()

@@ -4,9 +4,9 @@ import com.pedidos.application.service.CategoriaService;
 import com.pedidos.application.service.PedidoService;
 import com.pedidos.application.service.RestauranteService;
 import com.pedidos.domain.enums.StatusPedido;
-import com.pedidos.domain.model.CategoriaGlobal;
-import com.pedidos.domain.model.Pedido;
-import com.pedidos.domain.model.Restaurante;
+import com.pedidos.domain.entities.CategoriaGlobal;
+import com.pedidos.domain.entities.Pedido;
+import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.presentation.util.EntradaSegura;
 import com.pedidos.presentation.util.TerminalUtils;
 
@@ -115,7 +115,7 @@ public class MenuRestaurante {
         for (int i = 0; i < ativos.size(); i++) {
             Pedido p = ativos.get(i);
             System.out.println(TerminalUtils.linha(String.format(
-                    "  %-3d %-8s  %s", (i + 1), p.getId().substring(0, 8), p.getStatus())));
+                    "  %-3d %-8s  %s", (i + 1), p.getId().substring(0, Math.min(8, p.getId().length())), p.getStatus())));
         }
         System.out.println(TerminalUtils.SEPARADOR);
         System.out.println(TerminalUtils.linha("  0  \u00bb  Voltar"));

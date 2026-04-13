@@ -1,5 +1,5 @@
 package com.pedidos.domain.repository;
-import com.pedidos.domain.model.Produto;
+import com.pedidos.domain.entities.Produto;
 
 import java.util.List;
 import java.util.Optional;
