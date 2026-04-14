@@ -30,11 +30,11 @@ public class Endereco {
     @Column (name = "cep")
     private String cep;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
-    protected Endereco() {}  // adicionar antes do construtor existente
+    protected Endereco() {}
 
     public Endereco(String rua, String numero, String bairro, String cidade, String estado, String cep) {
         this.id = UUID.randomUUID().toString();
@@ -52,7 +52,6 @@ public class Endereco {
     public String getCidade() { return cidade; }
     public String getEstado() { return estado; }
     public String getCep() { return cep; }
-
 
     public void setRua(String rua) { this.rua = rua; }
     public void setNumero(String numero) { this.numero = numero; }
