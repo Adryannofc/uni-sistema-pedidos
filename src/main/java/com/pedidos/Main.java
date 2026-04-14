@@ -45,7 +45,6 @@ public class Main {
                 pedidoService, carrinhoService, restauranteRepo
         ).iniciar();
 
-        // --- Fecha recursos JPA ---
         JPAUtil.close();
     }
 }
