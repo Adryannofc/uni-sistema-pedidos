@@ -13,9 +13,7 @@ public class JPAUtil {
     private static final EntityManagerFactory factory =
             Persistence.createEntityManagerFactory("deliveryPU");
 
-    private JPAUtil() {
-        // Classe utilitária — não instanciar
-    }
+    private JPAUtil() {}
 
     /**
      * Retorna um novo EntityManager a partir da factory compartilhada.

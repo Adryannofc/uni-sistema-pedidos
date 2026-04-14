@@ -87,7 +87,7 @@ public class Pedido {
 
     public BigDecimal calcularTotal() {
         return itens.stream()
-                .map(ItemPedido::calcularSubtotal)
+                .map(item -> item.calcularSubtotal())
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .add(taxaEntrega);
     }

@@ -12,8 +12,6 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
 
-
-        // --- Iniciando Flyway ---
         try {
             FlyWayconfig.migrate();
         } catch (Exception e) {
@@ -24,7 +22,6 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
 
-        // --- Repositórios ---
         AdminRepositoryJPA adminRepo = new AdminRepositoryJPA(em);
         RestauranteRepositoryJPA restauranteRepo = new RestauranteRepositoryJPA(em);
         ClienteRepositoryJPA clienteRepo = new ClienteRepositoryJPA(em);
@@ -33,7 +30,6 @@ public class Main {
         ProdutoRepositoryJPA produtoRepo = new ProdutoRepositoryJPA(em);
         PedidoRepositoryJPA pedidoRepo = new PedidoRepositoryJPA(em);
 
-        // --- Services ---
         AutenticacaoService authService = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
         AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo);
         ClienteService clienteService = new ClienteService(clienteRepo, authService, adminRepo, restauranteRepo);
@@ -43,14 +39,12 @@ public class Main {
         PedidoService pedidoService = new PedidoService(pedidoRepo);
         CarrinhoService carrinhoService = new CarrinhoService();
 
-        // --- Inicia aplicação ---
         new MenuLogin(
                 authService, adminService, clienteService,
                 categoriaService, produtoService, restauranteService,
                 pedidoService, carrinhoService, restauranteRepo
         ).iniciar();
 
-        // --- Fecha recursos JPA ---
         JPAUtil.close();
     }
 }

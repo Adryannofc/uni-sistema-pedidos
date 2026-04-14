@@ -11,14 +11,16 @@ public class AdminRepositoryJPA implements AdminRepository {
 
     private EntityManager em;
 
-    public AdminRepositoryJPA (EntityManager em) { this.em = em; }
+    public AdminRepositoryJPA(EntityManager em) {
+        this.em = em;
+    }
 
     public void salvar(Usuario usuario) {
         try {
             em.getTransaction().begin();
             em.persist(usuario);
             em.getTransaction().commit();
-        } catch (Exception e){
+        } catch (Exception e) {
             em.getTransaction().rollback();
             throw new RuntimeException("Erro ao salvar o usuário", e);
         }
@@ -29,7 +31,7 @@ public class AdminRepositoryJPA implements AdminRepository {
             em.getTransaction().begin();
             em.merge(usuario);
             em.getTransaction().commit();
-        } catch (Exception e){
+        } catch (Exception e) {
             em.getTransaction().rollback();
             throw new RuntimeException("Erro em atualizar o usuário", e);
         }
@@ -44,8 +46,7 @@ public class AdminRepositoryJPA implements AdminRepository {
                 em.remove(usuario);
             }
             em.getTransaction().commit();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             em.getTransaction().rollback();
             throw new RuntimeException("Erro ao remover admin", e);
         }
@@ -57,13 +58,13 @@ public class AdminRepositoryJPA implements AdminRepository {
     }
 
     @Override
-    public Optional<Usuario> buscarPorEmail(String email){
+    public Optional<Usuario> buscarPorEmail(String email) {
         try {
-            Usuario usuario = em.createQuery("select u from Usuario u where u.email = :email",Usuario.class)
+            Usuario usuario = em.createQuery("select u from Usuario u where u.email = :email", Usuario.class)
                     .setParameter("email", email)
                     .getSingleResult();
             return Optional.of(usuario);
-        } catch (NoResultException e){
+        } catch (NoResultException e) {
             return Optional.empty();
         }
     }

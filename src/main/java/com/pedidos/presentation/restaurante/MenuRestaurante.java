@@ -131,7 +131,7 @@ public class MenuRestaurante {
 
     private void avancarStatus(Pedido pedido) {
         TerminalUtils.limparTela();
-        TerminalUtils.cabecalho("PEDIDO " + pedido.getId().substring(0, 8));
+        TerminalUtils.cabecalho("PEDIDO " + pedido.getId().substring(0, Math.min(8, pedido.getId().length())));
         System.out.println("  Endereco : " + pedido.getEnderecoEntrega());
         System.out.println("  Status   : " + pedido.getStatus());
         System.out.println();

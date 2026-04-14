@@ -29,7 +29,7 @@ public class ItemPedido {
     @Column(name = "preco_unitario", nullable = false, precision = 10, scale = 2)
     private BigDecimal precoUnitario;
 
-    protected ItemPedido() {}   // construtor no-arg para o JPA
+    protected ItemPedido() {}
 
     public ItemPedido(String produtoId, String nomeProduto, int quantidade, BigDecimal precoUnitario) {
         this.id = UUID.randomUUID().toString();
@@ -39,7 +39,6 @@ public class ItemPedido {
         this.precoUnitario = precoUnitario;
     }
 
-    // setter para o JPA fechar o relacionamento bidirecional
     public void setPedido(Pedido pedido) { this.pedido = pedido; }
 
     public String getId() { return id; }
