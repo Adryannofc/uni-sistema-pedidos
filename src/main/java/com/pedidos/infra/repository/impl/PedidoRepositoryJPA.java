@@ -19,7 +19,7 @@ public class PedidoRepositoryJPA implements PedidoRepository {
     public void salvar(Pedido pedido) {
         try {
             em.getTransaction().begin();
-            em.persist(pedido);
+            em.merge(pedido);
             em.getTransaction().commit();
         } catch (Exception e) {
             em.getTransaction().rollback();

@@ -68,10 +68,7 @@ public class MenuCliente {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Perfil
-    // ─────────────────────────────────────────────────────────────────────────
-
     private void menuPerfil() {
         while (true) {
             TerminalUtils.limparTela();
@@ -281,10 +278,7 @@ public class MenuCliente {
         TerminalUtils.pausar();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Meus Pedidos
-    // ─────────────────────────────────────────────────────────────────────────
-
     private void menuMeusPedidos() {
         TerminalUtils.limparTela();
         TerminalUtils.cabecalho("MEUS PEDIDOS", clienteLogado.getNome());
@@ -307,7 +301,7 @@ public class MenuCliente {
             }
 
             if (paraConfirmar != null) {
-                System.out.println("  Pedido " + paraConfirmar.getId().substring(0, 8) + " saiu para entrega!");
+                System.out.println("  Pedido " + paraConfirmar.getId().substring(0, Math.min(8, paraConfirmar.getId().length())) + " saiu para entrega!");
                 System.out.print("  Digite o codigo de confirmacao (ou Enter para pular): ");
                 String codigo = scanner.nextLine().trim();
                 if (!codigo.isBlank()) {
