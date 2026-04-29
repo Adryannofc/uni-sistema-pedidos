@@ -1,9 +1,10 @@
-package com.pedidos.presentation.menu;
+package com.pedidos.presentation;
 
 import com.pedidos.application.service.*;
 import com.pedidos.domain.entities.*;
 import com.pedidos.domain.repository.RestauranteRepository;
 import com.pedidos.presentation.admin.MenuCategorias;
+import com.pedidos.presentation.cliente.MenuCliente;
 import com.pedidos.presentation.restaurante.*;
 import com.pedidos.presentation.util.EntradaSegura;
 import com.pedidos.presentation.util.TerminalUtils;

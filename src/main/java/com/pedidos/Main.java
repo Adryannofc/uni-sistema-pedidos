@@ -4,7 +4,7 @@ import com.pedidos.application.service.*;
 import com.pedidos.infra.config.FlyWayconfig;
 import com.pedidos.infra.config.JPAUtil;
 import com.pedidos.infra.repository.impl.*;
-import com.pedidos.presentation.menu.MenuLogin;
+import com.pedidos.presentation.MenuLogin;
 import jakarta.persistence.EntityManager;
 
 import java.util.Scanner;

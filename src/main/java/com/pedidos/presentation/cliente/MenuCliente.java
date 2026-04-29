@@ -1,4 +1,4 @@
-package com.pedidos.presentation.menu;
+package com.pedidos.presentation.cliente;
 
 import com.pedidos.application.service.*;
 import com.pedidos.domain.enums.StatusPedido;
