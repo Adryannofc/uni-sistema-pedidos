@@ -47,49 +47,116 @@ public class MenuLogin {
         while (true) {
             TerminalUtils.limparTela();
             System.out.println("╔══════════════════════════════════════════════════════════════════════════════╗");
-            System.out.println("║                                    LOGIN                                     ║");
+            System.out.println("║                            SISTEMA DE DELIVERY                               ║");
+            System.out.println("╠══════════════════════════════════════════════════════════════════════════════╣");
+            System.out.println("║                                                                              ║");
+            System.out.println("║  [1] LOGIN                                                                   ║");
+            System.out.println("║  [2] CADASTRAR-SE                                                            ║");
+            System.out.println("║  [0] SAIR                                                                    ║");
+            System.out.println("║                                                                              ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════════════════╝");
 
-            String email = EntradaSegura.lerString(scan, "E-MAIL: ");
-            String senha = EntradaSegura.lerString(scan, "SENHA : ");
+            System.out.println("ESCOLHA UMA OPÇÃO: ");
+            int opcao = EntradaSegura.lerOpcao(scan, 0, 2);
 
-            try {
-                Usuario usuario = autenticacaoService.autenticar(email, senha);
-                System.out.println("Bem-vindo, " + usuario.getNome() + "!");
+            switch (opcao) {
+                case 1:
+                    TerminalUtils.limparTela();
 
-                switch (usuario.getTipoUsuario()) {
-                    case ADMIN -> {
-                        Admin adminLogado = (Admin) usuario;
-                        MenuCategorias menuCategorias = new MenuCategorias(adminService, categoriaService, scan);
-                        new com.pedidos.presentation.admin.MenuAdmin(adminService, scan, menuCategorias)
-                                .exibir(adminLogado);
+                    String email = EntradaSegura.lerString(scan, "E-MAIL: ");
+                    String senha = EntradaSegura.lerString(scan, "SENHA : ");
+
+                    try {
+                        Usuario usuario = autenticacaoService.autenticar(email, senha);
+                        System.out.println("Bem-vindo, " + usuario.getNome() + "!");
+
+                        switch (usuario.getTipoUsuario()) {
+                            case ADMIN -> {
+                                Admin adminLogado = (Admin) usuario;
+                                MenuCategorias menuCategorias = new MenuCategorias(adminService, categoriaService, scan);
+                                new com.pedidos.presentation.admin.MenuAdmin(adminService, scan, menuCategorias)
+                                        .exibir(adminLogado);
+                            }
+                            case RESTAURANTE -> {
+                                Restaurante restauranteLogado = (Restaurante) usuario;
+                                MenuProdutos menuProdutos = new MenuProdutos(produtoService, categoriaService, scan);
+                                MenuCategoriasCardapio menuCats = new MenuCategoriasCardapio(categoriaService, scan);
+                                new MenuRestaurante(
+                                        menuProdutos, menuCats,
+                                        restauranteService, categoriaService, pedidoService, scan
+                                ).exibir(restauranteLogado);
+                            }
+                            case CLIENTE -> {
+                                Cliente clienteLogado = (Cliente) usuario;
+                                new MenuCliente(
+                                        clienteLogado,
+                                        clienteService,
+                                        pedidoService,
+                                        carrinhoService,
+                                        produtoService,
+                                        restauranteRepo,
+                                        scan
+                                ).iniciar();
+                            }
+                        }
+                    } catch (RuntimeException e) {
+                        System.out.println("[ERRO] " + e.getMessage());
+                        TerminalUtils.pausar();
                     }
-                    case RESTAURANTE -> {
-                        Restaurante restauranteLogado = (Restaurante) usuario;
-                        MenuProdutos menuProdutos = new MenuProdutos(produtoService, categoriaService, scan);
-                        MenuCategoriasCardapio menuCats = new MenuCategoriasCardapio(categoriaService, scan);
-                        new MenuRestaurante(
-                                menuProdutos, menuCats,
-                                restauranteService, categoriaService, pedidoService, scan
-                        ).exibir(restauranteLogado);
-                    }
-                    case CLIENTE -> {
-                        Cliente clienteLogado = (Cliente) usuario;
-                        new MenuCliente(
-                                clienteLogado,
-                                clienteService,
-                                pedidoService,
-                                carrinhoService,
-                                produtoService,
-                                restauranteRepo,
-                                scan
-                        ).iniciar();
-                    }
-                }
-            } catch (RuntimeException e) {
-                System.out.println("[ERRO] " + e.getMessage());
-                TerminalUtils.pausar();
+                    break;
+                case 2:
+                    TerminalUtils.limparTela();
+
+                    System.out.println("╔══════════════════════════════════════════════════════════════════════════════╗");
+                    System.out.println("║                            CADASTRO                                          ║");
+                    System.out.println("╠══════════════════════════════════════════════════════════════════════════════╣");
+                    System.out.println("║  [1] CLIENTE                                                                   ║");
+                    System.out.println("║  [2] RESTAURANTE                                                            ║");
+                    System.out.println("║  [0] SAIR                                                                    ║");
+                    System.out.println("╚══════════════════════════════════════════════════════════════════════════════╝");
+
+                    int opcaoCadastro = EntradaSegura.lerOpcao(scan, 0, 2);
+                    switch (opcaoCadastro) {
+                        case 1:
+                            String nomeCadastroCliente = EntradaSegura.lerString(scan, "NOME : ");
+                            String emailCadastroCliente = EntradaSegura.lerString(scan, "EMAIL : ");
+                            String cpfCadastroCliente = EntradaSegura.lerString(scan, "CPF : ");
+                            String telefoneCadastroCliente = EntradaSegura.lerString(scan, "TELEFONE : ");
+                            String senhaCadastroCliente = EntradaSegura.lerString(scan, "SENHA: ");
+
+                            try {
+                                clienteService.cadastrarCliente(nomeCadastroCliente, emailCadastroCliente, senhaCadastroCliente,
+                                        cpfCadastroCliente, telefoneCadastroCliente);
+                                System.out.println("\n[✔] Bem-vindo, " + nomeCadastroCliente + "! Cadastro realizado.");
+                                TerminalUtils.pausar();
+                            } catch (RuntimeException e) {
+                                System.out.println("\n[✘] ERRO AO CADASTRAR: " + e.getMessage());
+                                TerminalUtils.pausar();
+                            }
+                            break;
+                        case 2:
+                            String nomeCadastroRestaurante = EntradaSegura.lerString(scan, "NOME : ");
+                            String emailCadastroRestaurante = EntradaSegura.lerString(scan, "EMAIL : ");
+                            String cnpjCadastroRestaurante = EntradaSegura.lerString(scan, "CNPJ : ");
+                            String telefoneCadastroRestaurante = EntradaSegura.lerString(scan, "TELEFONE : ");
+                            String senhaCadastroRestaurante = EntradaSegura.lerString(scan, "SENHA: ");
+                            try {
+                                restauranteService.cadastrarRestaurante(nomeCadastroRestaurante, emailCadastroRestaurante, senhaCadastroRestaurante,
+                                        cnpjCadastroRestaurante, telefoneCadastroRestaurante);
+                                System.out.println("\n[✔] Bem-vindo, " + nomeCadastroRestaurante + "! Cadastro realizado.");
+                                TerminalUtils.pausar();
+                            } catch (RuntimeException e) {
+                                System.out.println("\n[✘] ERRO AO CADASTRAR: " + e.getMessage());
+                                TerminalUtils.pausar();
+                            }
+                            break;
+
+                    };
+
             }
+
         }
     }
+
 }
+

@@ -34,6 +34,7 @@ public class ClienteService {
     public void cadastrarCliente(String nome, String email, String senha, String cpf, String telefone) {
         try {
             validarCpf(cpf);
+            validarTelefone(telefone);
 
             if (emailCadastrado(email)) {
                 throw new IllegalArgumentException("E-mail já cadastrado no sistema.");
@@ -138,4 +139,21 @@ public class ClienteService {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
+    private String validarTelefone(String telefone) {
+        String regexTelefone = "^(\\(\\d{2}\\)\\s?|\\d{2}\\s?)?(9?\\d{4}-?\\d{4})$";
+
+        if (telefone == null || !telefone.matches(regexTelefone)) {
+            throw new IllegalArgumentException("Telefone inválido. Use o formato (DDD) 99999-9999.");
+        }
+
+        String apenasNumeros = telefone.replaceAll("[^0-9]", "");
+
+        if (apenasNumeros.length() < 10 || apenasNumeros.length() > 11) {
+            throw new IllegalArgumentException("O telefone deve conter DDD e o número completo.");
+        }
+
+        return apenasNumeros;
+    }
+
 }

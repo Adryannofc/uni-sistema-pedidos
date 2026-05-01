@@ -1,5 +1,6 @@
 package com.pedidos.application.service;
 
+import com.pedidos.domain.entities.Cliente;
 import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.domain.entities.Usuario;
 import com.pedidos.domain.repository.CategoriaGlobalRepository;
@@ -127,5 +128,59 @@ public class RestauranteService {
             throw new IllegalArgumentException("CNPJ inválido — deve conter 14 dígitos");
         }
         return cnpjNormalizado;
+    }
+
+    private void validarCnpj(String cnpj) {
+
+        String regexCnpj = "^\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}$|^\\d{14}$";
+
+        try {
+            if (cnpj == null || !cnpj.matches(regexCnpj)) {
+                throw new IllegalArgumentException("CNPJ inválido. Informe 11 dígitos numéricos.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    private boolean emailCadastrado(String email) {
+        try {
+            return restauranteRepository.buscarPorEmail(email).isPresent();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public void cadastrarRestaurante(String nomeRestaurante, String emailRestaurante, String senhaRestaurante, String cnpjRestaurante, String telefoneRestaurante) {
+        try {
+            validarCnpj(cnpjRestaurante);
+            validarTelefone(telefoneRestaurante);
+
+            if (emailCadastrado(emailRestaurante)) {
+                throw new IllegalArgumentException("E-mail já cadastrado.");
+            }
+
+            String hash = autenticacaoService.hashSenha(senhaRestaurante);
+            Restaurante restaurante = new Restaurante(nomeRestaurante, emailRestaurante, hash, cnpjRestaurante, telefoneRestaurante);
+            restauranteRepository.salvar(restaurante);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    private String validarTelefone(String telefone) {
+        String regexTelefone = "^(\\(\\d{2}\\)\\s?|\\d{2}\\s?)?(9?\\d{4}-?\\d{4})$";
+
+        if (telefone == null || !telefone.matches(regexTelefone)) {
+            throw new IllegalArgumentException("Telefone inválido. Use o formato (DDD) 99999-9999.");
+        }
+
+        String apenasNumeros = telefone.replaceAll("[^0-9]", "");
+
+        if (apenasNumeros.length() < 10 || apenasNumeros.length() > 11) {
+            throw new IllegalArgumentException("O telefone deve conter DDD e o número completo.");
+        }
+
+        return apenasNumeros;
     }
 }

@@ -7,5 +7,7 @@ import java.util.List;
 public interface RestauranteRepository extends UsuarioRepository {
     Usuario buscarPorEmailSenha(String email, String senha);
 
+    void salvarCadastro(Usuario usuario);
+
     List<Restaurante> listarRestaurantes();
 }
