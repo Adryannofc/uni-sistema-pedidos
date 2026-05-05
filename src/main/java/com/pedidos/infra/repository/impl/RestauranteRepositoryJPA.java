@@ -20,7 +20,7 @@ public class RestauranteRepositoryJPA implements RestauranteRepository {
 
 
     @Override
-    public void salvar(Usuario usuario)
+    public void salvarCadastro(Usuario usuario)
     {
         try {
             em.getTransaction().begin();
@@ -32,6 +32,11 @@ public class RestauranteRepositoryJPA implements RestauranteRepository {
         };
 
     };
+
+    @Override
+    public void salvar(Usuario usuario) {
+
+    }
 
     @Override
     public Optional<Usuario> buscarPorId(String id){

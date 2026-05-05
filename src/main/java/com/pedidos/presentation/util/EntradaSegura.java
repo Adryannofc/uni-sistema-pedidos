@@ -5,7 +5,7 @@ public class EntradaSegura {
      public static int lerOpcao(Scanner sc, int min, int max) {
         while (true) {
             String entrada = sc.nextLine().trim();
-            try {
+                try {
                 int opcao = Integer.parseInt(entrada);
 
                 if (opcao >= min && opcao <= max) {

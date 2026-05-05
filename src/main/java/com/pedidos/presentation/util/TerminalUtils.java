@@ -108,6 +108,7 @@ public class TerminalUtils {
     /** Pausa a execucao ate o usuario pressionar Enter. */
     public static void pausar() {
         System.out.print("\n  Pressione Enter para continuar...");
-        SCN.nextLine();
+
+
     }
 }
