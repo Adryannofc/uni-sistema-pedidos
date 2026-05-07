@@ -57,7 +57,7 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
 
     @Override
     public List<CategoriaCardapio> buscarPorRestauranteId(String restauranteId){
-        return em.createQuery("select c from CategoriaCardapio c where c.restauranteId = :restauranteId",CategoriaCardapio.class)
+        return em.createQuery("select c from CategoriaCardapio c where c.restaurante.id = :restauranteId",CategoriaCardapio.class)
                     .setParameter("restauranteId", restauranteId)
                     .getResultList();
     }
