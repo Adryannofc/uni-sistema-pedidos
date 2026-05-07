@@ -30,10 +30,11 @@ public class Restaurante extends Usuario {
 
     protected Restaurante() {}
 
-    public Restaurante(String nome, String email, String senhaHash, String cnpj) {
+    public Restaurante(String nome, String email, String senhaHash, String cnpj, String telefone) {
         super(nome, email, senhaHash, TipoUsuario.RESTAURANTE);
         this.cnpj = cnpj;
         this.statusAtivo = false;
+        this.telefone = telefone;
     }
 
     public boolean isStatusAtivo() { return statusAtivo; }
