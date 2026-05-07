@@ -2,6 +2,7 @@ package com.pedidos.application.service;
 
 import com.pedidos.domain.entities.CategoriaCardapio;
 import com.pedidos.domain.entities.CategoriaGlobal;
+import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.domain.repository.CategoriaCardapioRepository;
 import com.pedidos.domain.repository.CategoriaGlobalRepository;
 import com.pedidos.domain.repository.ProdutoRepository;
@@ -79,7 +80,10 @@ public class CategoriaService {
     public void criarCategoriaCardapio(String nome, String descricao, String restauranteId) {
         try {
             validarNomeCardapioUnico(nome, restauranteId, null);
-            categoriaCardapioRepository.salvar(new CategoriaCardapio(nome, descricao, restauranteId));
+            Restaurante restaurante = (Restaurante) restauranteRepository
+                    .buscarPorId(restauranteId)
+                    .orElseThrow(() -> new IllegalArgumentException("Restaurante não encontrado."));
+            categoriaCardapioRepository.salvar(new CategoriaCardapio(nome, descricao, restaurante));
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
