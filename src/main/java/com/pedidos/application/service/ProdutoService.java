@@ -1,7 +1,9 @@
 package com.pedidos.application.service;
 
 import com.pedidos.domain.entities.Produto;
+import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.domain.repository.ProdutoRepository;
+import com.pedidos.domain.repository.RestauranteRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -9,9 +11,11 @@ import java.util.stream.Collectors;
 
 public class ProdutoService {
     private final ProdutoRepository produtoRepository;
+    private final RestauranteRepository restauranteRepository;
 
-    public ProdutoService(ProdutoRepository produtoRepository) {
+    public ProdutoService(ProdutoRepository produtoRepository, RestauranteRepository restauranteRepository) {
         this.produtoRepository = produtoRepository;
+        this.restauranteRepository = restauranteRepository;
     }
 
     /**
@@ -20,8 +24,11 @@ public class ProdutoService {
     public Produto criarProduto(String nome, String descricao, BigDecimal preco, String categoriaCardapioId, String restauranteId) {
         try {
             validarPreco(preco);
-
-            Produto produto = new Produto(nome, descricao, preco, categoriaCardapioId, restauranteId);
+            Restaurante restaurante = (Restaurante) restauranteRepository
+                    .buscarPorId(restauranteId)
+                    .orElseThrow(() -> new IllegalArgumentException("Restaurante não encontrado"));
+            Produto produto = new Produto(nome, descricao, preco, categoriaCardapioId);
+            produto.setRestaurante(restaurante);
             produtoRepository.salvar(produto);
             return produto;
         } catch (Exception e) {
@@ -34,9 +41,7 @@ public class ProdutoService {
      */
     public List<Produto> listarPorRestaurante(String restauranteId) {
         try {
-            return produtoRepository.listarTodos().stream()
-                    .filter(p -> p.getRestauranteId().equals(restauranteId))
-                    .collect(Collectors.toList());
+            return produtoRepository.listarTodos().stream().filter(p -> p.getRestauranteId().equals(restauranteId)).collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -47,9 +52,7 @@ public class ProdutoService {
      */
     public List<Produto> listarAtivosPorRestaurante(String restauranteId) {
         try {
-            return produtoRepository.listarTodos().stream()
-                    .filter(p -> p.getRestauranteId().equals(restauranteId) && p.isStatusAtivo())
-                    .collect(Collectors.toList());
+            return produtoRepository.listarTodos().stream().filter(p -> p.getRestauranteId().equals(restauranteId) && p.isStatusAtivo()).collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -115,8 +118,7 @@ public class ProdutoService {
      */
     private Produto buscarProdutoDono(String produtoId, String restauranteId) {
         try {
-            Produto produto = produtoRepository.buscarPorId(produtoId)
-                    .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
+            Produto produto = produtoRepository.buscarPorId(produtoId).orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
 
             if (!produto.getRestauranteId().equals(restauranteId)) {
                 throw new IllegalArgumentException("Produto não pertence a este restaurante.");
@@ -143,8 +145,7 @@ public class ProdutoService {
 
     public Produto buscarPorId(String produtoId) {
         try {
-            return produtoRepository.buscarPorId(produtoId)
-                    .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
+            return produtoRepository.buscarPorId(produtoId).orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }

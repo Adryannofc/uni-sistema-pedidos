@@ -23,10 +23,11 @@ public class CategoriaCardapio {
 
     protected CategoriaCardapio() {}
 
-    public CategoriaCardapio(String nome, String descricao, String restauranteId) {
+    public CategoriaCardapio(String nome, String descricao, Restaurante restaurante) {
         this.id = UUID.randomUUID().toString();
         this.nome = nome;
         this.descricao = descricao;
+        this.restaurante = restaurante;
     }
 
     public String getId()        { return id; }

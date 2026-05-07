@@ -35,7 +35,16 @@ public class RestauranteRepositoryJPA implements RestauranteRepository {
 
     @Override
     public void salvar(Usuario usuario) {
-
+        try {
+            em.getTransaction().begin();
+            em.merge(usuario);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if(em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Erro ao atualizar restaurante", e);
+        }
     }
 
     @Override
