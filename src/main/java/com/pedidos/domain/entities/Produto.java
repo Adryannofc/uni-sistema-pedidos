@@ -36,14 +36,13 @@ public class Produto {
 
     }
 
-    // Construtor completo — carregado do banco (UUID já existente)
-    public Produto(String nome, String descricao, BigDecimal preco, String categoriaCardapioId, String restauranteId) {
+    public Produto(String nome, String descricao, BigDecimal preco, String categoriaCardapioId) {
         this.id = UUID.randomUUID().toString();
         setNome(nome);
         setDescricao(descricao);
         setPreco(preco);
         this.categoriaCardapioId = categoriaCardapioId;
-        this.statusAtivo = true; // começa ativo por padrão
+        this.statusAtivo = true;
     }
 
     public String getNome() {
@@ -98,5 +97,8 @@ public class Produto {
             throw new IllegalArgumentException("Preço deve ser maior que zero.");
         }
         this.preco = preco;
+    }
+    public void setRestaurante(Restaurante restaurante) {
+        this.restaurante = restaurante;
     }
 }
