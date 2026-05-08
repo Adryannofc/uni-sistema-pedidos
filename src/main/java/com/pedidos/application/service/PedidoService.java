@@ -18,8 +18,8 @@ public class PedidoService {
     /**
      * Cria e persiste um novo pedido.
      *
-     * @param clienteId         id do cliente que realizou o pedido
-     * @param restauranteId     id do restaurante do pedido
+     * @param cliente         id do cliente que realizou o pedido
+     * @param restaurante     id do restaurante do pedido
      * @param carrinho          itens selecionados pelo cliente
      * @param enderecoEntrega   endereço de entrega
      * @param codigoConfirmacao código para confirmar a entrega
