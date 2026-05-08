@@ -30,6 +30,7 @@ public class Main {
         ProdutoRepositoryJPA produtoRepo = new ProdutoRepositoryJPA(em);
         PedidoRepositoryJPA pedidoRepo = new PedidoRepositoryJPA(em);
         AreaEntregaRepositoryJPA areaRepo = new AreaEntregaRepositoryJPA(em);
+        HorarioFuncionamentoRepositoryJPA horarioFuncionamentoRepo = new HorarioFuncionamentoRepositoryJPA(em);
 
         AutenticacaoService authService = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
         AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo);
@@ -40,11 +41,12 @@ public class Main {
         PedidoService pedidoService = new PedidoService(pedidoRepo);
         CarrinhoService carrinhoService = new CarrinhoService();
         AreaEntregaService areaEntregaService = new AreaEntregaService(areaRepo);
+        HorarioService horarioService = new HorarioService(horarioFuncionamentoRepo);
 
         new MenuLogin(
                 authService, adminService, clienteService,
                 categoriaService, produtoService, restauranteService,
-                pedidoService, carrinhoService, restauranteRepo, areaEntregaService
+                pedidoService, carrinhoService, restauranteRepo, areaEntregaService, horarioService
         ).iniciar();
 
         JPAUtil.close();

@@ -92,6 +92,24 @@ CREATE TABLE itens_pedido
     preco_unitario DECIMAL(10, 2) NOT NULL
 );
 
+CREATE TABLE areas_entrega (
+    id VARCHAR(36) PRIMARY KEY,
+    restaurante_id VARCHAR(36) NOT NULL REFERENCES restaurantes(usuario_id),
+    bairro VARCHAR(100) NOT NULL,
+    distancia_maxima_km DECIMAL(6,2),
+    taxa_entrega DECIMAL(10,2) NOT NULL,
+    previsao_entrega_minutos INT
+);
+
+CREATE TABLE horarios_funcionamento (
+    id VARCHAR(36) PRIMARY KEY,
+    restaurante_id VARCHAR(36) NOT NULL REFERENCES restaurantes(usuario_id),
+    dia_semana VARCHAR(15) NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fim TIME NOT NULL,
+    CONSTRAINT chk_horario CHECK (hora_fim > hora_inicio)
+);
+
 CREATE TABLE cliente_restaurantes_favoritos (
    cliente_id VARCHAR(36) NOT NULL,
    restaurante_id VARCHAR(36) NOT NULL,

@@ -21,6 +21,7 @@
         <class>com.pedidos.domain.entities.Pedido</class>
         <class>com.pedidos.domain.entities.ItemPedido</class>
         <class>com.pedidos.domain.entities.AreaEntrega</class>
+        <class>com.pedidos.domain.entities.HorarioFuncionamento</class>
         <properties>
 
             <!-- JDBC LOCAL -->

@@ -22,6 +22,7 @@ public class MenuLogin {
     private final CarrinhoService carrinhoService;
     private final RestauranteRepository restauranteRepo;
     private final AreaEntregaService areaEntregaService;
+    private final HorarioService horarioService;
 
     private final Scanner scan = new Scanner(System.in);
 
@@ -34,7 +35,8 @@ public class MenuLogin {
                      PedidoService pedidoService,
                      CarrinhoService carrinhoService,
                      RestauranteRepository restauranteRepo,
-                     AreaEntregaService areaEntregaService) {
+                     AreaEntregaService areaEntregaService,
+                     HorarioService horarioService) {
         this.autenticacaoService = autenticacaoService;
         this.adminService = adminService;
         this.clienteService = clienteService;
@@ -45,6 +47,7 @@ public class MenuLogin {
         this.carrinhoService = carrinhoService;
         this.restauranteRepo = restauranteRepo;
         this.areaEntregaService = areaEntregaService;
+        this.horarioService = horarioService;
     }
 
     public void iniciar() {
@@ -86,9 +89,10 @@ public class MenuLogin {
                                 MenuProdutos menuProdutos = new MenuProdutos(produtoService, categoriaService, scan);
                                 MenuCategoriasCardapio menuCats = new MenuCategoriasCardapio(categoriaService, scan);
                                 MenuAreaEntrega menuAreaEntrega = new MenuAreaEntrega(areaEntregaService, scan);
+                                MenuHorarios menuHorarios = new MenuHorarios(horarioService, scan);
                                 new MenuRestaurante(
-                                        menuProdutos, menuCats, menuAreaEntrega,
-                                        restauranteService, categoriaService, pedidoService, areaEntregaService, scan
+                                        menuProdutos, menuCats, menuAreaEntrega, menuHorarios,
+                                        restauranteService, categoriaService, pedidoService, areaEntregaService, horarioService, scan
                                 ).exibir(restauranteLogado);
                             }
                             case CLIENTE -> {

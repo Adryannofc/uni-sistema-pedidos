@@ -82,7 +82,7 @@ public class AreaEntregaService {
 
         AreaEntrega areaEntrega = buscarPorId(id);
 
-        if (novoBairro == null) {
+        if (novoBairro == null || novoBairro.isBlank()) {
             throw new IllegalArgumentException("Bairro é obrigatório");
         }
 
