@@ -19,11 +19,11 @@ public class AreaEntregaService {
 
     public AreaEntrega criarAreaEntrega(Restaurante restaurante,
                                         String bairro,
-                                        BigDecimal distanciaKm,
+                                        BigDecimal distanciaMaximaKm,
                                         BigDecimal taxaEntrega,
-                                        int previsaoMinutos) {
+                                        int previsaoEntregaMinutos) {
 
-        if (bairro == null) {
+        if (bairro == null || bairro.isBlank()) {
             throw new IllegalArgumentException("Bairro é obrigatório");
         }
 
@@ -31,11 +31,11 @@ public class AreaEntregaService {
             throw new IllegalArgumentException("Taxa de entrega não pode ser negativa");
         }
 
-        if (distanciaKm.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Previsão de entrega deve ser maior que zero");
+        if (distanciaMaximaKm.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Distância máxim deve ser maior que zero");
         }
 
-        if (previsaoMinutos <= 0) {
+        if (previsaoEntregaMinutos <= 0) {
             throw new IllegalArgumentException("Previsão de entrega deve ser maior que zero");
         }
 
@@ -50,13 +50,13 @@ public class AreaEntregaService {
         }
 
         AreaEntrega areaEntrega = new AreaEntrega(
+                restaurante,
                 bairro,
-                distanciaKm,
+                distanciaMaximaKm,
                 taxaEntrega,
-                previsaoMinutos
+                previsaoEntregaMinutos
         );
 
-        areaEntrega.setRestaurante(restaurante);
         areaEntregaRepository.salvar(areaEntrega);
 
         return areaEntrega;

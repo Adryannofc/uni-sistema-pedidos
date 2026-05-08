@@ -32,7 +32,7 @@ public class AreaEntrega {
 
     public AreaEntrega() {}
 
-    public AreaEntrega(String bairro,
+    public AreaEntrega(Restaurante restaurante, String bairro,
                        BigDecimal distanciaKm, BigDecimal taxaEntrega,
                        int previsaoMinutos) {
         this.id = UUID.randomUUID().toString();  // ← novo
@@ -40,6 +40,7 @@ public class AreaEntrega {
         this.distanciaKm = distanciaKm;
         this.taxaEntrega = taxaEntrega;
         this.previsaoMinutos = previsaoMinutos;
+        this.restaurante = restaurante;
     }
 
     public String getId() {
