@@ -20,7 +20,7 @@ public class ProdutoRepositoryJPA implements ProdutoRepository {
         try {
             em.getTransaction().begin();
 
-            em.persist(produto);
+            em.merge(produto);
             em.getTransaction().commit();
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
