@@ -28,6 +28,12 @@ public class Restaurante extends Usuario {
     @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Produto> produtos;
 
+    @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<AreaEntrega> areasEntrega;
+
+    @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<HorarioFuncionamento> horariosFuncionamento;
+
     protected Restaurante() {}
 
     public Restaurante(String nome, String email, String senhaHash, String cnpj, String telefone) {
