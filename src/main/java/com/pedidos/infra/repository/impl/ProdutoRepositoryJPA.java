@@ -1,6 +1,8 @@
 package com.pedidos.infra.repository.impl;
 
+import com.pedidos.domain.entities.Pedido;
 import com.pedidos.domain.entities.Produto;
+import com.pedidos.domain.enums.StatusPedido;
 import com.pedidos.domain.repository.ProdutoRepository;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -34,6 +36,14 @@ public class ProdutoRepositoryJPA implements ProdutoRepository {
     public Optional<Produto> buscarPorId(String id) {
         return Optional.ofNullable(em.find(Produto.class, id));
     }
+
+    @Override
+    public List<Pedido> buscarPorStatus(StatusPedido statusPedido, String restauranteId){
+        return em.createQuery("SELECT p FROM Pedido p WHERE p.restaurante.id = :restauranteId AND p.status = :status", Pedido.class)
+                .setParameter("restauranteId", restauranteId)
+                .setParameter("status", statusPedido)
+                .getResultList();
+    };
 
     @Override
     public List<Produto> listarTodos() {

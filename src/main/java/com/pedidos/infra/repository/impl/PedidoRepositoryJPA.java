@@ -11,7 +11,7 @@ import java.util.List;
 
 public class PedidoRepositoryJPA implements PedidoRepository {
 
-    private final EntityManager em;
+    private static EntityManager em = null;
 
     public PedidoRepositoryJPA(EntityManager em){this.em = em;}
 
@@ -53,7 +53,6 @@ public class PedidoRepositoryJPA implements PedidoRepository {
                 .getResultList();
     }
 
-    @Override
     public List<Pedido> filtrarPorStatus(String restauranteId, StatusPedido status) {
         return em.createQuery(
                         "SELECT p FROM Pedido p WHERE p.restaurante.id = :rid AND p.status = :status", Pedido.class)
@@ -62,17 +61,12 @@ public class PedidoRepositoryJPA implements PedidoRepository {
                 .getResultList();
     }
 
+
+
     @Override
     public List<Pedido> buscarPorRestaurante(String restauranteId) {
         return em.createQuery("SELECT p FROM Pedido p WHERE p.restaurante.id = :rid", Pedido.class)
                 .setParameter("rid", restauranteId)
-                .getResultList();
-    }
-
-    @Override
-    public List<Pedido> buscarPorStatus(StatusPedido status) {
-        return em.createQuery("SELECT p FROM Pedido p WHERE p.status = :status", Pedido.class)
-                .setParameter("status", status)
                 .getResultList();
     }
 

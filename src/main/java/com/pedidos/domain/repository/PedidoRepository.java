@@ -23,5 +23,5 @@ public interface PedidoRepository {
 
     void deletar(String id);
 
-    List<Pedido> buscarPorStatus(StatusPedido status);
+
 }

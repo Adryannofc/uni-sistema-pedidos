@@ -3,6 +3,7 @@ package com.pedidos.application.service;
 import com.pedidos.domain.enums.StatusPedido;
 import com.pedidos.domain.entities.*;
 import com.pedidos.domain.repository.PedidoRepository;
+import com.pedidos.infra.repository.impl.PedidoRepositoryJPA;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -169,4 +170,8 @@ public class PedidoService {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+    public List<Pedido> filtrarPorStatus(String restauranteId, StatusPedido status) {
+        return pedidoRepository.filtrarPorStatus(restauranteId, status);
+    }
+
 }
