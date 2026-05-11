@@ -568,8 +568,6 @@ public class MenuCliente {
                     + " | Total: " + moeda.format(pedido.calcularTotal()));
             System.out.println("  Seu codigo de confirmacao de entrega: [ " + codigo + " ]");
 
-        } catch (IllegalStateException e) {
-            TerminalUtils.erro(e.getMessage());
         } catch (Exception e) {
             TerminalUtils.erro(e.getMessage());
         }

@@ -51,12 +51,14 @@ public class HorarioFuncionamento {
     }
 
     /**
-     * Verifica se o restaurante está aberto em um determinado horário.
+     * Verifica se o horário informado está contido na janela de funcionamento deste dia.
+     * NOTA: Este método verifica apenas a hora, não o dia da semana.
+     * O filtro por DayOfWeek é realizado no PedidoService.
      *
      * @param horario horário a verificar
-     * @return true se o horário está dentro da janela de funcionamento
+     * @return true se o horário está entre hora_inicio e hora_fim
      */
-    public boolean estaAberto(LocalTime horario) {
+    public boolean contemHorario(LocalTime horario) {
         return !horario.isBefore(horaInicio) && !horario.isAfter(horaFim);
     }
 

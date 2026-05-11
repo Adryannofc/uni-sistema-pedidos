@@ -194,13 +194,21 @@ public class PedidoService {
 
             List<HorarioFuncionamento> horarios = horarioRepository.buscarPorRestauranteId(restauranteId);
 
+            // RN-01: Se não houver horário cadastrado, rejeitar pedido com mensagem clara
             if (horarios == null || horarios.isEmpty()) {
-                return false; // Se não houver horário cadastrado, considerar como fechado
+                throw new IllegalStateException("Restaurante sem horários de funcionamento cadastrados. Tente novamente mais tarde.");
             }
 
-            return horarios.stream()
+            // Verificar se há horário disponível para o dia atual
+            boolean temHorarioHoje = horarios.stream()
                     .filter(h -> h.getDiaSemana() == hoje)
-                    .anyMatch(h -> h.estaAberto(agora));
+                    .anyMatch(h -> h.contemHorario(agora));
+
+            if (!temHorarioHoje) {
+                throw new IllegalStateException("Restaurante fechado no momento. Consulte os horários de funcionamento.");
+            }
+
+            return true;
         } catch (Exception e) {
             throw new RuntimeException("Erro ao verificar horário de funcionamento: " + e.getMessage(), e);
         }

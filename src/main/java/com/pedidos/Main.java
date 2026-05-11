@@ -1,6 +1,7 @@
 package com.pedidos;
 
 import com.pedidos.application.service.*;
+import com.pedidos.domain.repository.AreaEntregaRepository;
 import com.pedidos.infra.config.FlyWayconfig;
 import com.pedidos.infra.config.JPAUtil;
 import com.pedidos.infra.repository.impl.*;
@@ -29,6 +30,7 @@ public class Main {
         ProdutoRepositoryJPA produtoRepo = new ProdutoRepositoryJPA(em);
         PedidoRepositoryJPA pedidoRepo = new PedidoRepositoryJPA(em);
         HorarioFuncionamentoRepositoryJPA horarioRepo = new HorarioFuncionamentoRepositoryJPA(em);
+        AreaEntregaRepositoryJPA areaEntregaRepo = new AreaEntregaRepositoryJPA(em);
 
         AutenticacaoService authService = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
         AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo);
@@ -38,8 +40,9 @@ public class Main {
         RestauranteService restauranteService = new RestauranteService(restauranteRepo, categoriaGlobalRepo, authService);
         PedidoService pedidoService = new PedidoService(pedidoRepo, horarioRepo);
         CarrinhoService carrinhoService = new CarrinhoService();
-        AreaEntregaService areaEntregaService = new AreaEntregaService(areaRepo);
-        HorarioService horarioService = new HorarioService(horarioFuncionamentoRepo);
+        HorarioService horarioService = new HorarioService(horarioRepo);
+        AreaEntregaService areaEntregaService = new AreaEntregaService(areaEntregaRepo);
+
 
         new MenuLogin(
                 authService, adminService, clienteService,

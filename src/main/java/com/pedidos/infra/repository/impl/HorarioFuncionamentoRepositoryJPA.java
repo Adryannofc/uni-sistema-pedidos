@@ -18,7 +18,8 @@ public class HorarioFuncionamentoRepositoryJPA implements HorarioFuncionamentoRe
     public void salvar(HorarioFuncionamento horario) {
         try {
             em.getTransaction().begin();
-            if (horario.getId() == null || em.find(HorarioFuncionamento.class, horario.getId()) == null) {
+            // ID sempre gerado via UUID no construtor — controle de persist vs merge via em.find()
+            if (em.find(HorarioFuncionamento.class, horario.getId()) == null) {
                 em.persist(horario);
             } else {
                 em.merge(horario);
