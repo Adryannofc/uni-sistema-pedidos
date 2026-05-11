@@ -15,22 +15,11 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
     public void salvar(CategoriaCardapio categoria) {
         try {
             em.getTransaction().begin();
-            em.persist(categoria);
-            em.getTransaction().commit();
-        } catch (Exception e){
-            em.getTransaction().rollback();
-            throw new RuntimeException("Erro ao salvar a categoria no cardapio", e);
-        }
-    }
-
-    public void atualizar(CategoriaCardapio categoria) {
-        try {
-            em.getTransaction().begin();
             em.merge(categoria);
             em.getTransaction().commit();
         } catch (Exception e){
             em.getTransaction().rollback();
-            throw new RuntimeException("Erro em atualizar a categoria no cardapio", e);
+            throw new RuntimeException("Erro ao salvar a categoria no cardapio", e);
         }
     }
 
@@ -57,7 +46,7 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
 
     @Override
     public List<CategoriaCardapio> buscarPorRestauranteId(String restauranteId){
-        return em.createQuery("select c from CategoriaCardapio c where c.restauranteId = :restauranteId",CategoriaCardapio.class)
+        return em.createQuery("select c from CategoriaCardapio c where c.restaurante.id = :restauranteId",CategoriaCardapio.class)
                     .setParameter("restauranteId", restauranteId)
                     .getResultList();
     }
