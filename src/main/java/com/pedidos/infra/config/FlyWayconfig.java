@@ -12,7 +12,6 @@ public class FlyWayconfig {
                 )
                 .locations("classpath:db/migration")
                 .load();
-
         flyway.migrate();
     }
 }

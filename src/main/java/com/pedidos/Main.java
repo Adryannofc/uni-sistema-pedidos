@@ -11,7 +11,6 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-
         try {
             FlyWayconfig.migrate();
         } catch (Exception e) {
@@ -29,6 +28,7 @@ public class Main {
         CategoriaCardapioRepositoryJPA categoriaCardapioRepo = new CategoriaCardapioRepositoryJPA(em);
         ProdutoRepositoryJPA produtoRepo = new ProdutoRepositoryJPA(em);
         PedidoRepositoryJPA pedidoRepo = new PedidoRepositoryJPA(em);
+        HorarioFuncionamentoRepositoryJPA horarioRepo = new HorarioFuncionamentoRepositoryJPA(em);
 
         AutenticacaoService authService = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
         AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo);
@@ -36,7 +36,7 @@ public class Main {
         CategoriaService categoriaService = new CategoriaService(categoriaGlobalRepo, categoriaCardapioRepo, restauranteRepo, produtoRepo);
         ProdutoService produtoService = new ProdutoService(produtoRepo);
         RestauranteService restauranteService = new RestauranteService(restauranteRepo, categoriaGlobalRepo, authService);
-        PedidoService pedidoService = new PedidoService(pedidoRepo);
+        PedidoService pedidoService = new PedidoService(pedidoRepo, horarioRepo);
         CarrinhoService carrinhoService = new CarrinhoService();
 
         new MenuLogin(
