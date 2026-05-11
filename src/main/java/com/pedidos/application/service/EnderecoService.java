@@ -24,7 +24,7 @@ public class EnderecoService {
      * @return endereço criado e salvo
      * @throws IllegalArgumentException se rua, bairro ou cidade forem nulos ou vazios
      */
-    public Endereco criarEndereco(String clienteId, String rua, String numero, String bairro, String cidade, String estado, String cep) {
+    public Endereco criarEndereco(String clienteId, String rua, String numero, String bairro, String cidade, String estado, String cep, Boolean isPadrao) {
         try {
             if (rua == null || rua.isBlank()) {
                 throw new IllegalArgumentException("Rua é obrigatória.");
@@ -36,7 +36,7 @@ public class EnderecoService {
                 throw new IllegalArgumentException("Cidade é obrigatória.");
             }
 
-            Endereco endereco = new Endereco(rua, numero, bairro, cidade, estado, cep);
+            Endereco endereco = new Endereco(rua, numero, bairro, cidade, estado, cep, isPadrao);
             enderecoRepository.salvar(endereco);
             return endereco;
         } catch (Exception e) {

@@ -11,6 +11,7 @@ import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -81,7 +82,7 @@ public class MenuCliente {
             System.out.println(TerminalUtils.linha("  4  \u00bb  Editar CPF"));
             System.out.println(TerminalUtils.linha("  5  \u00bb  Editar Telefone"));
             System.out.println(TerminalUtils.linha("  6  \u00bb  Alterar Senha"));
-            System.out.println(TerminalUtils.linha("  7  \u00bb  Meu Endereco"));
+            System.out.println(TerminalUtils.linha("  7  \u00bb  Meus Enderecos"));
             System.out.println(TerminalUtils.linha("  8  \u00bb  Meus Favoritos"));
             System.out.println(TerminalUtils.SEPARADOR);
             System.out.println(TerminalUtils.linha("  0  \u00bb  Voltar"));
@@ -97,7 +98,7 @@ public class MenuCliente {
                 case 4 -> acaoEditarCpf();
                 case 5 -> acaoEditarTelefone();
                 case 6 -> acaoAlterarSenha();
-                case 7 -> acaoEditarEndereco();
+                case 7 -> menuGerenciarEnderecos();
                 case 8 -> menuFavoritos();
                 case 0 -> {
                     return;
@@ -152,8 +153,8 @@ public class MenuCliente {
         System.out.println("  E-mail   : " + clienteLogado.getEmail());
         System.out.println("  CPF      : " + clienteLogado.getCpf());
         System.out.println("  Telefone : " + clienteLogado.getTelefone());
-        Endereco end = clienteLogado.getEnderecoEntrega();
-        System.out.println("  Endereco : " + (end != null ? end.toString() : "Nao cadastrado"));
+        Optional<Endereco> end = clienteLogado.getEnderecoPadrao();
+        System.out.println("  Endereco : " + (end.isPresent() ? end.toString() : "Nao cadastrado"));
         TerminalUtils.pausar();
     }
 
@@ -233,30 +234,150 @@ public class MenuCliente {
         TerminalUtils.pausar();
     }
 
-    private void acaoEditarEndereco() {
-        TerminalUtils.limparTela();
-        TerminalUtils.cabecalho("MEU ENDERECO");
-        try {
-            Endereco atual = clienteLogado.getEnderecoEntrega();
-            if (atual != null) {
-                System.out.println("  Atual: " + atual);
-            } else {
-                System.out.println("  Nenhum endereco cadastrado.");
-            }
-            System.out.println();
-            System.out.print("  Rua    : "); String rua = scanner.nextLine().trim();
-            System.out.print("  Numero : "); String numero = scanner.nextLine().trim();
-            System.out.print("  Bairro : "); String bairro = scanner.nextLine().trim();
-            System.out.print("  Cidade : "); String cidade = scanner.nextLine().trim();
-            System.out.print("  Estado : "); String estado = scanner.nextLine().trim();
-            System.out.print("  CEP    : "); String cep = scanner.nextLine().trim();
+    private void menuGerenciarEnderecos() {
+        while (true) {
+            TerminalUtils.limparTela();
+            TerminalUtils.cabecalho("GERENCIAR ENDERECOS");
 
-            clienteService.salvarEndereco(clienteLogado, rua, numero, bairro, cidade, estado, cep);
-            TerminalUtils.sucesso("Endereco salvo com sucesso.");
-        } catch (Exception e) {
-            TerminalUtils.erro(e.getMessage());
+            List<Endereco> enderecos = clienteLogado.getEnderecos();
+
+            if (enderecos.isEmpty()) {
+                System.out.println("  Nenhum endereco cadastrado.");
+            } else {
+                System.out.println("  Meus enderecos:");
+                System.out.println();
+
+                for (int i = 0; i < enderecos.size(); i++) {
+                    Endereco e = enderecos.get(i);
+
+                    String marcador = e.isPadrao() ? " [PADRAO]" : "";
+
+                    System.out.println(
+                            "  " + (i + 1) + " - "
+                                    + e.getRua() + ", "
+                                    + e.getNumero() + " - "
+                                    + e.getBairro() + " - "
+                                    + e.getCidade() + "/"
+                                    + e.getEstado() + " || "
+                                    + e.getCep()
+                                    + marcador
+                    );
+                }
+            }
+
+            System.out.println();
+            System.out.println("  1 - Adicionar endereco");
+            System.out.println("  2 - Definir endereco padrao");
+            System.out.println("  3 - Remover endereco");
+            System.out.println("  0 - Voltar");
+            System.out.println();
+
+            System.out.print("  Escolha: ");
+            String opcao = scanner.nextLine().trim();
+
+            try {
+
+                switch (opcao) {
+
+                    case "1":
+
+                        System.out.println();
+                        System.out.print("  Rua    : ");
+                        String rua = scanner.nextLine().trim();
+
+                        System.out.print("  Numero : ");
+                        String numero = scanner.nextLine().trim();
+
+                        System.out.print("  Bairro : ");
+                        String bairro = scanner.nextLine().trim();
+
+                        System.out.print("  Cidade : ");
+                        String cidade = scanner.nextLine().trim();
+
+                        System.out.print("  Estado : ");
+                        String estado = scanner.nextLine().trim();
+
+                        System.out.print("  CEP    : ");
+                        String cep = scanner.nextLine().trim();
+
+                        clienteService.salvarEndereco(
+                                clienteLogado,
+                                rua,
+                                numero,
+                                bairro,
+                                cidade,
+                                estado,
+                                cep
+                        );
+
+                        TerminalUtils.sucesso("Endereco cadastrado com sucesso.");
+                        break;
+
+                    case "2":
+
+                        if (enderecos.isEmpty()) {
+                            TerminalUtils.erro("Voce nao possui enderecos cadastrados.");
+                            break;
+                        }
+
+                        System.out.println();
+                        System.out.print("  Numero do endereco: ");
+                        int indicePadrao = Integer.parseInt(scanner.nextLine()) - 1;
+
+                        if (indicePadrao < 0 || indicePadrao >= enderecos.size()) {
+                            TerminalUtils.erro("Endereco invalido.");
+                            break;
+                        }
+
+                        Endereco enderecoPadrao = enderecos.get(indicePadrao);
+
+                        clienteService.definirEnderecoPadrao(
+                                clienteLogado,
+                                enderecoPadrao.getId()
+                        );
+
+                        TerminalUtils.sucesso("Endereco definido como padrao.");
+                        break;
+
+                    case "3":
+
+                        if (enderecos.isEmpty()) {
+                            TerminalUtils.erro("Voce nao possui enderecos cadastrados.");
+                            break;
+                        }
+
+                        System.out.println();
+                        System.out.print("  Numero do endereco: ");
+                        int indiceRemover = Integer.parseInt(scanner.nextLine()) - 1;
+
+                        if (indiceRemover < 0 || indiceRemover >= enderecos.size()) {
+                            TerminalUtils.erro("Endereco invalido.");
+                            break;
+                        }
+
+                        Endereco enderecoRemover = enderecos.get(indiceRemover);
+
+                        clienteService.removerEndereco(
+                                clienteLogado,
+                                enderecoRemover
+                        );
+
+                        TerminalUtils.sucesso("Endereco removido com sucesso.");
+                        break;
+
+                    case "0":
+                        return;
+
+                    default:
+                        TerminalUtils.erro("Opcao invalida.");
+                }
+
+            } catch (Exception e) {
+                TerminalUtils.erro(e.getMessage());
+            }
+
+            TerminalUtils.pausar();
         }
-        TerminalUtils.pausar();
     }
 
     private void acaoAlterarSenha() {
@@ -542,8 +663,8 @@ public class MenuCliente {
             System.out.println(TerminalUtils.linha("  Subtotal : " + moeda.format(carrinho.calcularSubtotal())));
             System.out.println(TerminalUtils.BASE);
 
-            Endereco endereco = clienteLogado.getEnderecoEntrega();
-            if (endereco == null) {
+            Optional<Endereco> endereco = clienteLogado.getEnderecoPadrao();
+            if (endereco.isEmpty()) {
                 TerminalUtils.erro("Voce nao tem endereco cadastrado. Acesse Perfil > Meu Endereco.");
                 TerminalUtils.pausar();
                 return;
@@ -560,7 +681,7 @@ public class MenuCliente {
             Restaurante restaurante = (Restaurante) restauranteRepo.buscarPorId(carrinho.getRestauranteId()).get();
 
             Pedido pedido = pedidoService.criarPedido(
-                    clienteLogado, restaurante, carrinho, endereco, codigo);
+                    clienteLogado, restaurante, carrinho, endereco.orElse(null), codigo);
 
             carrinhoService.encerrarCarrinho();
 

@@ -10,5 +10,7 @@ public interface EnderecoRepository {
 
     Optional<Endereco> buscarPorCliente(String clienteId);
 
+    Optional<Endereco> buscarPadraoDoCliente(String clienteId);
+
     void remover(String clienteId);
 }

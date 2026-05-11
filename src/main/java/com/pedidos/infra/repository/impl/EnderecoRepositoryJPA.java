@@ -61,5 +61,18 @@ public class EnderecoRepositoryJPA implements EnderecoRepository {
         } catch (NoResultException e) {
             return Optional.empty();
         }
+
+    }
+
+    @Override
+    public Optional<Endereco> buscarPadraoDoCliente(String clienteId) {
+        try {
+            return Optional.ofNullable(em.createQuery("select e from Endereco e where e.cliente.id = :cid and e.isPadrao = true", Endereco.class)
+                    .setParameter("cid", clienteId)
+                    .getSingleResult()
+            );
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 }

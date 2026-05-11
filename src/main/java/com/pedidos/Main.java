@@ -31,10 +31,11 @@ public class Main {
         PedidoRepositoryJPA pedidoRepo = new PedidoRepositoryJPA(em);
         AreaEntregaRepositoryJPA areaRepo = new AreaEntregaRepositoryJPA(em);
         HorarioFuncionamentoRepositoryJPA horarioFuncionamentoRepo = new HorarioFuncionamentoRepositoryJPA(em);
+        EnderecoRepositoryJPA enderecoRepo = new EnderecoRepositoryJPA(em);
 
         AutenticacaoService authService = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
         AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo);
-        ClienteService clienteService = new ClienteService(clienteRepo, authService, adminRepo, restauranteRepo);
+        ClienteService clienteService = new ClienteService(clienteRepo, authService, adminRepo, restauranteRepo, enderecoRepo);
         CategoriaService categoriaService = new CategoriaService(categoriaGlobalRepo, categoriaCardapioRepo, restauranteRepo, produtoRepo);
         ProdutoService produtoService = new ProdutoService(produtoRepo, restauranteRepo);
         RestauranteService restauranteService = new RestauranteService(restauranteRepo, categoriaGlobalRepo, authService);
