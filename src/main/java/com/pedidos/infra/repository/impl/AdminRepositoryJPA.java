@@ -18,22 +18,11 @@ public class AdminRepositoryJPA implements AdminRepository {
     public void salvar(Usuario usuario) {
         try {
             em.getTransaction().begin();
-            em.persist(usuario);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            em.getTransaction().rollback();
-            throw new RuntimeException("Erro ao salvar o usuário", e);
-        }
-    }
-
-    public void atualizar(Usuario usuario) {
-        try {
-            em.getTransaction().begin();
             em.merge(usuario);
             em.getTransaction().commit();
         } catch (Exception e) {
             em.getTransaction().rollback();
-            throw new RuntimeException("Erro em atualizar o usuário", e);
+            throw new RuntimeException("Erro ao salvar o usuário", e);
         }
     }
 

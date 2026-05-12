@@ -6,21 +6,26 @@ import com.pedidos.domain.repository.PedidoRepository;
 import com.pedidos.infra.repository.impl.PedidoRepositoryJPA;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
+    private final HorarioFuncionamentoRepository horarioRepository;
 
-    public PedidoService(PedidoRepository pedidoRepository) {
+    public PedidoService(PedidoRepository pedidoRepository, HorarioFuncionamentoRepository horarioRepository) {
         this.pedidoRepository = pedidoRepository;
+        this.horarioRepository = horarioRepository;
     }
 
     /**
      * Cria e persiste um novo pedido.
      *
-     * @param clienteId         id do cliente que realizou o pedido
-     * @param restauranteId     id do restaurante do pedido
+     * @param cliente         id do cliente que realizou o pedido
+     * @param restaurante     id do restaurante do pedido
      * @param carrinho          itens selecionados pelo cliente
      * @param enderecoEntrega   endereço de entrega
      * @param codigoConfirmacao código para confirmar a entrega
@@ -30,6 +35,11 @@ public class PedidoService {
         try {
             if (enderecoEntrega == null) {
                 throw new IllegalArgumentException("Informe um endereço de entrega antes de finalizar o pedido.");
+            }
+
+            // Verificar se o restaurante está aberto no momento
+            if (!isRestauranteAberto(restaurante.getId())) {
+                throw new IllegalStateException("Restaurante fechado no momento.");
             }
 
             Pedido pedido = new Pedido();

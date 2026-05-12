@@ -1,8 +1,6 @@
 package com.pedidos.presentation.restaurante;
 
-import com.pedidos.application.service.CategoriaService;
-import com.pedidos.application.service.PedidoService;
-import com.pedidos.application.service.RestauranteService;
+import com.pedidos.application.service.*;
 import com.pedidos.domain.enums.StatusPedido;
 import com.pedidos.domain.entities.CategoriaGlobal;
 import com.pedidos.domain.entities.Pedido;
@@ -18,20 +16,28 @@ import java.util.Scanner;
 public class MenuRestaurante {
     private final MenuProdutos menuProdutos;
     private final MenuCategoriasCardapio menuCategorias;
+    private final MenuAreaEntrega menuAreaEntrega;
+    private final MenuHorarios menuHorarios;
     private final RestauranteService restauranteService;
     private final CategoriaService categoriaService;
     private final PedidoService pedidoService;
+    private final AreaEntregaService areaEntregaService;
+    private final HorarioService horarioService;
     private final Scanner scanner;
 
-    public MenuRestaurante(MenuProdutos menuProdutos, MenuCategoriasCardapio menuCategorias,
+    public MenuRestaurante(MenuProdutos menuProdutos, MenuCategoriasCardapio menuCategorias, MenuAreaEntrega menuAreaEntrega, MenuHorarios menuHorarios,
                            RestauranteService restauranteService,
                            CategoriaService categoriaService,
-                           PedidoService pedidoService, Scanner scanner) {
+                           PedidoService pedidoService, AreaEntregaService areaEntregaService,HorarioService horarioService, Scanner scanner) {
         this.menuProdutos = menuProdutos;
         this.menuCategorias = menuCategorias;
+        this.menuAreaEntrega = menuAreaEntrega;
+        this.menuHorarios = menuHorarios;
         this.restauranteService = restauranteService;
         this.categoriaService = categoriaService;
         this.pedidoService = pedidoService;
+        this.areaEntregaService = areaEntregaService;
+        this.horarioService = horarioService;
         this.scanner = scanner;
     }
 
@@ -64,23 +70,27 @@ public class MenuRestaurante {
             System.out.println(TerminalUtils.linha("    1  \u00bb  Produtos"));
             System.out.println(TerminalUtils.linha("    2  \u00bb  Categorias do Cardapio"));
             System.out.println(TerminalUtils.linha("    3  \u00bb  Pedidos"));
+            System.out.println(TerminalUtils.linha("    4  \u00bb  Area Entrega"));
+            System.out.println(TerminalUtils.linha("    5  \u00bb  Horario de Funcionamento"));
             System.out.println(TerminalUtils.SEPARADOR);
             System.out.println(TerminalUtils.linha("  CONTA"));
             System.out.println(TerminalUtils.SEPARADOR);
-            System.out.println(TerminalUtils.linha("    4  \u00bb  Perfil e Configuracoes"));
+            System.out.println(TerminalUtils.linha("    6  \u00bb  Perfil e Configuracoes"));
             System.out.println(TerminalUtils.SEPARADOR);
             System.out.println(TerminalUtils.linha("    0  \u00bb  Sair (Logout)"));
             System.out.println(TerminalUtils.BASE);
             System.out.println();
             System.out.print("  Escolha uma opcao: ");
 
-            int opcao = EntradaSegura.lerOpcao(scanner, 0, 4);
+            int opcao = EntradaSegura.lerOpcao(scanner, 0, 6);
 
             switch (opcao) {
                 case 1 -> menuProdutos.exibir(restauranteLogado);
                 case 2 -> menuCategorias.exibir(restauranteLogado);
                 case 3 -> menuPedidos(restauranteLogado);
-                case 4 -> exibirMenuPerfil(restauranteLogado);
+                case 4 -> menuAreaEntrega.exibir(restauranteLogado);
+                case 5 -> menuHorarios.exibir(restauranteLogado);
+                case 6 -> exibirMenuPerfil(restauranteLogado);
                 case 0 -> {
                     if (confirmar("Deseja realmente sair da sua conta?")) {
                         return;

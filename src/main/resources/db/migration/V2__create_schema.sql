@@ -47,7 +47,7 @@ CREATE TABLE enderecos
     cidade     VARCHAR(100),
     estado     VARCHAR(2),
     cep        VARCHAR(9),
-    cliente_id VARCHAR(36) UNIQUE REFERENCES clientes (usuario_id)
+    cliente_id VARCHAR(36) REFERENCES clientes (usuario_id)
 );
 
 CREATE TABLE categorias_cardapio
@@ -91,6 +91,26 @@ CREATE TABLE itens_pedido
     quantidade     INT            NOT NULL,
     preco_unitario DECIMAL(10, 2) NOT NULL
 );
+
+CREATE TABLE areas_entrega (
+    id VARCHAR(36) PRIMARY KEY,
+    restaurante_id VARCHAR(36) NOT NULL REFERENCES restaurantes(usuario_id),
+    bairro VARCHAR(100) NOT NULL,
+    distancia_maxima_km DECIMAL(6,2),
+    taxa_entrega DECIMAL(10,2) NOT NULL,
+    previsao_entrega_minutos INT
+);
+
+CREATE TABLE horarios_funcionamento (
+    id VARCHAR(36) PRIMARY KEY,
+    restaurante_id VARCHAR(36) NOT NULL REFERENCES restaurantes(usuario_id),
+    dia_semana VARCHAR(15) NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fim TIME NOT NULL,
+    CONSTRAINT chk_horario CHECK (hora_fim > hora_inicio)
+);
+
+CREATE INDEX idx_horarios_restaurante ON horarios_funcionamento (restaurante_id);
 
 CREATE TABLE cliente_restaurantes_favoritos (
    cliente_id VARCHAR(36) NOT NULL,

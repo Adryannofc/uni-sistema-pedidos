@@ -7,18 +7,21 @@ import com.pedidos.domain.entities.Usuario;
 import com.pedidos.domain.repository.AdminRepository;
 import com.pedidos.domain.repository.ClienteRepository;
 import com.pedidos.domain.repository.RestauranteRepository;
+import com.pedidos.domain.repository.EnderecoRepository;
 
 public class ClienteService {
     private final ClienteRepository clienteRepository;
     private final AutenticacaoService autenticacaoService;
     private final AdminRepository adminRepository;
     private final RestauranteRepository restauranteRepository;
+    private final EnderecoRepository enderecoRepository;
 
-    public ClienteService(ClienteRepository clienteRepository, AutenticacaoService autenticacaoService, AdminRepository adminRepository, RestauranteRepository restauranteRepository) {
+    public ClienteService(ClienteRepository clienteRepository, AutenticacaoService autenticacaoService, AdminRepository adminRepository, RestauranteRepository restauranteRepository, EnderecoRepository enderecoRepository) {
         this.clienteRepository = clienteRepository;
         this.autenticacaoService = autenticacaoService;
         this.adminRepository = adminRepository;
         this.restauranteRepository = restauranteRepository;
+        this.enderecoRepository = enderecoRepository;
     }
 
     public void favoritar(Cliente cliente, Restaurante restaurante) {
@@ -81,11 +84,51 @@ public class ClienteService {
 
     public void salvarEndereco(Cliente cliente, String rua, String numero, String bairro, String cidade, String estado, String cep) {
         try {
-            cliente.setEnderecoEntrega(new Endereco(rua, numero, bairro, cidade, estado, cep));
+
+            boolean jaPossuiPadrao = enderecoRepository.buscarPadraoDoCliente(cliente.getId()).isPresent();
+
+            boolean isPadrao = !jaPossuiPadrao;
+
+            Endereco endereco = new Endereco(rua, numero, bairro, cidade, estado, cep, isPadrao);
+
+            cliente.setEndereco(endereco);;
+            cliente.setClienteAoEndereco(endereco);
             clienteRepository.salvar(cliente);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+    }
+
+    public void removerEndereco(Cliente cliente, Endereco endereco) {
+
+        Endereco removido = cliente.getEnderecos()
+                .stream()
+                .filter(e -> e.getId().equals(endereco.getId()))
+                .findFirst()
+                .orElseThrow();
+
+        boolean eraPadrao = removido.isPadrao();
+
+        cliente.getEnderecos().remove(removido);
+
+        if (eraPadrao && !cliente.getEnderecos().isEmpty()) {
+            cliente.getEnderecos().get(0).setIsPadrao(true);
+        }
+
+        clienteRepository.salvar(cliente);
+    }
+
+    public void definirEnderecoPadrao(Cliente cliente, String enderecoId) {
+
+        for (Endereco endereco : cliente.getEnderecos()) {
+            endereco.setIsPadrao(false);
+
+            if (endereco.getId().equals(enderecoId)) {
+                endereco.setIsPadrao(true);
+            }
+        }
+
+        clienteRepository.salvar(cliente);
     }
 
     public void editarTelefone(Cliente cliente, String novoTelefone) {
