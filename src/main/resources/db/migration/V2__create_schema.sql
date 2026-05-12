@@ -47,7 +47,7 @@ CREATE TABLE enderecos
     cidade     VARCHAR(100),
     estado     VARCHAR(2),
     cep        VARCHAR(9),
-    cliente_id VARCHAR(36) UNIQUE REFERENCES clientes (usuario_id)
+    cliente_id VARCHAR(36) REFERENCES clientes (usuario_id)
 );
 
 CREATE TABLE categorias_cardapio

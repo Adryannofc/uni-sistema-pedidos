@@ -154,7 +154,7 @@ public class MenuCliente {
         System.out.println("  CPF      : " + clienteLogado.getCpf());
         System.out.println("  Telefone : " + clienteLogado.getTelefone());
         Optional<Endereco> end = clienteLogado.getEnderecoPadrao();
-        System.out.println("  Endereco : " + (end.isPresent() ? end.toString() : "Nao cadastrado"));
+        System.out.println("  Endereco : " + (end.isPresent() ? end.get().toString() : "Nao cadastrado"));
         TerminalUtils.pausar();
     }
 

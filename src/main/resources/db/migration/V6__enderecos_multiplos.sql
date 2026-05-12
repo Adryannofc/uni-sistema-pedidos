@@ -5,7 +5,7 @@ UPDATE enderecos
 SET padrao = TRUE;
 
 ALTER TABLE enderecos
-DROP CONSTRAINT enderecos_cliente_id_key;
+DROP CONSTRAINT enderecos_cliente_id_fkey;
 
 CREATE UNIQUE INDEX uq_endereco_padrao_cliente
     ON enderecos(cliente_id)

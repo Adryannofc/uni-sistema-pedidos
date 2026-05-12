@@ -21,7 +21,7 @@ public class Cliente extends Usuario {
     private String telefone;
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<Endereco> enderecos;
+    private List<Endereco> enderecos = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
@@ -80,7 +80,7 @@ public class Cliente extends Usuario {
     }
 
     public void setEndereco(Endereco endereco) {
-        this.enderecos = enderecos == null ? new ArrayList<>() : enderecos;
+        this.enderecos.add(endereco);
     }
 
     public Optional<Endereco> getEnderecoPadrao() {
@@ -92,7 +92,6 @@ public class Cliente extends Usuario {
 
     public void setClienteAoEndereco(Endereco endereco) {
         endereco.setCliente(this);
-        enderecos.add(endereco);
     }
 
 
