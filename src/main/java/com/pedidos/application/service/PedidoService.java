@@ -174,4 +174,9 @@ public class PedidoService {
         return pedidoRepository.filtrarPorStatus(restauranteId, status);
     }
 
+    public List<Pedido> obterHistoricoFinalizado(String restauranteId) {
+        return pedidoRepository.buscarHistoricoFinalizado(restauranteId);
+    }
+
+
 }

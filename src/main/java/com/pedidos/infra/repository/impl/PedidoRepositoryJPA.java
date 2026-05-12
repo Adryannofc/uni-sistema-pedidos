@@ -11,7 +11,7 @@ import java.util.List;
 
 public class PedidoRepositoryJPA implements PedidoRepository {
 
-    private static EntityManager em = null;
+    private final EntityManager em;
 
     public PedidoRepositoryJPA(EntityManager em){this.em = em;}
 
@@ -53,13 +53,20 @@ public class PedidoRepositoryJPA implements PedidoRepository {
                 .getResultList();
     }
 
+    @Override
     public List<Pedido> filtrarPorStatus(String restauranteId, StatusPedido status) {
-        return em.createQuery(
-                        "SELECT p FROM Pedido p WHERE p.restaurante.id = :rid AND p.status = :status", Pedido.class)
-                .setParameter("rid", restauranteId)
-                .setParameter("status", status)
-                .getResultList();
+        try {
+            return em.createQuery(
+                            "SELECT p FROM Pedido p WHERE p.restaurante.id = :rid AND p.status = :status", Pedido.class)
+
+                    .setParameter("rid", restauranteId)
+                    .setParameter("status", status)
+                    .getResultList();
+        }catch (Exception e)
+        {throw new RuntimeException("Erro em filtrar Pedidos" + e.getMessage());}
     }
+
+
 
 
 
@@ -85,4 +92,13 @@ public class PedidoRepositoryJPA implements PedidoRepository {
         }
     }
 
+    @Override
+    public List<Pedido> buscarHistoricoFinalizado(String restauranteId) {
+        String jpql = "SELECT p FROM Pedido p WHERE p.restaurante.id = :rid " +
+                "AND p.status IN ( com.pedidos.domain.enums.StatusPedido.ENTREGUE, com.pedidos.domain.enums.StatusPedido.CANCELADO)";
+
+        return em.createQuery(jpql, Pedido.class)
+                .setParameter("rid", restauranteId)
+                .getResultList();
+    }
 }

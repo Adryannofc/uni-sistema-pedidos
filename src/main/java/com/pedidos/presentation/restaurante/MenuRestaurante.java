@@ -7,8 +7,6 @@ import com.pedidos.domain.enums.StatusPedido;
 import com.pedidos.domain.entities.CategoriaGlobal;
 import com.pedidos.domain.entities.Pedido;
 import com.pedidos.domain.entities.Restaurante;
-import com.pedidos.domain.repository.PedidoRepository;
-import com.pedidos.infra.repository.impl.PedidoRepositoryJPA;
 import com.pedidos.presentation.util.EntradaSegura;
 import com.pedidos.presentation.util.TerminalUtils;
 
@@ -113,13 +111,14 @@ public class MenuRestaurante {
         switch (opcao) {
             case 1 -> exibirPedidos(restauranteLogado);
             case 2 -> {
-                List<Pedido> finalizados = pedidoService.filtrarPorStatus(restauranteLogado.getId(), StatusPedido.ENTREGUE);
-                historicoPedidos(finalizados);
+                List<Pedido> listaParaExibir = pedidoService.obterHistoricoFinalizado(restauranteLogado.getId());
+
+                historicoPedidos(listaParaExibir);
 
             }
             case 3 -> {
                 TerminalUtils.limparTela();
-                System.out.println("=== FILTRAR POR STATUS ===");
+                TerminalUtils.cabecalho("=== FILTRAR POR STATUS ===");
                 System.out.println("[1] AGUARDANDO CONFIRMAÇÃO");
                 System.out.println("[2] CONFIRMADO");
                 System.out.println("[3] EM PREPARO");
@@ -156,7 +155,7 @@ public class MenuRestaurante {
             System.out.println("║                        HISTÓRICO COMPLETO DE PEDIDOS                           ║");
             System.out.println("╠════════════════════════════════════════════════════════════════════════════════╣");
             System.out.println("║       ID      |    CLIENTE    |      DATA      |   TOTAL (R$)  |   STATUS      ║");
-            System.out.println("╟─SEM HISTÓRICO─┼─SEM HISTÓRICO─┼─SEM HISTÓRICO──┼─SEM HISTÓRICO─┼─SEM HISTÓRICO─╢");
+            TerminalUtils.aviso("╟─SEM HISTÓRICO─┼─SEM HISTÓRICO─┼─SEM HISTÓRICO──┼─SEM HISTÓRICO─┼─SEM HISTÓRICO─╢");
             return;
         };
 
@@ -171,7 +170,7 @@ public class MenuRestaurante {
 
         for (Pedido p : historico)
         {
-            if (p.getStatus() != StatusPedido.ENTREGUE) {
+            if (p.getStatus() != StatusPedido.ENTREGUE && p.getStatus() != StatusPedido.CANCELADO) {
                 continue;
             }
 
@@ -191,6 +190,15 @@ public class MenuRestaurante {
 
         };
         System.out.println("╚══════════════════════════════════════════════════════════════════════════════");
+        System.out.println("  ESCOLHA UMA OPÇÃO (0 para voltar): ");
+
+        int num = EntradaSegura.lerOpcao(scanner, 0, historico.size());
+        if (num == 0) return;
+
+        Pedido pedido = historico.get(num - 1);
+
+        exibirDetalhes(pedido);
+
         TerminalUtils.pausar();
     };
 
@@ -363,6 +371,38 @@ public class MenuRestaurante {
             }
         }
     }
+
+    private void exibirDetalhes(Pedido detalhePedido)
+    {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        TerminalUtils.limparTela();
+
+        if (detalhePedido == null)
+        {
+            TerminalUtils.aviso("[!] Nenhum detalhe encontrado para o pedido selecionado");
+            return;
+        }
+
+            System.out.println("╔══════════════════════════════════════════════════════════════════════════════╗");
+            System.out.printf(" ║ DETALHES DO PEDIDO: %-56s ║\n", detalhePedido.getId());
+            System.out.println("╠══════════════════════════════════════════════════════════════════════════════╣");
+
+            System.out.printf("║ CLIENTE: %-67s ║\n", detalhePedido.getCliente().getNome());
+            System.out.printf("║ EMAIL:   %-67s ║\n", detalhePedido.getCliente().getEmail());
+            System.out.printf("║ DATA:    %-67s ║\n", detalhePedido.getDataPedido().format(fmt));
+            System.out.printf("║ STATUS:  %-67s ║\n", detalhePedido.getStatus());
+
+
+            System.out.println("╟──────────────────────────────────────────────────────────────────────────────╢");
+            System.out.println("║ ITENS DO PEDIDO:                                                             ║");
+            System.out.printf(" ║- Total do Pedido: R$ %-54.2f ║\n", detalhePedido.getTotal());
+            System.out.println("║                                                                              ║");
+            System.out.println("╚══════════════════════════════════════════════════════════════════════════════╝");
+
+            TerminalUtils.pausar();
+
+    };
 
     // ─── Acoes do perfil ──────────────────────────────────────────────────────
 

@@ -12,7 +12,7 @@ public class Carrinho {
     private final List<ItemPedido> itens = new ArrayList<>();
 
     public Carrinho(String clienteId, String restauranteId) {
-        this.clienteId     = clienteId;
+        this.clienteId = clienteId;
         this.restauranteId = restauranteId;
     }
 
@@ -43,8 +43,19 @@ public class Carrinho {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public String getClienteId()     { return clienteId; }
-    public String getRestauranteId() { return restauranteId; }
-    public List<ItemPedido> getItens() { return Collections.unmodifiableList(itens); }
-    public boolean estaVazio()       { return itens.isEmpty(); }
+    public String getClienteId() {
+        return clienteId;
+    }
+
+    public String getRestauranteId() {
+        return restauranteId;
+    }
+
+    public List<ItemPedido> getItens() {
+        return Collections.unmodifiableList(itens);
+    }
+
+    public boolean estaVazio() {
+        return itens.isEmpty();
+    }
 }

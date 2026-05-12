@@ -24,4 +24,5 @@ public interface PedidoRepository {
     void deletar(String id);
 
 
+    List<Pedido> buscarHistoricoFinalizado(String restauranteId);
 }
