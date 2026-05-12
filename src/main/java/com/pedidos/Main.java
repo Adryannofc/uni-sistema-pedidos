@@ -39,10 +39,10 @@ public class Main {
         CategoriaService categoriaService = new CategoriaService(categoriaGlobalRepo, categoriaCardapioRepo, restauranteRepo, produtoRepo);
         ProdutoService produtoService = new ProdutoService(produtoRepo, restauranteRepo);
         RestauranteService restauranteService = new RestauranteService(restauranteRepo, categoriaGlobalRepo, authService);
-        PedidoService pedidoService = new PedidoService(pedidoRepo, horarioRepo);
+        PedidoService pedidoService = new PedidoService(pedidoRepo, horarioFuncionamentoRepo);
         CarrinhoService carrinhoService = new CarrinhoService();
-        HorarioService horarioService = new HorarioService(horarioRepo);
-        AreaEntregaService areaEntregaService = new AreaEntregaService(areaEntregaRepo);
+        HorarioService horarioService = new HorarioService(horarioFuncionamentoRepo);
+        AreaEntregaService areaEntregaService = new AreaEntregaService(areaRepo);
 
 
         new MenuLogin(
