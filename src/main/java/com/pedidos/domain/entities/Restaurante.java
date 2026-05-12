@@ -29,10 +29,7 @@ public class Restaurante extends Usuario {
     private List<Produto> produtos;
 
     @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<AreaEntrega> areasEntrega;
-
-    @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<HorarioFuncionamento> horariosFuncionamento;
+    private List<HorarioFuncionamento> horarios;
 
     protected Restaurante() {}
 
@@ -69,6 +66,9 @@ public class Restaurante extends Usuario {
     public void setCategoriaGlobal(CategoriaGlobal categoriaGlobal) {
         this.categoriaGlobal = categoriaGlobal;
     }
+
+    public List<HorarioFuncionamento> getHorarios() { return horarios; }
+    public void setHorarios(List<HorarioFuncionamento> horarios) { this.horarios = horarios; }
 
     // Mantido para não quebrar RestauranteService e camada de apresentação
     public String getCategoriaGlobalId() {

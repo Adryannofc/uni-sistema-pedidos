@@ -3,16 +3,22 @@ package com.pedidos.application.service;
 import com.pedidos.domain.enums.StatusPedido;
 import com.pedidos.domain.entities.*;
 import com.pedidos.domain.repository.PedidoRepository;
+import com.pedidos.domain.repository.HorarioFuncionamentoRepository;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
+    private final HorarioFuncionamentoRepository horarioRepository;
 
-    public PedidoService(PedidoRepository pedidoRepository) {
+    public PedidoService(PedidoRepository pedidoRepository, HorarioFuncionamentoRepository horarioRepository) {
         this.pedidoRepository = pedidoRepository;
+        this.horarioRepository = horarioRepository;
     }
 
     /**
@@ -29,6 +35,11 @@ public class PedidoService {
         try {
             if (enderecoEntrega == null) {
                 throw new IllegalArgumentException("Informe um endereço de entrega antes de finalizar o pedido.");
+            }
+
+            // Verificar se o restaurante está aberto no momento
+            if (!isRestauranteAberto(restaurante.getId())) {
+                throw new IllegalStateException("Restaurante fechado no momento.");
             }
 
             Pedido pedido = new Pedido();
@@ -167,6 +178,39 @@ public class PedidoService {
             return pedidoRepository.buscarPorRestaurante(restauranteId);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Verifica se um restaurante está aberto no momento atual.
+     *
+     * @param restauranteId id do restaurante
+     * @return true se o restaurante está aberto, false caso contrário
+     */
+    private boolean isRestauranteAberto(String restauranteId) {
+        try {
+            DayOfWeek hoje = LocalDate.now().getDayOfWeek();
+            LocalTime agora = LocalTime.now();
+
+            List<HorarioFuncionamento> horarios = horarioRepository.buscarPorRestauranteId(restauranteId);
+
+            // RN-01: Se não houver horário cadastrado, rejeitar pedido com mensagem clara
+            if (horarios == null || horarios.isEmpty()) {
+                throw new IllegalStateException("Restaurante sem horários de funcionamento cadastrados. Tente novamente mais tarde.");
+            }
+
+            // Verificar se há horário disponível para o dia atual
+            boolean temHorarioHoje = horarios.stream()
+                    .filter(h -> h.getDiaSemana() == hoje)
+                    .anyMatch(h -> h.contemHorario(agora));
+
+            if (!temHorarioHoje) {
+                throw new IllegalStateException("Restaurante fechado no momento. Consulte os horários de funcionamento.");
+            }
+
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao verificar horário de funcionamento: " + e.getMessage(), e);
         }
     }
 }

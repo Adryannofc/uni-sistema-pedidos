@@ -1,6 +1,7 @@
 package com.pedidos;
 
 import com.pedidos.application.service.*;
+import com.pedidos.domain.repository.AreaEntregaRepository;
 import com.pedidos.infra.config.FlyWayconfig;
 import com.pedidos.infra.config.JPAUtil;
 import com.pedidos.infra.repository.impl.*;
@@ -11,7 +12,6 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-
         try {
             FlyWayconfig.migrate();
         } catch (Exception e) {
@@ -29,8 +29,8 @@ public class Main {
         CategoriaCardapioRepositoryJPA categoriaCardapioRepo = new CategoriaCardapioRepositoryJPA(em);
         ProdutoRepositoryJPA produtoRepo = new ProdutoRepositoryJPA(em);
         PedidoRepositoryJPA pedidoRepo = new PedidoRepositoryJPA(em);
-        AreaEntregaRepositoryJPA areaRepo = new AreaEntregaRepositoryJPA(em);
-        HorarioFuncionamentoRepositoryJPA horarioFuncionamentoRepo = new HorarioFuncionamentoRepositoryJPA(em);
+        HorarioFuncionamentoRepositoryJPA horarioRepo = new HorarioFuncionamentoRepositoryJPA(em);
+        AreaEntregaRepositoryJPA areaEntregaRepo = new AreaEntregaRepositoryJPA(em);
 
         AutenticacaoService authService = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
         AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo);
@@ -38,10 +38,11 @@ public class Main {
         CategoriaService categoriaService = new CategoriaService(categoriaGlobalRepo, categoriaCardapioRepo, restauranteRepo, produtoRepo);
         ProdutoService produtoService = new ProdutoService(produtoRepo, restauranteRepo);
         RestauranteService restauranteService = new RestauranteService(restauranteRepo, categoriaGlobalRepo, authService);
-        PedidoService pedidoService = new PedidoService(pedidoRepo);
+        PedidoService pedidoService = new PedidoService(pedidoRepo, horarioRepo);
         CarrinhoService carrinhoService = new CarrinhoService();
-        AreaEntregaService areaEntregaService = new AreaEntregaService(areaRepo);
-        HorarioService horarioService = new HorarioService(horarioFuncionamentoRepo);
+        HorarioService horarioService = new HorarioService(horarioRepo);
+        AreaEntregaService areaEntregaService = new AreaEntregaService(areaEntregaRepo);
+
 
         new MenuLogin(
                 authService, adminService, clienteService,
