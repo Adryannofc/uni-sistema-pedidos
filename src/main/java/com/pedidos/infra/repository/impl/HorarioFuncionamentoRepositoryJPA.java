@@ -1,35 +1,35 @@
 package com.pedidos.infra.repository.impl;
 
-import com.pedidos.domain.entities.AreaEntrega;
 import com.pedidos.domain.entities.HorarioFuncionamento;
-import com.pedidos.domain.entities.Produto;
 import com.pedidos.domain.repository.HorarioFuncionamentoRepository;
 import jakarta.persistence.EntityManager;
-
-import java.time.DayOfWeek;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Optional;
 
 public class HorarioFuncionamentoRepositoryJPA implements HorarioFuncionamentoRepository {
 
     private final EntityManager em;
 
-    // Motor para realizarmos as Quarrys
     public HorarioFuncionamentoRepositoryJPA(EntityManager em) {
         this.em = em;
     }
 
     @Override
-    public void salvar(HorarioFuncionamento horarioFuncionamento) {
+    public void salvar(HorarioFuncionamento horario) {
         try {
             em.getTransaction().begin();
-            em.merge(horarioFuncionamento);
+            // ID sempre gerado via UUID no construtor — controle de persist vs merge via em.find()
+            if (em.find(HorarioFuncionamento.class, horario.getId()) == null) {
+                em.persist(horario);
+            } else {
+                em.merge(horario);
+            }
             em.getTransaction().commit();
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            throw new RuntimeException("Erro ao salvar produto", e);
+            throw new RuntimeException("Erro ao salvar horário de funcionamento: " + e.getMessage(), e);
         }
     }
 
@@ -40,16 +40,10 @@ public class HorarioFuncionamentoRepositoryJPA implements HorarioFuncionamentoRe
 
     @Override
     public List<HorarioFuncionamento> buscarPorRestauranteId(String restauranteId) {
-        return em.createQuery("SELECT h FROM HorarioFuncionamento h WHERE h.restaurante.id = :rid", HorarioFuncionamento.class)
-                .setParameter("rid", restauranteId)
-                .getResultList();
-    }
-
-    public List<HorarioFuncionamento> buscarPorRestauranteEdiaSemana(String restauranteId, DayOfWeek diaSemana) {
-        return em.createQuery("SELECT h FROM HorarioFuncionamento h WHERE h.restaurante.id = :rid AND h.diaSemana = :dia", HorarioFuncionamento.class)
-                .setParameter("rid", restauranteId)
-                .setParameter("dia", diaSemana)
-                .getResultList();
+        return em.createQuery(
+                "SELECT h FROM HorarioFuncionamento h WHERE h.restaurante.id = :restauranteId",
+                HorarioFuncionamento.class
+        ).setParameter("restauranteId", restauranteId).getResultList();
     }
 
     @Override
@@ -59,17 +53,21 @@ public class HorarioFuncionamentoRepositoryJPA implements HorarioFuncionamentoRe
     }
 
     @Override
-    public void deletar(String id) {
+    public void remover(String id) {
         try {
             em.getTransaction().begin();
-            HorarioFuncionamento horarioFuncionamento = em.find(HorarioFuncionamento.class, id);
-            if (horarioFuncionamento != null) {
-                em.remove(horarioFuncionamento);
+            HorarioFuncionamento horario = em.find(HorarioFuncionamento.class, id);
+            if (horario != null) {
+                em.remove(horario);
             }
             em.getTransaction().commit();
         } catch (Exception e) {
-            em.getTransaction().rollback();
-            throw new RuntimeException("Erro ao deletar Horario de Funcionamento", e);
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Erro ao remover horário: " + e.getMessage(), e);
         }
     }
 }
+
+

@@ -110,6 +110,8 @@ CREATE TABLE horarios_funcionamento (
     CONSTRAINT chk_horario CHECK (hora_fim > hora_inicio)
 );
 
+CREATE INDEX idx_horarios_restaurante ON horarios_funcionamento (restaurante_id);
+
 CREATE TABLE cliente_restaurantes_favoritos (
    cliente_id VARCHAR(36) NOT NULL,
    restaurante_id VARCHAR(36) NOT NULL,

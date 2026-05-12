@@ -59,7 +59,6 @@ public class MenuLogin {
             System.out.println("║                                                                              ║");
             System.out.println("║  [1] LOGIN                                                                   ║");
             System.out.println("║  [2] CADASTRAR-SE                                                            ║");
-            System.out.println("║  [0] SAIR                                                                    ║");
             System.out.println("║                                                                              ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════════════════╝");
 
@@ -110,7 +109,6 @@ public class MenuLogin {
                         }
                     } catch (RuntimeException e) {
                         System.out.println("[ERRO] " + e.getMessage());
-                        TerminalUtils.pausar();
                     }
                     break;
                 case 2:
@@ -137,10 +135,8 @@ public class MenuLogin {
                                 clienteService.cadastrarCliente(nomeCadastroCliente, emailCadastroCliente, senhaCadastroCliente,
                                         cpfCadastroCliente, telefoneCadastroCliente);
                                 System.out.println("\n[✔] Bem-vindo, " + nomeCadastroCliente + "! Cadastro realizado.");
-                                TerminalUtils.pausar();
                             } catch (RuntimeException e) {
                                 System.out.println("\n[✘] ERRO AO CADASTRAR: " + e.getMessage());
-                                TerminalUtils.pausar();
                             }
                             break;
                         case 2:
@@ -153,13 +149,10 @@ public class MenuLogin {
                                 restauranteService.cadastrarRestaurante(nomeCadastroRestaurante, emailCadastroRestaurante, senhaCadastroRestaurante,
                                         cnpjCadastroRestaurante, telefoneCadastroRestaurante);
                                 System.out.println("\n[✔] Bem-vindo, " + nomeCadastroRestaurante + "! Cadastro realizado.");
-                                TerminalUtils.pausar();
                             } catch (RuntimeException e) {
                                 System.out.println("\n[✘] ERRO AO CADASTRAR: " + e.getMessage());
-                                TerminalUtils.pausar();
                             }
                             break;
-
                     };
 
             }

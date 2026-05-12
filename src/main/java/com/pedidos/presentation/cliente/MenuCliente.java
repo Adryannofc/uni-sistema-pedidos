@@ -450,7 +450,7 @@ public class MenuCliente {
                     p.getId().substring(0, Math.min(8, p.getId().length())),
                     p.getDataPedido().format(fmt),
                     p.getStatus(),
-                    moeda.format(p.calcularTotal()))));
+                    moeda.format(p.getTotal()))));
         }
         System.out.println(TerminalUtils.BASE);
         System.out.println();

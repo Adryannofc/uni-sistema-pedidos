@@ -75,13 +75,13 @@ public class HorarioService {
 
     public void removerHorario(String id) {
         buscarPorId(id);
-        horarioRepository.deletar(id);
+        horarioRepository.remover(id);
     }
 
-    public boolean restauranteEstaAberto(String restauranteId, LocalDateTime agora) {
+    public boolean restauranteEstaAberto(String restauranteId, LocalTime agora) {
         return horarioRepository.buscarPorRestauranteId(restauranteId)
                 .stream()
-                .anyMatch(h -> h.estaAberto(agora));
+                .anyMatch(h -> h.contemHorario(agora));
     }
 
     public List<DayOfWeek> listarDiasDisponiveis(String restauranteId) {
