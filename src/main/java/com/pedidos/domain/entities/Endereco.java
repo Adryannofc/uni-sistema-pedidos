@@ -30,13 +30,16 @@ public class Endereco {
     @Column (name = "cep")
     private String cep;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @Column (name = "padrao")
+    private boolean isPadrao;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
     protected Endereco() {}
 
-    public Endereco(String rua, String numero, String bairro, String cidade, String estado, String cep) {
+    public Endereco(String rua, String numero, String bairro, String cidade, String estado, String cep, Boolean isPadrao) {
         this.id = UUID.randomUUID().toString();
         this.rua = rua;
         this.numero = numero;
@@ -44,14 +47,17 @@ public class Endereco {
         this.cidade = cidade;
         this.estado = estado;
         this.cep = cep;
+        this.isPadrao = isPadrao;
     }
 
+    public String getId() { return id; }
     public String getRua() { return rua; }
     public String getNumero() { return numero; }
     public String getBairro() { return bairro; }
     public String getCidade() { return cidade; }
     public String getEstado() { return estado; }
     public String getCep() { return cep; }
+    public boolean isPadrao() { return isPadrao; }
 
     public void setRua(String rua) { this.rua = rua; }
     public void setNumero(String numero) { this.numero = numero; }
@@ -62,6 +68,7 @@ public class Endereco {
     public void setCliente(Cliente cliente) {
         this.cliente = cliente;
     }
+    public void setIsPadrao(Boolean isPadrao) {this.isPadrao = isPadrao;}
 
     @Override
     public String toString() {
