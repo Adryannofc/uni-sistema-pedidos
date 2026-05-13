@@ -1,6 +1,8 @@
 package com.pedidos.view.restaurante;
 
 import com.pedidos.application.service.*;
+import com.pedidos.domain.entities.CategoriaCardapio;
+import com.pedidos.domain.entities.Produto;
 import com.pedidos.domain.entities.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -10,6 +12,7 @@ import com.pedidos.view.util.session.SessionManager;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.math.BigDecimal;
 import java.util.List;
 
 public class RestauranteFrame extends BaseFrame {
@@ -103,21 +106,23 @@ public class RestauranteFrame extends BaseFrame {
         add(abas, BorderLayout.CENTER);
     }
 
+    /** --------------- ABA DE PEDIDOS ------------------- */
+
     private JPanel criarPainelProdutos() {
 
         JPanel painel = new JPanel(new BorderLayout());
         JSplitPane splitPane = new JSplitPane();
 
         splitPane.setDividerLocation(200);
-        splitPane.setLeftComponent(criarPainelCategorias());
-        splitPane.setRightComponent(criarPainelDeProdutos());
+        splitPane.setLeftComponent(criarTabelaDeCategorias());
+        splitPane.setRightComponent(criarTabelaDeProdutos());
 
         painel.add(splitPane, BorderLayout.CENTER);
 
         return painel;
     }
 
-    private JScrollPane criarPainelCategorias() {
+    private JScrollPane criarTabelaDeCategorias() {
 
         DefaultListModel<String> model = new DefaultListModel<>();
         JList<String> listaCategorias = new JList<>(model);
@@ -129,7 +134,7 @@ public class RestauranteFrame extends BaseFrame {
         return new JScrollPane(listaCategorias);
     }
 
-    private JPanel criarPainelDeProdutos() {
+    private JPanel criarTabelaDeProdutos () {
 
         JPanel painel = new JPanel(new BorderLayout());
 
@@ -143,8 +148,201 @@ public class RestauranteFrame extends BaseFrame {
 
         DefaultTableModel model = new DefaultTableModel(atributos, 0);
         JTable tabelaProdutos = new JTable(model);
+        carregarProdutos(model);
 
-        produtoService.listarPorRestaurante(usuario.getId())
+        JToolBar toolBarCrud = new JToolBar();
+
+        JButton btnNovoProduto = new JButton("+ Novo Produto");
+        JButton btnEditarProduto = new JButton("Editar");
+        JButton btnAtivarProduto = new JButton("Ativar/Desativar");
+        JButton btnRemoverProduto = new JButton("Remover");
+
+        toolBarCrud.add(btnNovoProduto);
+        toolBarCrud.add(btnEditarProduto);
+        toolBarCrud.add(btnAtivarProduto);
+        toolBarCrud.add(btnRemoverProduto);
+
+        painel.add(toolBarCrud, BorderLayout.NORTH);
+        painel.add(new JScrollPane(tabelaProdutos), BorderLayout.CENTER);
+
+        /**------- Eventos ---------*/
+
+
+        //  -------= Criar novo produto =----------------
+        btnNovoProduto.addActionListener (e -> {
+
+            JTextField campoNovoNome = new JTextField();
+            JTextField campoNovoDescricao = new JTextField();
+            JTextField campoNovoPreco = new JTextField();
+
+            JComboBox<String> selecionadorCategoria = new JComboBox<>();
+
+            selecionadorCategoria.addItem("Sem categoria");
+
+            List<CategoriaCardapio> categoriasCardapio = categoriaService.listarCategoriasCardapio(usuario.getId());
+
+            categoriasCardapio.forEach(c -> selecionadorCategoria.addItem(c.getNome()));
+
+            JPanel painelNovoProduto = new JPanel(new GridLayout(0, 1));
+
+            painelNovoProduto.add(new JLabel("Nome:"));
+            painelNovoProduto.add(campoNovoNome);
+
+            painelNovoProduto.add(new JLabel("Descrição:"));
+            painelNovoProduto.add(campoNovoDescricao);
+
+            painelNovoProduto.add(new JLabel("Preço:"));
+            painelNovoProduto.add(campoNovoPreco);
+
+            painelNovoProduto.add(new JLabel("Categoria:"));
+            painelNovoProduto.add(selecionadorCategoria);
+
+            int option = JOptionPane.showConfirmDialog(
+                    this,
+                    painelNovoProduto,
+                    "Novo Produto",
+                    JOptionPane.OK_CANCEL_OPTION
+            );
+
+            if(option != JOptionPane.OK_OPTION) {
+                return;
+            }
+
+            String nome = campoNovoNome.getText();
+            String descricao = campoNovoDescricao.getText();
+            BigDecimal preco = new BigDecimal(campoNovoPreco.getText());
+            String categoriaSelecionada = (String) selecionadorCategoria.getSelectedItem();
+            String categoriaId = null;
+
+            if(!categoriaSelecionada.equals("Sem categoria")) {
+
+                categoriaId = categoriasCardapio.stream()
+                        .filter(c -> c.getNome().equals(categoriaSelecionada))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Categoria não encontrada"))
+                        .getId();
+            }
+
+            produtoService.criarProduto(nome, descricao, preco ,categoriaId, usuario.getId());
+            carregarProdutos(model);
+        });
+
+
+        // ---------------= Editar produto =----------------
+
+        btnEditarProduto.addActionListener (e -> {
+            int linhaSelecionadaEditarProduto = tabelaProdutos.getSelectedRow();
+
+            if (linhaSelecionadaEditarProduto == -1) {
+                JOptionPane.showMessageDialog(this, "Selecione um produto.");
+                return;
+            }
+
+            JTextField campoNovoNome = new JTextField();
+            JTextField campoNovoDescricao = new JTextField();
+            JTextField campoNovoPreco = new JTextField();
+
+            JComboBox<String> selecionadorCategoria = new JComboBox<>();
+
+            selecionadorCategoria.addItem("Sem categoria");
+
+            List<CategoriaCardapio> categoriasCardapio = categoriaService.listarCategoriasCardapio(usuario.getId());
+
+            categoriasCardapio.forEach(c -> selecionadorCategoria.addItem(c.getNome()));
+
+            JPanel painelNovoProduto = new JPanel(new GridLayout(0, 1));
+
+            painelNovoProduto.add(new JLabel("Nome:"));
+            painelNovoProduto.add(campoNovoNome);
+
+            painelNovoProduto.add(new JLabel("Descrição:"));
+            painelNovoProduto.add(campoNovoDescricao);
+
+            painelNovoProduto.add(new JLabel("Preço:"));
+            painelNovoProduto.add(campoNovoPreco);
+
+            painelNovoProduto.add(new JLabel("Categoria:"));
+            painelNovoProduto.add(selecionadorCategoria);
+
+            int option = JOptionPane.showConfirmDialog(
+                    this,
+                    painelNovoProduto,
+                    "Novo Produto",
+                    JOptionPane.OK_CANCEL_OPTION
+            );
+
+            if(option != JOptionPane.OK_OPTION) {
+                return;
+            }
+
+            String novoNome = campoNovoNome.getText();
+            String novoDescricao = campoNovoDescricao.getText();
+            BigDecimal novoPreco = new BigDecimal(campoNovoPreco.getText());
+            String categoriaSelecionada = (String) selecionadorCategoria.getSelectedItem();
+            String novoCategoriaId = null;
+
+            if(!categoriaSelecionada.equals("Sem categoria")) {
+
+                novoCategoriaId = categoriasCardapio.stream()
+                        .filter(c -> c.getNome().equals(categoriaSelecionada))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Categoria não encontrada"))
+                        .getId();
+            }
+
+            produtoService.editarProduto((String) tabelaProdutos.getValueAt(linhaSelecionadaEditarProduto, 0),
+                                                    usuario.getId(), novoNome, novoDescricao, novoPreco, novoCategoriaId);
+
+            carregarProdutos(model);
+
+        });
+
+
+        // ---------= Ativo ou Inativo --------------
+
+        btnAtivarProduto.addActionListener (e -> {
+            int linhaSelecionadaAtivarProduto = tabelaProdutos.getSelectedRow();
+
+            if(linhaSelecionadaAtivarProduto == -1) {
+                JOptionPane.showMessageDialog(this, "Selecione um produto.");
+                return;
+            }
+
+            String produtoId = (String) tabelaProdutos.getValueAt(linhaSelecionadaAtivarProduto, 0);
+
+            produtoService.ativarInativar(produtoId, usuario.getId());
+            carregarProdutos(model);
+
+        });
+
+        btnRemoverProduto.addActionListener ( e -> {
+
+            int linhaSelecionadaRemoverProduto = tabelaProdutos.getSelectedRow();
+
+            if (linhaSelecionadaRemoverProduto == -1) {
+                JOptionPane.showMessageDialog(this, "Selecione um produto.");
+                return;
+            }
+
+            produtoService.removerProduto(
+                    (String) tabelaProdutos.getValueAt(linhaSelecionadaRemoverProduto, 0),
+                    usuario.getId()
+            );;
+
+            carregarProdutos(model);
+
+        });
+
+        return painel;
+    }
+
+    // Metodo para carregar produtos
+
+    private void carregarProdutos (DefaultTableModel model) {
+
+        model.setRowCount(0);
+
+        produtoService.listarPorRestaurante (usuario.getId())
                 .forEach(p -> model.addRow(new Object[]{
                         p.getId(),
                         p.getNome(),
@@ -153,27 +351,6 @@ public class RestauranteFrame extends BaseFrame {
                         p.isStatusAtivo() ? "Ativo" : "Inativo"
                 }));
 
-        painel.add(criarToolbarCrud(), BorderLayout.NORTH);
-        painel.add(new JScrollPane(tabelaProdutos), BorderLayout.CENTER);
-
-        return painel;
-    }
-
-    private JToolBar criarToolbarCrud() {
-
-        JToolBar toolBar = new JToolBar();
-
-        JButton btnNovoProduto = new JButton("+ Novo Produto");
-        JButton btnEditarProduto = new JButton("Editar");
-        JButton btnAtivarProduto = new JButton("Ativar");
-        JButton btnRemoverProduto = new JButton("Remover");
-
-        toolBar.add(btnNovoProduto);
-        toolBar.add(btnEditarProduto);
-        toolBar.add(btnAtivarProduto);
-        toolBar.add(btnRemoverProduto);
-
-        return toolBar;
     }
 
     private JScrollPane criarTabela() {
