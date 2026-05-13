@@ -10,11 +10,8 @@ public class SessionManager {
 
     private Usuario   usuarioLogado;
     private JFrame frameAtual;
-    private CarrinhoManager carrinho;
 
-    private SessionManager() {
-        this.carrinho = new CarrinhoManager();
-    }
+    private SessionManager() {}
 
     public static SessionManager getInstance() {
         if (instancia == null) instancia = new SessionManager();
@@ -40,5 +37,4 @@ public class SessionManager {
     public boolean    estaLogado()       { return usuarioLogado != null; }
     public TipoUsuario getTipo()         { return usuarioLogado != null ? usuarioLogado.getTipoUsuario() : null; }
     public String     getNome()          { return usuarioLogado != null ? usuarioLogado.getNome() : "Desconectado"; }
-    public CarrinhoManager getCarrinho() { return carrinho; }
 }
