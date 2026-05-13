@@ -67,6 +67,12 @@ public class Restaurante extends Usuario {
         this.categoriaGlobal = categoriaGlobal;
     }
 
+    public List<CategoriaCardapio> getCategorias() { return categorias; }
+    public void setCategorias(List<CategoriaCardapio> categorias) { this.categorias = categorias; }
+
+    public List<Produto> getProdutos() { return produtos; }
+    public void setProdutos(List<Produto> produtos) { this.produtos = produtos; }
+
     public List<HorarioFuncionamento> getHorarios() { return horarios; }
     public void setHorarios(List<HorarioFuncionamento> horarios) { this.horarios = horarios; }
 
