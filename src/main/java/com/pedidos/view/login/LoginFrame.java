@@ -1,8 +1,9 @@
 package com.pedidos.view.login;
 
-import com.pedidos.application.service.AutenticacaoService;
+import com.pedidos.application.service.*;
 import com.pedidos.domain.entities.Usuario;
 import com.pedidos.domain.enums.TipoUsuario;
+import com.pedidos.domain.repository.RestauranteRepository;
 import com.pedidos.view.admin.AdminFrame;
 import com.pedidos.view.cliente.ClienteFrame;
 import com.pedidos.view.restaurante.RestauranteFrame;
@@ -17,6 +18,16 @@ import java.awt.*;
 
 public class LoginFrame extends BaseFrame {
     private final AutenticacaoService autenticacaoService;
+    private final AdminService adminService;
+    private final ClienteService clienteService;
+    private final CategoriaService categoriaService;
+    private final ProdutoService produtoService;
+    private final RestauranteService restauranteService;
+    private final PedidoService pedidoService;
+    private final CarrinhoService carrinhoService;
+    private final RestauranteRepository restauranteRepo;
+    private final AreaEntregaService areaEntregaService;
+    private final HorarioService horarioService;
 
     private JTextField campoEmail;
     private JPasswordField campoSenha;
@@ -25,9 +36,29 @@ public class LoginFrame extends BaseFrame {
     private JButton botaoEntrar;
     private JLabel labelConexao;
 
-    public LoginFrame(AutenticacaoService autenticacaoService) {
+    public LoginFrame(AutenticacaoService autenticacaoService,
+                      AdminService adminService,
+                      ClienteService clienteService,
+                      CategoriaService categoriaService,
+                      ProdutoService produtoService,
+                      RestauranteService restauranteService,
+                      PedidoService pedidoService,
+                      CarrinhoService carrinhoService,
+                      RestauranteRepository restauranteRepo,
+                      AreaEntregaService areaEntregaService,
+                      HorarioService horarioService) {
         super("Sistema de Delivery - Login", 500, 310);
         this.autenticacaoService = autenticacaoService;
+        this.adminService = adminService;
+        this.clienteService = clienteService;
+        this.categoriaService = categoriaService;
+        this.produtoService = produtoService;
+        this.restauranteService = restauranteService;
+        this.pedidoService = pedidoService;
+        this.carrinhoService = carrinhoService;
+        this.restauranteRepo = restauranteRepo;
+        this.areaEntregaService = areaEntregaService;
+        this.horarioService = horarioService;
         construirInterface();
     }
 
@@ -236,9 +267,19 @@ public class LoginFrame extends BaseFrame {
         JFrame proximo;
 
         switch (tipo) {
+
             case ADMIN       -> proximo = new AdminFrame(usuario);
-            case RESTAURANTE -> proximo = new RestauranteFrame(usuario);
+
+            case RESTAURANTE -> proximo = new RestauranteFrame
+                                                (usuario,
+                                                categoriaService,
+                                                produtoService,
+                                                restauranteService,
+                                                areaEntregaService,
+                                                horarioService);
+
             case CLIENTE     -> proximo = new ClienteFrame(usuario);
+
             default -> {
                 JOptionPane.showMessageDialog(this,
                         "Tipo de usuário desconhecido: " + tipo,
