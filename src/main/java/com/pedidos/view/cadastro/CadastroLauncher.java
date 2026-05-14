@@ -1,11 +1,10 @@
-package com.pedidos.dev;
+package com.pedidos.view.cadastro;
 
 import com.pedidos.application.service.AutenticacaoService;
 import com.pedidos.application.service.ClienteService;
 import com.pedidos.application.service.RestauranteService;
 import com.pedidos.infra.repository.impl.*;
 import com.pedidos.domain.repository.*;
-import com.pedidos.view.cadastro.CadastroFrame;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
