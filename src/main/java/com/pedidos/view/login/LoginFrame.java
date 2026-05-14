@@ -5,6 +5,7 @@ import com.pedidos.domain.entities.Usuario;
 import com.pedidos.domain.enums.TipoUsuario;
 import com.pedidos.domain.repository.RestauranteRepository;
 import com.pedidos.view.admin.AdminFrame;
+import com.pedidos.view.cadastro.CadastroFrame;
 import com.pedidos.view.cliente.ClienteFrame;
 import com.pedidos.view.restaurante.RestauranteFrame;
 import com.pedidos.view.util.base.BaseFrame;
@@ -35,6 +36,7 @@ public class LoginFrame extends BaseFrame {
     private JButton botaoCancelar;
     private JButton botaoEntrar;
     private JLabel labelConexao;
+    private JLabel linkCadastrar;  // ← linha que faltava
 
     public LoginFrame(AutenticacaoService autenticacaoService,
                       AdminService adminService,
@@ -72,12 +74,11 @@ public class LoginFrame extends BaseFrame {
     }
 
     private JPanel criarPainelCentral() {
-        JPanel externo = new JPanel(new BorderLayout(0,6));
+        JPanel externo = new JPanel(new BorderLayout(0, 6));
         externo.setBackground(AppColors.CINZA_FUNDO);
         externo.setBorder(new EmptyBorder(10, 15, 8, 15));
         externo.add(criarPainelFormulario(), BorderLayout.CENTER);
         externo.add(criarLabelHint(), BorderLayout.SOUTH);
-
         return externo;
     }
 
@@ -89,8 +90,7 @@ public class LoginFrame extends BaseFrame {
                 TitledBorder.DEFAULT_JUSTIFICATION,
                 TitledBorder.DEFAULT_POSITION,
                 AppFonts.LABEL,
-                AppColors.TEXTO_SECUNDARIO
-                ));
+                AppColors.TEXTO_SECUNDARIO));
 
         JLabel labelEmail = rotulo("E-mail:");
         JLabel labelSenha = rotulo("Senha:");
@@ -104,6 +104,16 @@ public class LoginFrame extends BaseFrame {
         checkLembrar = new JCheckBox("Lembrar acesso");
         checkLembrar.setFont(AppFonts.LABEL);
         checkLembrar.setOpaque(false);
+
+        linkCadastrar = new JLabel("<html><a href='#'>Não tem conta? Cadastre-se</a></html>");
+        linkCadastrar.setFont(AppFonts.LABEL);
+        linkCadastrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        linkCadastrar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                abrirCadastro();
+            }
+        });
 
         botaoCancelar = botaoSecundario("Cancelar");
         botaoCancelar.addActionListener(e -> cancelar());
@@ -126,8 +136,15 @@ public class LoginFrame extends BaseFrame {
         gl.setAutoCreateContainerGaps(true);
 
         gl.setHorizontalGroup(gl.createSequentialGroup()
-                .addGroup(gl.createParallelGroup(GroupLayout.Alignment.TRAILING).addComponent(labelEmail).addComponent(labelSenha))
-                .addGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(campoEmail,   GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE).addComponent(campoSenha,   GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE).addComponent(checkLembrar).addComponent(painelBotoes, GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
+                .addGroup(gl.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                        .addComponent(labelEmail)
+                        .addComponent(labelSenha))
+                .addGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(campoEmail,   GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
+                        .addComponent(campoSenha,   GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
+                        .addComponent(checkLembrar)
+                        .addComponent(linkCadastrar)
+                        .addComponent(painelBotoes, GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
         );
 
         gl.setVerticalGroup(gl.createSequentialGroup()
@@ -139,6 +156,7 @@ public class LoginFrame extends BaseFrame {
                         .addComponent(campoSenha))
                 .addGap(4)
                 .addComponent(checkLembrar)
+                .addComponent(linkCadastrar)
                 .addGap(8)
                 .addComponent(painelBotoes)
         );
@@ -156,7 +174,6 @@ public class LoginFrame extends BaseFrame {
         hint.setFont(AppFonts.HINT);
         hint.setForeground(AppColors.TEXTO_SECUNDARIO);
         hint.setBorder(new EmptyBorder(4, 2, 0, 0));
-
         return hint;
     }
 
@@ -177,7 +194,6 @@ public class LoginFrame extends BaseFrame {
 
         barra.add(labelVersao,  BorderLayout.WEST);
         barra.add(labelConexao, BorderLayout.EAST);
-
         return barra;
     }
 
@@ -197,13 +213,9 @@ public class LoginFrame extends BaseFrame {
 
     // ACOES
 
-    /**
-     * Fluxo: validarCampos → autenticacaoService.autenticar()
-     *        → SessionManager.iniciarSessao() → redirecionarConformalPapel()
-     *
-     * autenticar() lança RuntimeException em credenciais inválidas —
-     * a mensagem do catch distingue "email ou senha inválidos" de outros erros.
-     */
+    private void abrirCadastro() {
+        new CadastroFrame(clienteService, restauranteService).setVisible(true);
+    }
 
     private void autenticarUsuario() {
         String email = campoEmail.getText().trim();
@@ -213,24 +225,20 @@ public class LoginFrame extends BaseFrame {
 
         try {
             Usuario usuario = autenticacaoService.autenticar(email, senha);
-
             SessionManager.getInstance().iniciarSessao(usuario, this);
             labelConexao.setText("Conectado: " + usuario.getNome());
             redirecionarConformalPapel(usuario);
 
         } catch (RuntimeException ex) {
             String msg = ex.getMessage();
-            // AutenticacaoService lança "Email ou senha inválidos."
             if (msg != null && msg.toLowerCase().contains("inválido")) {
                 JOptionPane.showMessageDialog(this,
                         "E-mail ou senha inválidos.\nVerifique seus dados e tente novamente.",
-                        "Falha no Login",
-                        JOptionPane.ERROR_MESSAGE);
+                        "Falha no Login", JOptionPane.ERROR_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this,
                         "Erro ao conectar:\n" + msg,
-                        "Erro de Conexão",
-                        JOptionPane.ERROR_MESSAGE);
+                        "Erro de Conexão", JOptionPane.ERROR_MESSAGE);
             }
             campoSenha.setText("");
             campoSenha.requestFocus();
@@ -267,19 +275,15 @@ public class LoginFrame extends BaseFrame {
         JFrame proximo;
 
         switch (tipo) {
-
             case ADMIN       -> proximo = new AdminFrame(usuario);
-
-            case RESTAURANTE -> proximo = new RestauranteFrame
-                                                (usuario,
-                                                categoriaService,
-                                                produtoService,
-                                                restauranteService,
-                                                areaEntregaService,
-                                                horarioService);
-
+            case RESTAURANTE -> proximo = new RestauranteFrame(
+                    usuario,
+                    categoriaService,
+                    produtoService,
+                    restauranteService,
+                    areaEntregaService,
+                    horarioService);
             case CLIENTE     -> proximo = new ClienteFrame(usuario);
-
             default -> {
                 JOptionPane.showMessageDialog(this,
                         "Tipo de usuário desconhecido: " + tipo,
@@ -339,4 +343,3 @@ public class LoginFrame extends BaseFrame {
         return btn;
     }
 }
-
