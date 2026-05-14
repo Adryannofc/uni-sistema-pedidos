@@ -54,11 +54,11 @@ public class LoginFrame extends BaseFrame {
         this.categoriaService = categoriaService;
         this.produtoService = produtoService;
         this.restauranteService = restauranteService;
-        this.pedidoService = pedidoService;
         this.carrinhoService = carrinhoService;
         this.restauranteRepo = restauranteRepo;
         this.areaEntregaService = areaEntregaService;
         this.horarioService = horarioService;
+        this.pedidoService = pedidoService;
         construirInterface();
     }
 
@@ -276,7 +276,7 @@ public class LoginFrame extends BaseFrame {
                                                 produtoService,
                                                 restauranteService,
                                                 areaEntregaService,
-                                                horarioService);
+                                                horarioService, pedidoService);
 
             case CLIENTE     -> proximo = new ClienteFrame(usuario);
 

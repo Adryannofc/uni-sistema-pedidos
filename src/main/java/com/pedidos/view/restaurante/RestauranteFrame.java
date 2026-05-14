@@ -2,8 +2,9 @@ package com.pedidos.view.restaurante;
 
 import com.pedidos.application.service.*;
 import com.pedidos.domain.entities.CategoriaCardapio;
-import com.pedidos.domain.entities.Produto;
+import com.pedidos.domain.entities.Pedido;
 import com.pedidos.domain.entities.Usuario;
+import com.pedidos.domain.enums.StatusPedido;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 import com.pedidos.view.util.base.BaseFrame;
@@ -23,7 +24,9 @@ public class RestauranteFrame extends BaseFrame {
     private final RestauranteService restauranteService;
     private final AreaEntregaService areaEntregaService;
     private final HorarioService horarioService;
+    private final PedidoService pedidoService;
 
+    private DefaultTableModel modelPedidos;
     private DefaultTableModel modelProdutos;
     private CategoriaCardapio categoriaSelecionada;
 
@@ -32,7 +35,7 @@ public class RestauranteFrame extends BaseFrame {
                             ProdutoService produtoService,
                             RestauranteService restauranteService,
                             AreaEntregaService areaEntregaService,
-                            HorarioService horarioService) {
+                            HorarioService horarioService, PedidoService pedidoService) {
         super("Sistema de Delivery — Painel do Restaurante", 700, 500);
         this.usuario = usuario;
         this.categoriaService = categoriaService;
@@ -40,6 +43,7 @@ public class RestauranteFrame extends BaseFrame {
         this.restauranteService = restauranteService;
         this.areaEntregaService = areaEntregaService;
         this.horarioService = horarioService;
+        this.pedidoService = pedidoService;
         construirInterface();
         criarAbasMenu();
     }
@@ -102,7 +106,9 @@ public class RestauranteFrame extends BaseFrame {
         JTabbedPane abas = new JTabbedPane();
 
         abas.addTab("Produtos", criarPainelProdutos());
-        abas.addTab("Pedidos", new JPanel());
+        abas.addTab("Pedidos", criarPainelPedidos());
+        abas.addTab("Áreas de Entrega", new JPanel());
+        abas.addTab("Horários de funcionamento", new JPanel());
         abas.addTab("Perfil", new JPanel());
 
         add(abas, BorderLayout.CENTER);
@@ -184,8 +190,9 @@ public class RestauranteFrame extends BaseFrame {
         painelBotoes.add(btnNovaCategoria);
         painelBotoes.add(btnRemoverCategoria);
 
+        /**------------= Categoria eventos =---------------*/
 
-        // -----------= Criar nova categoria =---------------
+        // -----------= Criar nova categoria =--------------- //
         btnNovaCategoria.addActionListener(e -> {
 
             String nome = JOptionPane.showInputDialog(
@@ -212,7 +219,7 @@ public class RestauranteFrame extends BaseFrame {
         });
 
 
-        // -------= Listar todas categorias =-------
+        // ----------= Listar todas categorias =----------- //
         btnListarTodos.addActionListener( e -> {
 
             categoriaSelecionada = null;
@@ -221,7 +228,7 @@ public class RestauranteFrame extends BaseFrame {
 
         });
 
-        // ------------= Remover categoria =--------------
+        // ------------= Remover categoria =-------------- //
         btnRemoverCategoria.addActionListener(e -> {
 
             CategoriaCardapio categoria = listaCategorias.getSelectedValue();
@@ -256,7 +263,7 @@ public class RestauranteFrame extends BaseFrame {
             carregarProdutos(categoriaSelecionada);
         });
 
-        // ---------= Selecionar categoria =----------------
+        // ------------= Selecionar categoria =-------------- //
         listaCategorias.addListSelectionListener(e -> {
 
             if (!e.getValueIsAdjusting()) {
@@ -309,10 +316,10 @@ public class RestauranteFrame extends BaseFrame {
         painel.add(toolBarCrud, BorderLayout.NORTH);
         painel.add(new JScrollPane(tabelaProdutos), BorderLayout.CENTER);
 
-        /**-------------= Eventos =-----------------*/
+        /**-------------= Produtos Eventos =-----------------*/
 
 
-        //  -------= Criar novo produto =----------------
+        //  ----------= Criar novo produto =-------------- //
         btnNovoProduto.addActionListener(e -> {
 
             FormularioProduto form = criarFormularioProduto();
@@ -357,7 +364,7 @@ public class RestauranteFrame extends BaseFrame {
         });
 
 
-        // ------  -----= Editar produto =----------------
+        // -------------= Editar produto =--------------- //
 
         btnEditarProduto.addActionListener(e -> {
 
@@ -409,7 +416,7 @@ public class RestauranteFrame extends BaseFrame {
         });
 
 
-        // ---------= Ativo ou Inativo --------------
+        // -----------= Ativo ou Inativo -------------- //
 
         btnAtivarProduto.addActionListener(e -> {
 
@@ -425,7 +432,7 @@ public class RestauranteFrame extends BaseFrame {
         });
 
 
-        // ----------= Remover produto =----------------
+        // -------------= Remover produto =--------------- //
 
         btnRemoverProduto.addActionListener(e -> {
 
@@ -541,6 +548,113 @@ public class RestauranteFrame extends BaseFrame {
         }
 
         return 0;
+    }
+
+    public JPanel criarPainelPedidos() {
+
+        JPanel painelPedidos = new JPanel(new BorderLayout());
+        JPanel painelAcoesPedidos = new JPanel();
+
+        JComboBox<String> filtroStatus = new JComboBox<>();
+        filtroStatus.addItem("Todos");
+        filtroStatus.addItem("PENDENTE");
+        filtroStatus.addItem("PREPARANDO");
+        filtroStatus.addItem("SAIU_PARA_ENTREGA");
+        filtroStatus.addItem("ENTREGUE");
+
+        JButton btnFiltrarPedidos = new JButton("Filtrar");
+
+        JComboBox<String> novoStatus = new JComboBox<>();
+        novoStatus.addItem("PENDENTE");
+        novoStatus.addItem("EM_PREPARO");
+        novoStatus.addItem("SAIU_PARA_ENTREGA");
+        novoStatus.addItem("ENTREGUE");
+
+        JButton btnAtualizarStatus = new JButton("Atualizar Status");
+
+        painelAcoesPedidos.add(new JLabel("Filtro:"));
+        painelAcoesPedidos.add(filtroStatus);
+        painelAcoesPedidos.add(btnFiltrarPedidos);
+
+        painelAcoesPedidos.add(new JLabel("Novo status:"));
+        painelAcoesPedidos.add(novoStatus);
+        painelAcoesPedidos.add(btnAtualizarStatus);
+
+        // --- Construindo tabela de pedidos --- //
+        String[] atributos = { "ID", "Cliente", "Status", "Total", "Itens" };
+         modelPedidos = new DefaultTableModel(atributos, 0);
+        JTable tabelaPedidos = new JTable(modelPedidos);
+        JScrollPane scrollPedidos = new JScrollPane(tabelaPedidos);
+
+        painelPedidos.add(painelAcoesPedidos, BorderLayout.NORTH);
+        painelPedidos.add(scrollPedidos, BorderLayout.CENTER);
+
+        List<Pedido> pedidos = pedidoService.listarPorRestaurante(usuario.getId());
+        carregarPedidos(pedidos);
+
+        btnFiltrarPedidos.addActionListener(e -> {
+
+            String statusSelecionado = (String) filtroStatus.getSelectedItem();
+
+            if (statusSelecionado.equals("Todos")) {
+                carregarPedidos(pedidoService.listarPorRestaurante(usuario.getId()));
+            } else {
+                carregarPedidos(pedidoService.listarPorRestaurante(usuario.getId())
+                        .stream()
+                        .filter(p -> p.getStatus().name().equals(statusSelecionado))
+                        .toList());
+            }
+        });
+
+        btnAtualizarStatus.addActionListener(e -> {
+
+            int linhaSelecionada = tabelaPedidos.getSelectedRow();
+
+            if (linhaSelecionada == -1) {
+                JOptionPane.showMessageDialog(this, "Selecione um pedido para atualizar.");
+                return;
+            }
+
+            String pedidoId = (String) tabelaPedidos.getValueAt(linhaSelecionada, 0);
+            StatusPedido statusNovo = StatusPedido.valueOf((String) novoStatus.getSelectedItem());
+
+            try {
+
+                int op = JOptionPane.showConfirmDialog(
+                        this,
+                        "Atualizarstatus do pedido para" + statusNovo + "?",
+                        "Confirmar atualização de status",
+                        JOptionPane.OK_CANCEL_OPTION
+                );
+
+                if (op != JOptionPane.OK_OPTION) {
+                    return;
+                }
+
+                pedidoService.atualizarStatus(pedidoId, statusNovo);
+                carregarPedidos(pedidoService.listarPorRestaurante(usuario.getId()));
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao atualizar status: " + ex.getMessage());
+            }
+        });
+
+        return painelPedidos;
+    }
+
+    public void carregarPedidos (List<Pedido> pedidos) {
+
+        modelPedidos.setRowCount(0);
+
+        for (Pedido p : pedidos) {
+            modelPedidos.addRow(new Object[]{
+                    p.getId(),
+                    p.getCliente().getNome(),
+                    p.getStatus(),
+                    String.format("R$ %.2f", p.getTotal()),
+                    p.getItens()
+            });
+
+        }
     }
 }
 

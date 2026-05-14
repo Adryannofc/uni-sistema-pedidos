@@ -47,4 +47,9 @@ public class ItemPedido {
     public int getQuantidade() { return quantidade; }
     public BigDecimal getPrecoUnitario() { return precoUnitario; }
     public BigDecimal calcularSubtotal() { return precoUnitario.multiply(BigDecimal.valueOf(quantidade)); }
+
+    @Override
+    public String toString() {
+        return nomeProduto;
+    }
 }
