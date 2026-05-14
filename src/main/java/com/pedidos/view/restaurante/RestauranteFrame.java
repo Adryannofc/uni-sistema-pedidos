@@ -24,12 +24,15 @@ public class RestauranteFrame extends BaseFrame {
     private final AreaEntregaService areaEntregaService;
     private final HorarioService horarioService;
 
-    public RestauranteFrame( Usuario usuario,
-                             CategoriaService categoriaService,
-                             ProdutoService produtoService,
-                             RestauranteService restauranteService,
-                             AreaEntregaService areaEntregaService,
-                             HorarioService horarioService) {
+    private DefaultTableModel modelProdutos;
+    private CategoriaCardapio categoriaSelecionada;
+
+    public RestauranteFrame(Usuario usuario,
+                            CategoriaService categoriaService,
+                            ProdutoService produtoService,
+                            RestauranteService restauranteService,
+                            AreaEntregaService areaEntregaService,
+                            HorarioService horarioService) {
         super("Sistema de Delivery — Painel do Restaurante", 700, 500);
         this.usuario = usuario;
         this.categoriaService = categoriaService;
@@ -38,8 +41,7 @@ public class RestauranteFrame extends BaseFrame {
         this.areaEntregaService = areaEntregaService;
         this.horarioService = horarioService;
         construirInterface();
-        criarMenu();
-        criarAbas();
+        criarAbasMenu();
     }
 
     private void construirInterface() {
@@ -57,7 +59,7 @@ public class RestauranteFrame extends BaseFrame {
         nomeLabel.setFont(AppFonts.STATUS);
         nomeLabel.setForeground(AppColors.TEXTO_BRANCO);
 
-        header.add(titulo,    BorderLayout.WEST);
+        header.add(titulo, BorderLayout.WEST);
         header.add(nomeLabel, BorderLayout.EAST);
 
         JLabel centro = new JLabel("Área do restaurante — em desenvolvimento",
@@ -66,6 +68,23 @@ public class RestauranteFrame extends BaseFrame {
 
         JButton btnSair = new JButton("Sair");
         btnSair.addActionListener(e -> {
+
+            JPanel painelConfirmarSaida = new JPanel(new BorderLayout());
+            JLabel labelConfirmarSaida = new JLabel("Tem certeza que deseja sair?");
+            labelConfirmarSaida.setFont(AppFonts.LABEL);
+            painelConfirmarSaida.add(labelConfirmarSaida, BorderLayout.CENTER);
+
+            int option = JOptionPane.showConfirmDialog(
+                    this,
+                    painelConfirmarSaida,
+                    "Sair",
+                    JOptionPane.OK_CANCEL_OPTION
+            );
+
+            if (option != JOptionPane.OK_OPTION) {
+                return;
+            }
+
             SessionManager.getInstance().encerrarSessao();
             dispose();
             System.exit(0);
@@ -78,24 +97,7 @@ public class RestauranteFrame extends BaseFrame {
         add(rodape, BorderLayout.SOUTH);
     }
 
-    private void criarMenu() {
-
-        JMenuBar menuBar = new JMenuBar();
-
-        JMenu menuCardapio = new JMenu("Cardápio");
-        JMenu menuPedidos = new JMenu("Pedidos");
-        JMenu menuPerfil = new JMenu("Perfil");
-        JMenu menuLogout = new JMenu("Logout");
-
-        menuBar.add(menuCardapio);
-        menuBar.add(menuPedidos);
-        menuBar.add(menuPerfil);
-        menuBar.add(menuLogout);
-
-        setJMenuBar(menuBar);
-    }
-
-    private void criarAbas() {
+    private void criarAbasMenu() {
 
         JTabbedPane abas = new JTabbedPane();
 
@@ -106,7 +108,9 @@ public class RestauranteFrame extends BaseFrame {
         add(abas, BorderLayout.CENTER);
     }
 
-    /** --------------- ABA DE PEDIDOS ------------------- */
+    /**
+     * --------------- ABA DE PRODUTOS -------------------
+     */
 
     private JPanel criarPainelProdutos() {
 
@@ -122,19 +126,158 @@ public class RestauranteFrame extends BaseFrame {
         return painel;
     }
 
-    private JScrollPane criarTabelaDeCategorias() {
+    private static class FormularioProduto {
 
-        DefaultListModel<String> model = new DefaultListModel<>();
-        JList<String> listaCategorias = new JList<>(model);
+        JTextField campoNome = new JTextField();
+        JTextField campoDescricao = new JTextField();
+        JTextField campoPreco = new JTextField();
 
-        categoriaService.listarCategoriasCardapio(usuario.getId())
-                .forEach(c ->
-                        model.addElement(c.getNome()));
+        JComboBox<String> selecionadorCategoria = new JComboBox<>();
 
-        return new JScrollPane(listaCategorias);
+        JPanel painel = new JPanel(new GridLayout(0, 1));
     }
 
-    private JPanel criarTabelaDeProdutos () {
+
+    private FormularioProduto criarFormularioProduto() {
+
+        FormularioProduto form = new FormularioProduto();
+
+        form.selecionadorCategoria.addItem("Sem categoria");
+
+        categoriaService
+                .listarCategoriasCardapio(usuario.getId())
+                .forEach(c ->
+                        form.selecionadorCategoria.addItem(c.getNome())
+                );
+
+        form.painel.add(new JLabel("Nome:"));
+        form.painel.add(form.campoNome);
+
+        form.painel.add(new JLabel("Descrição:"));
+        form.painel.add(form.campoDescricao);
+
+        form.painel.add(new JLabel("Preço:"));
+        form.painel.add(form.campoPreco);
+
+        form.painel.add(new JLabel("Categoria:"));
+        form.painel.add(form.selecionadorCategoria);
+
+        return form;
+    }
+
+    private JPanel criarTabelaDeCategorias() {
+
+        JPanel painel = new JPanel(new BorderLayout());
+
+        DefaultListModel<CategoriaCardapio> model = new DefaultListModel<>();
+        JList<CategoriaCardapio> listaCategorias = new JList<>(model);
+
+        categoriaService.listarCategoriasCardapio(usuario.getId()).forEach(model::addElement);
+
+        JButton btnNovaCategoria = new JButton("+");
+        JButton btnListarTodos = new JButton("All");
+        JButton btnRemoverCategoria = new JButton("-");
+
+        JPanel painelBotoes = new JPanel(new GridLayout(1, 2, 5, 5));
+
+        painelBotoes.add(btnListarTodos);
+        painelBotoes.add(btnNovaCategoria);
+        painelBotoes.add(btnRemoverCategoria);
+
+
+        // -----------= Criar nova categoria =---------------
+        btnNovaCategoria.addActionListener(e -> {
+
+            String nome = JOptionPane.showInputDialog(
+                    this,
+                    "Nome da categoria:"
+            );
+
+            if (nome.isBlank()) {
+                return;
+            }
+
+            String descricao = JOptionPane.showInputDialog(
+                    this,
+                    "Descrição da Categoria:"
+            );
+
+            categoriaService.criarCategoriaCardapio(nome, descricao,  usuario.getId());
+
+            model.clear();
+
+            categoriaService
+                    .listarCategoriasCardapio(usuario.getId())
+                    .forEach(model::addElement);
+        });
+
+
+        // -------= Listar todas categorias =-------
+        btnListarTodos.addActionListener( e -> {
+
+            categoriaSelecionada = null;
+
+            carregarProdutos(categoriaSelecionada);
+
+        });
+
+        // ------------= Remover categoria =--------------
+        btnRemoverCategoria.addActionListener(e -> {
+
+            CategoriaCardapio categoria = listaCategorias.getSelectedValue();
+
+            if (categoria == null) {
+                JOptionPane.showMessageDialog(this, "Selecione uma categoria para remover.");
+                return;
+            }
+
+            JPanel painelConfirmarRemoverCategoria = new JPanel(new BorderLayout());
+            JLabel labelConfirmarRemoverCategoria = new JLabel("Tem certeza que deseja remover esta categoria?");
+            painelConfirmarRemoverCategoria.add(labelConfirmarRemoverCategoria, BorderLayout.CENTER);
+
+            int option = DialogJOptionPane("confirm", null,"Remover Categoria",
+                    painelConfirmarRemoverCategoria,
+                    DialogOptions.OK_CANCEL);
+
+            if (option != JOptionPane.OK_OPTION) {
+                return;
+            }
+
+            categoriaService.removerCategoriaCardapio(categoria.getId());
+
+            model.clear();
+
+            categoriaService
+                    .listarCategoriasCardapio(usuario.getId())
+                    .forEach(model::addElement);
+
+            categoriaSelecionada = null;
+
+            carregarProdutos(categoriaSelecionada);
+        });
+
+        // ---------= Selecionar categoria =----------------
+        listaCategorias.addListSelectionListener(e -> {
+
+            if (!e.getValueIsAdjusting()) {
+
+                categoriaSelecionada = listaCategorias.getSelectedValue();
+
+                if (categoriaSelecionada != null) {
+
+                    carregarProdutos(categoriaSelecionada);
+
+                }
+            }
+        });
+
+        painel.add(painelBotoes, BorderLayout.NORTH);
+        painel.add(new JScrollPane(listaCategorias), BorderLayout.CENTER);
+
+        return painel;
+    }
+
+    private JPanel criarTabelaDeProdutos() {
 
         JPanel painel = new JPanel(new BorderLayout());
 
@@ -146,9 +289,8 @@ public class RestauranteFrame extends BaseFrame {
                 "Status"
         };
 
-        DefaultTableModel model = new DefaultTableModel(atributos, 0);
-        JTable tabelaProdutos = new JTable(model);
-        carregarProdutos(model);
+        modelProdutos = new DefaultTableModel(atributos, 0);
+        JTable tabelaProdutos = new JTable(modelProdutos);
 
         JToolBar toolBarCrud = new JToolBar();
 
@@ -156,6 +298,8 @@ public class RestauranteFrame extends BaseFrame {
         JButton btnEditarProduto = new JButton("Editar");
         JButton btnAtivarProduto = new JButton("Ativar/Desativar");
         JButton btnRemoverProduto = new JButton("Remover");
+
+        carregarProdutos(null);
 
         toolBarCrud.add(btnNovoProduto);
         toolBarCrud.add(btnEditarProduto);
@@ -165,171 +309,148 @@ public class RestauranteFrame extends BaseFrame {
         painel.add(toolBarCrud, BorderLayout.NORTH);
         painel.add(new JScrollPane(tabelaProdutos), BorderLayout.CENTER);
 
-        /**------- Eventos ---------*/
+        /**-------------= Eventos =-----------------*/
 
 
         //  -------= Criar novo produto =----------------
-        btnNovoProduto.addActionListener (e -> {
+        btnNovoProduto.addActionListener(e -> {
 
-            JTextField campoNovoNome = new JTextField();
-            JTextField campoNovoDescricao = new JTextField();
-            JTextField campoNovoPreco = new JTextField();
+            FormularioProduto form = criarFormularioProduto();
 
-            JComboBox<String> selecionadorCategoria = new JComboBox<>();
+            int option = DialogJOptionPane("confirm", null,"Novo Produto", form.painel, DialogOptions.OK_CANCEL);
 
-            selecionadorCategoria.addItem("Sem categoria");
-
-            List<CategoriaCardapio> categoriasCardapio = categoriaService.listarCategoriasCardapio(usuario.getId());
-
-            categoriasCardapio.forEach(c -> selecionadorCategoria.addItem(c.getNome()));
-
-            JPanel painelNovoProduto = new JPanel(new GridLayout(0, 1));
-
-            painelNovoProduto.add(new JLabel("Nome:"));
-            painelNovoProduto.add(campoNovoNome);
-
-            painelNovoProduto.add(new JLabel("Descrição:"));
-            painelNovoProduto.add(campoNovoDescricao);
-
-            painelNovoProduto.add(new JLabel("Preço:"));
-            painelNovoProduto.add(campoNovoPreco);
-
-            painelNovoProduto.add(new JLabel("Categoria:"));
-            painelNovoProduto.add(selecionadorCategoria);
-
-            int option = JOptionPane.showConfirmDialog(
-                    this,
-                    painelNovoProduto,
-                    "Novo Produto",
-                    JOptionPane.OK_CANCEL_OPTION
-            );
-
-            if(option != JOptionPane.OK_OPTION) {
+            if (option != JOptionPane.OK_OPTION) {
                 return;
             }
 
-            String nome = campoNovoNome.getText();
-            String descricao = campoNovoDescricao.getText();
-            BigDecimal preco = new BigDecimal(campoNovoPreco.getText());
-            String categoriaSelecionada = (String) selecionadorCategoria.getSelectedItem();
+            if (form.campoNome.getText().isBlank()) {
+
+                DialogJOptionPane("message", "Nome obrigatório", "AVISO", null, DialogOptions.WARNING_MESSAGE);
+
+                return;
+            }
+
+            if (form.campoPreco.getText().isBlank()) {
+
+                DialogJOptionPane("message", "Preço obrigatório", "AVISO", null, DialogOptions.WARNING_MESSAGE);
+
+                return;
+            }
+
+            String categoriaEscolhida = (String) form.selecionadorCategoria.getSelectedItem();
             String categoriaId = null;
 
-            if(!categoriaSelecionada.equals("Sem categoria")) {
+            if (!categoriaEscolhida.equals("Sem categoria")) {
 
-                categoriaId = categoriasCardapio.stream()
-                        .filter(c -> c.getNome().equals(categoriaSelecionada))
+                categoriaId = categoriaService.listarCategoriasCardapio(usuario.getId())
+                        .stream()
+                        .filter(c -> c.getNome().equals(categoriaEscolhida))
                         .findFirst()
                         .orElseThrow(() -> new RuntimeException("Categoria não encontrada"))
                         .getId();
             }
 
-            produtoService.criarProduto(nome, descricao, preco ,categoriaId, usuario.getId());
-            carregarProdutos(model);
+            produtoService.criarProduto(form.campoNome.getText(), form.campoDescricao.getText(),
+                    new BigDecimal(form.campoPreco.getText()), categoriaId, usuario.getId());
+
+            carregarProdutos(categoriaSelecionada);
         });
 
 
-        // ---------------= Editar produto =----------------
+        // ------  -----= Editar produto =----------------
 
-        btnEditarProduto.addActionListener (e -> {
-            int linhaSelecionadaEditarProduto = tabelaProdutos.getSelectedRow();
+        btnEditarProduto.addActionListener(e -> {
 
-            if (linhaSelecionadaEditarProduto == -1) {
-                JOptionPane.showMessageDialog(this, "Selecione um produto.");
+            int ed = lerLinhaSelecionada(tabelaProdutos);
+
+            if (ed == -1) {
                 return;
             }
 
-            JTextField campoNovoNome = new JTextField();
-            JTextField campoNovoDescricao = new JTextField();
-            JTextField campoNovoPreco = new JTextField();
-
-            JComboBox<String> selecionadorCategoria = new JComboBox<>();
-
-            selecionadorCategoria.addItem("Sem categoria");
+            FormularioProduto form = criarFormularioProduto();
 
             List<CategoriaCardapio> categoriasCardapio = categoriaService.listarCategoriasCardapio(usuario.getId());
 
-            categoriasCardapio.forEach(c -> selecionadorCategoria.addItem(c.getNome()));
+            int option = DialogJOptionPane("confirm", null,"Editar Produto", form.painel, DialogOptions.OK_CANCEL);
 
-            JPanel painelNovoProduto = new JPanel(new GridLayout(0, 1));
-
-            painelNovoProduto.add(new JLabel("Nome:"));
-            painelNovoProduto.add(campoNovoNome);
-
-            painelNovoProduto.add(new JLabel("Descrição:"));
-            painelNovoProduto.add(campoNovoDescricao);
-
-            painelNovoProduto.add(new JLabel("Preço:"));
-            painelNovoProduto.add(campoNovoPreco);
-
-            painelNovoProduto.add(new JLabel("Categoria:"));
-            painelNovoProduto.add(selecionadorCategoria);
-
-            int option = JOptionPane.showConfirmDialog(
-                    this,
-                    painelNovoProduto,
-                    "Novo Produto",
-                    JOptionPane.OK_CANCEL_OPTION
-            );
-
-            if(option != JOptionPane.OK_OPTION) {
+            if (option != JOptionPane.OK_OPTION) {
                 return;
             }
 
-            String novoNome = campoNovoNome.getText();
-            String novoDescricao = campoNovoDescricao.getText();
-            BigDecimal novoPreco = new BigDecimal(campoNovoPreco.getText());
-            String categoriaSelecionada = (String) selecionadorCategoria.getSelectedItem();
+            if (form.campoNome.getText().isBlank()) {
+                form.campoNome.setText((String) tabelaProdutos.getValueAt(ed, 1));
+            }
+
+            if (form.campoDescricao.getText().isBlank()) {
+                form.campoDescricao.setText((String) tabelaProdutos.getValueAt(ed, 2));
+            }
+
+            if (form.campoPreco.getText().isBlank()) {
+                form.campoPreco.setText(tabelaProdutos.getValueAt(ed, 3).toString());
+            }
+
+            String categoriaEscolhida = (String) form.selecionadorCategoria.getSelectedItem();
             String novoCategoriaId = null;
 
-            if(!categoriaSelecionada.equals("Sem categoria")) {
+            if (!categoriaEscolhida.equals("Sem categoria")) {
 
                 novoCategoriaId = categoriasCardapio.stream()
-                        .filter(c -> c.getNome().equals(categoriaSelecionada))
+                        .filter(c -> c.getNome().equals(categoriaEscolhida))
                         .findFirst()
                         .orElseThrow(() -> new RuntimeException("Categoria não encontrada"))
                         .getId();
             }
 
-            produtoService.editarProduto((String) tabelaProdutos.getValueAt(linhaSelecionadaEditarProduto, 0),
-                                                    usuario.getId(), novoNome, novoDescricao, novoPreco, novoCategoriaId);
+            produtoService.editarProduto((String) tabelaProdutos.getValueAt(ed, 0),
+                    usuario.getId(), form.campoNome.getText(), form.campoDescricao.getText(),
+                    new BigDecimal(form.campoPreco.getText()), novoCategoriaId);
 
-            carregarProdutos(model);
-
+            carregarProdutos(categoriaSelecionada);
         });
 
 
         // ---------= Ativo ou Inativo --------------
 
-        btnAtivarProduto.addActionListener (e -> {
-            int linhaSelecionadaAtivarProduto = tabelaProdutos.getSelectedRow();
+        btnAtivarProduto.addActionListener(e -> {
 
-            if(linhaSelecionadaAtivarProduto == -1) {
-                JOptionPane.showMessageDialog(this, "Selecione um produto.");
-                return;
-            }
+            int a = lerLinhaSelecionada(tabelaProdutos);
 
-            String produtoId = (String) tabelaProdutos.getValueAt(linhaSelecionadaAtivarProduto, 0);
+            if (a == -1) { return; }
+
+            String produtoId = (String) tabelaProdutos.getValueAt(a, 0);
 
             produtoService.ativarInativar(produtoId, usuario.getId());
-            carregarProdutos(model);
+            carregarProdutos(categoriaSelecionada);
 
         });
 
-        btnRemoverProduto.addActionListener ( e -> {
 
-            int linhaSelecionadaRemoverProduto = tabelaProdutos.getSelectedRow();
+        // ----------= Remover produto =----------------
 
-            if (linhaSelecionadaRemoverProduto == -1) {
-                JOptionPane.showMessageDialog(this, "Selecione um produto.");
+        btnRemoverProduto.addActionListener(e -> {
+
+            JPanel painelConfirmarRemoverProduto = new JPanel(new BorderLayout());
+            JLabel labelConfirmarRemoverProduto = new JLabel("Tem certeza que deseja remover este produto?");
+            painelConfirmarRemoverProduto.add(labelConfirmarRemoverProduto, BorderLayout.CENTER);
+
+            int r = lerLinhaSelecionada(tabelaProdutos);
+
+            if (r == -1) { return; }
+
+            int option = DialogJOptionPane("confirm", null,"Remover Produto",
+                                            painelConfirmarRemoverProduto,
+                                            DialogOptions.OK_CANCEL);
+
+            if (option != JOptionPane.OK_OPTION) {
                 return;
             }
 
             produtoService.removerProduto(
-                    (String) tabelaProdutos.getValueAt(linhaSelecionadaRemoverProduto, 0),
+                    (String) tabelaProdutos.getValueAt(r, 0),
                     usuario.getId()
-            );;
+            );
 
-            carregarProdutos(model);
+            carregarProdutos(categoriaSelecionada);
 
         });
 
@@ -338,31 +459,88 @@ public class RestauranteFrame extends BaseFrame {
 
     // Metodo para carregar produtos
 
-    private void carregarProdutos (DefaultTableModel model) {
+    private void carregarProdutos(CategoriaCardapio categoria) {
 
-        model.setRowCount(0);
+        modelProdutos.setRowCount(0);
 
-        produtoService.listarPorRestaurante (usuario.getId())
-                .forEach(p -> model.addRow(new Object[]{
-                        p.getId(),
-                        p.getNome(),
-                        p.getDescricao(),
-                        p.getPreco(),
-                        p.isStatusAtivo() ? "Ativo" : "Inativo"
-                }));
+        if (categoria != null) {
+            produtoService.listarPorRestaurante(usuario.getId())
+                    .stream()
+                    .filter(p -> p.getCategoriaCardapioId() != null)
+                    .filter(p -> p.getCategoriaCardapioId().equals(categoria.getId()))
+                    .forEach(p -> modelProdutos.addRow(new Object[]{
+                            p.getId(),
+                            p.getNome(),
+                            p.getDescricao(),
+                            p.getPreco(),
+                            p.isStatusAtivo() ? "Ativo" : "Inativo"
+                    }));
+        } else {
+            produtoService.listarPorRestaurante(usuario.getId())
+                    .forEach(p -> modelProdutos.addRow(new Object[]{
+                            p.getId(),
+                            p.getNome(),
+                            p.getDescricao(),
+                            p.getPreco(),
+                            p.isStatusAtivo() ? "Ativo" : "Inativo"
+                    }));
+
+        }
+    }
+
+     //Metodo para ler coluna selecionada
+
+    private int lerLinhaSelecionada(JTable tabela){
+
+        int linhaSelecionada = tabela.getSelectedRow();
+
+        if (linhaSelecionada == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione um produto.");
+        }
+
+        return linhaSelecionada;
 
     }
 
-    private JScrollPane criarTabela() {
-
-        JTable tabela = new JTable();
-
-        return new JScrollPane(tabela);
+    public enum DialogOptions {
+        OK_CANCEL,
+        YES_NO,
+        WARNING_MESSAGE
     }
 
-    private void criarRodape() {
+    private int DialogJOptionPane(String typeShow,
+                                         String message,
+                                         String title,
+                                         JPanel painel,
+                                         DialogOptions option) {
 
+        int typeOption = switch (option) {
+
+            case YES_NO -> JOptionPane.YES_NO_OPTION;
+            case OK_CANCEL -> JOptionPane.OK_CANCEL_OPTION;
+            case WARNING_MESSAGE -> JOptionPane.WARNING_MESSAGE;
+
+        };
+
+        if (typeShow == "confirm") {
+            return JOptionPane.showConfirmDialog(
+                    this,
+                    painel,
+                    title,
+                    typeOption
+            );
+        }
+
+        if (typeShow == "message") {
+            JOptionPane.showMessageDialog(
+                    this,
+                    message,
+                    title,
+                    typeOption
+            );
+        }
+
+        return 0;
     }
-
-
 }
+

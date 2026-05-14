@@ -78,10 +78,7 @@ public class ProdutoService {
                 produto.setPreco(novoPreco);
             }
 
-            if (novaCategoriaCardapioId != null && !novaCategoriaCardapioId.isBlank()) {
-                produto.setCategoriaCardapioId(novaCategoriaCardapioId);
-            }
-
+            produto.setCategoriaCardapioId(novaCategoriaCardapioId);
             produtoRepository.salvar(produto);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
