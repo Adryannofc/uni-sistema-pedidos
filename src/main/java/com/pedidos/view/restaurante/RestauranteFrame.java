@@ -1,9 +1,7 @@
 package com.pedidos.view.restaurante;
 
 import com.pedidos.application.service.*;
-import com.pedidos.domain.entities.CategoriaCardapio;
-import com.pedidos.domain.entities.Pedido;
-import com.pedidos.domain.entities.Usuario;
+import com.pedidos.domain.entities.*;
 import com.pedidos.domain.enums.StatusPedido;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -13,6 +11,8 @@ import com.pedidos.view.util.session.SessionManager;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -296,7 +296,13 @@ public class RestauranteFrame extends BaseFrame {
                 "Status"
         };
 
-        modelProdutos = new DefaultTableModel(atributos, 0);
+        modelProdutos = new DefaultTableModel(atributos, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
         JTable tabelaProdutos = new JTable(modelProdutos);
 
         JToolBar toolBarCrud = new JToolBar();
@@ -374,26 +380,28 @@ public class RestauranteFrame extends BaseFrame {
                 return;
             }
 
+            String produtoId = (String) tabelaProdutos.getValueAt(ed, 0);
+            Produto produto = produtoService.buscarPorId(produtoId);
+
             FormularioProduto form = criarFormularioProduto();
+
+            form.campoNome.setText(produto.getNome());
+            form.campoDescricao.setText(produto.getDescricao());
+            form.campoPreco.setText(produto.getPreco().toString());
 
             List<CategoriaCardapio> categoriasCardapio = categoriaService.listarCategoriasCardapio(usuario.getId());
 
-            int option = DialogJOptionPane("confirm", null,"Editar Produto", form.painel, DialogOptions.OK_CANCEL);
+            String categoriaAtual = categoriasCardapio.stream()
+                    .filter(c -> c.getId().equals(produto.getCategoriaCardapioId()))
+                    .findFirst()
+                    .map(CategoriaCardapio::getNome)
+                    .orElse("Sem categoria");
 
+            form.selecionadorCategoria.setSelectedItem(categoriaAtual);
+
+            int option = DialogJOptionPane("confirm", null,"Editar Produto", form.painel, DialogOptions.OK_CANCEL);
             if (option != JOptionPane.OK_OPTION) {
                 return;
-            }
-
-            if (form.campoNome.getText().isBlank()) {
-                form.campoNome.setText((String) tabelaProdutos.getValueAt(ed, 1));
-            }
-
-            if (form.campoDescricao.getText().isBlank()) {
-                form.campoDescricao.setText((String) tabelaProdutos.getValueAt(ed, 2));
-            }
-
-            if (form.campoPreco.getText().isBlank()) {
-                form.campoPreco.setText(tabelaProdutos.getValueAt(ed, 3).toString());
             }
 
             String categoriaEscolhida = (String) form.selecionadorCategoria.getSelectedItem();
@@ -408,7 +416,18 @@ public class RestauranteFrame extends BaseFrame {
                         .getId();
             }
 
-            produtoService.editarProduto((String) tabelaProdutos.getValueAt(ed, 0),
+            int op = JOptionPane.showConfirmDialog(
+                    this,
+                    "Salvar alterações do produto?",
+                    "Confirmar edição",
+                    JOptionPane.OK_CANCEL_OPTION
+            );
+
+            if (op != JOptionPane.OK_OPTION) {
+                return;
+            }
+
+            produtoService.editarProduto(produtoId,
                     usuario.getId(), form.campoNome.getText(), form.campoDescricao.getText(),
                     new BigDecimal(form.campoPreco.getText()), novoCategoriaId);
 
@@ -555,17 +574,18 @@ public class RestauranteFrame extends BaseFrame {
         JPanel painelPedidos = new JPanel(new BorderLayout());
         JPanel painelAcoesPedidos = new JPanel();
 
+        JPanel painelDetalhesPedido = new JPanel(new BorderLayout());
+
         JComboBox<String> filtroStatus = new JComboBox<>();
         filtroStatus.addItem("Todos");
         filtroStatus.addItem("PENDENTE");
-        filtroStatus.addItem("PREPARANDO");
+        filtroStatus.addItem("EM_PREPARO");
         filtroStatus.addItem("SAIU_PARA_ENTREGA");
         filtroStatus.addItem("ENTREGUE");
 
         JButton btnFiltrarPedidos = new JButton("Filtrar");
 
         JComboBox<String> novoStatus = new JComboBox<>();
-        novoStatus.addItem("PENDENTE");
         novoStatus.addItem("EM_PREPARO");
         novoStatus.addItem("SAIU_PARA_ENTREGA");
         novoStatus.addItem("ENTREGUE");
@@ -580,9 +600,17 @@ public class RestauranteFrame extends BaseFrame {
         painelAcoesPedidos.add(novoStatus);
         painelAcoesPedidos.add(btnAtualizarStatus);
 
+        painelPedidos.add(painelDetalhesPedido, BorderLayout.EAST);
+
         // --- Construindo tabela de pedidos --- //
-        String[] atributos = { "ID", "Cliente", "Status", "Total", "Itens" };
-         modelPedidos = new DefaultTableModel(atributos, 0);
+        String[] atributos = { "ID", "Cliente", "Status" };
+         modelPedidos = new DefaultTableModel(atributos, 0) {
+             @Override
+             public boolean isCellEditable(int row, int column) {
+                 return false;
+             }
+         };
+
         JTable tabelaPedidos = new JTable(modelPedidos);
         JScrollPane scrollPedidos = new JScrollPane(tabelaPedidos);
 
@@ -603,6 +631,34 @@ public class RestauranteFrame extends BaseFrame {
                         .stream()
                         .filter(p -> p.getStatus().name().equals(statusSelecionado))
                         .toList());
+            }
+        });
+
+        tabelaPedidos.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    int linhaSelecionada = tabelaPedidos.getSelectedRow();
+                    if (linhaSelecionada != -1) {
+                        Pedido pedidoSelecionado = pedidoService.buscarPorId((String) tabelaPedidos.getValueAt(linhaSelecionada, 0));
+
+                        JButton btnVoltar = new JButton("Voltar");
+
+                        btnVoltar.addActionListener(ev -> {
+                            painelDetalhesPedido.removeAll();
+                            painelDetalhesPedido.revalidate();
+                            painelDetalhesPedido.repaint();
+                        });
+
+                        JTable tabelaDetalhesPedido = criarMostrarDetalhesPedido(pedidoSelecionado);
+
+                        painelDetalhesPedido.removeAll();
+                        painelDetalhesPedido.add(new JScrollPane(tabelaDetalhesPedido), BorderLayout.CENTER);
+                        painelDetalhesPedido.add(btnVoltar, BorderLayout.SOUTH);
+                        painelDetalhesPedido.revalidate();
+                        painelDetalhesPedido.repaint();
+                    }
+                }
             }
         });
 
@@ -641,6 +697,23 @@ public class RestauranteFrame extends BaseFrame {
         return painelPedidos;
     }
 
+    private JTable criarMostrarDetalhesPedido(Pedido pedido) {
+        String[] atributos = {"Produto", "Quantidade", "Preço Unitário", "Subtotal"};
+        DefaultTableModel modelDetalhesPedido = new DefaultTableModel(atributos, 0);
+        JTable tabelaDetalhes = new JTable(modelDetalhesPedido);
+
+        for (ItemPedido item : pedido.getItens()) {
+            modelDetalhesPedido.addRow(new Object[]{
+                    item.getNomeProduto(),
+                    item.getQuantidade(),
+                    item.getPrecoUnitario(),
+                    item.getPrecoUnitario().multiply(BigDecimal.valueOf(item.getQuantidade()))
+            });
+        }
+
+        return tabelaDetalhes;
+    }
+
     public void carregarPedidos (List<Pedido> pedidos) {
 
         modelPedidos.setRowCount(0);
@@ -651,7 +724,10 @@ public class RestauranteFrame extends BaseFrame {
                     p.getCliente().getNome(),
                     p.getStatus(),
                     String.format("R$ %.2f", p.getTotal()),
-                    p.getItens()
+                    p.getItens().stream()
+                            .map(i -> i.getNomeProduto() + " x" + i.getQuantidade())
+                            .reduce((a, b) -> a + ", " + b)
+                            .orElse("")
             });
 
         }

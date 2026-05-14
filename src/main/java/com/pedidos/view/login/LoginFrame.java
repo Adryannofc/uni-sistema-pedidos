@@ -276,7 +276,8 @@ public class LoginFrame extends BaseFrame {
                                                 produtoService,
                                                 restauranteService,
                                                 areaEntregaService,
-                                                horarioService, pedidoService);
+                                                horarioService,
+                                                        pedidoService);
 
             case CLIENTE     -> proximo = new ClienteFrame(usuario);
 
