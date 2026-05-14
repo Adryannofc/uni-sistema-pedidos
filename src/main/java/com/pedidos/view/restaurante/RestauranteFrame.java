@@ -36,7 +36,7 @@ public class RestauranteFrame extends BaseFrame {
                             RestauranteService restauranteService,
                             AreaEntregaService areaEntregaService,
                             HorarioService horarioService, PedidoService pedidoService) {
-        super("Sistema de Delivery — Painel do Restaurante", 700, 500);
+        super("Sistema de Delivery — Painel do Restaurante", 1000, 800);
         this.usuario = usuario;
         this.categoriaService = categoriaService;
         this.produtoService = produtoService;
@@ -71,6 +71,7 @@ public class RestauranteFrame extends BaseFrame {
         centro.setFont(AppFonts.LABEL);
 
         JButton btnSair = new JButton("Sair");
+        btnSair.setFont(AppFonts.BOTAO);
         btnSair.addActionListener(e -> {
 
             JPanel painelConfirmarSaida = new JPanel(new BorderLayout());
@@ -104,6 +105,7 @@ public class RestauranteFrame extends BaseFrame {
     private void criarAbasMenu() {
 
         JTabbedPane abas = new JTabbedPane();
+        abas.setFont(AppFonts.MENU);
 
         abas.addTab("Produtos", criarPainelProdutos());
         abas.addTab("Pedidos", criarPainelPedidos());
@@ -177,6 +179,7 @@ public class RestauranteFrame extends BaseFrame {
 
         DefaultListModel<CategoriaCardapio> model = new DefaultListModel<>();
         JList<CategoriaCardapio> listaCategorias = new JList<>(model);
+        listaCategorias.setFont(AppFonts.LABEL);
 
         categoriaService.listarCategoriasCardapio(usuario.getId()).forEach(model::addElement);
 
@@ -304,6 +307,9 @@ public class RestauranteFrame extends BaseFrame {
         };
 
         JTable tabelaProdutos = new JTable(modelProdutos);
+        tabelaProdutos.setFont(AppFonts.LABEL);
+        tabelaProdutos.getTableHeader().setFont(AppFonts.LABEL);
+        tabelaProdutos.setRowHeight(24);
 
         JToolBar toolBarCrud = new JToolBar();
 
@@ -311,6 +317,10 @@ public class RestauranteFrame extends BaseFrame {
         JButton btnEditarProduto = new JButton("Editar");
         JButton btnAtivarProduto = new JButton("Ativar/Desativar");
         JButton btnRemoverProduto = new JButton("Remover");
+        btnNovoProduto.setFont(AppFonts.BOTAO);
+        btnEditarProduto.setFont(AppFonts.BOTAO);
+        btnAtivarProduto.setFont(AppFonts.BOTAO);
+        btnRemoverProduto.setFont(AppFonts.BOTAO);
 
         carregarProdutos(null);
 
@@ -582,21 +592,30 @@ public class RestauranteFrame extends BaseFrame {
         filtroStatus.addItem("EM_PREPARO");
         filtroStatus.addItem("SAIU_PARA_ENTREGA");
         filtroStatus.addItem("ENTREGUE");
+        filtroStatus.setFont(AppFonts.LABEL);
 
         JButton btnFiltrarPedidos = new JButton("Filtrar");
+        btnFiltrarPedidos.setFont(AppFonts.BOTAO);
 
         JComboBox<String> novoStatus = new JComboBox<>();
         novoStatus.addItem("EM_PREPARO");
         novoStatus.addItem("SAIU_PARA_ENTREGA");
         novoStatus.addItem("ENTREGUE");
+        novoStatus.setFont(AppFonts.LABEL);
 
         JButton btnAtualizarStatus = new JButton("Atualizar Status");
+        btnAtualizarStatus.setFont(AppFonts.BOTAO);
 
-        painelAcoesPedidos.add(new JLabel("Filtro:"));
+        JLabel labelFiltro = new JLabel("Filtro:");
+        labelFiltro.setFont(AppFonts.LABEL);
+        JLabel labelNovoStatus = new JLabel("Novo status:");
+        labelNovoStatus.setFont(AppFonts.LABEL);
+
+        painelAcoesPedidos.add(labelFiltro);
         painelAcoesPedidos.add(filtroStatus);
         painelAcoesPedidos.add(btnFiltrarPedidos);
 
-        painelAcoesPedidos.add(new JLabel("Novo status:"));
+        painelAcoesPedidos.add(labelNovoStatus);
         painelAcoesPedidos.add(novoStatus);
         painelAcoesPedidos.add(btnAtualizarStatus);
 
@@ -612,6 +631,9 @@ public class RestauranteFrame extends BaseFrame {
          };
 
         JTable tabelaPedidos = new JTable(modelPedidos);
+        tabelaPedidos.setFont(AppFonts.LABEL);
+        tabelaPedidos.getTableHeader().setFont(AppFonts.LABEL);
+        tabelaPedidos.setRowHeight(24);
         JScrollPane scrollPedidos = new JScrollPane(tabelaPedidos);
 
         painelPedidos.add(painelAcoesPedidos, BorderLayout.NORTH);
@@ -643,6 +665,7 @@ public class RestauranteFrame extends BaseFrame {
                         Pedido pedidoSelecionado = pedidoService.buscarPorId((String) tabelaPedidos.getValueAt(linhaSelecionada, 0));
 
                         JButton btnVoltar = new JButton("Voltar");
+                        btnVoltar.setFont(AppFonts.BOTAO);
 
                         btnVoltar.addActionListener(ev -> {
                             painelDetalhesPedido.removeAll();
@@ -701,6 +724,9 @@ public class RestauranteFrame extends BaseFrame {
         String[] atributos = {"Produto", "Quantidade", "Preço Unitário", "Subtotal"};
         DefaultTableModel modelDetalhesPedido = new DefaultTableModel(atributos, 0);
         JTable tabelaDetalhes = new JTable(modelDetalhesPedido);
+        tabelaDetalhes.setFont(AppFonts.LABEL);
+        tabelaDetalhes.getTableHeader().setFont(AppFonts.LABEL);
+        tabelaDetalhes.setRowHeight(24);
 
         for (ItemPedido item : pedido.getItens()) {
             modelDetalhesPedido.addRow(new Object[]{
