@@ -83,8 +83,8 @@ public class RestauranteFrame extends BaseFrame {
 
         abas.addTab("Produtos",                  new PainelProdutos(usuario, produtoService, categoriaService));
         abas.addTab("Pedidos",                   new PainelPedidos(usuario, pedidoService));
-        abas.addTab("Áreas de Entrega",          new JPanel());
-        abas.addTab("Horários de funcionamento", new JPanel());
+        abas.addTab("Áreas de Entrega",          new PainelAreaEntrega(usuario, areaEntregaService));
+        abas.addTab("Horários de funcionamento", new PainelHorarios(usuario, horarioService));
         abas.addTab("Perfil",                    new JPanel());
 
         add(abas, BorderLayout.CENTER);
