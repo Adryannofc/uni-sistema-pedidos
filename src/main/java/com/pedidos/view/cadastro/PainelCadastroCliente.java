@@ -6,7 +6,9 @@ import com.pedidos.view.util.AppFonts;
 
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.text.MaskFormatter;
 import java.awt.*;
+import java.text.ParseException;
 
 /**
  * Etapa 2A do wizard — formulário de cadastro de Cliente.
@@ -17,11 +19,11 @@ public class PainelCadastroCliente extends JPanel {
     private final CadastroFrame  frame;
     private final ClienteService clienteService;
 
-    private JTextField     campoNome;
-    private JTextField     campoEmail;
-    private JTextField     campoCPF;
-    private JTextField     campoTelefone;
-    private JPasswordField campoSenha;
+    private JTextField          campoNome;
+    private JTextField          campoEmail;
+    private JFormattedTextField campoCPF;
+    private JFormattedTextField campoTelefone;
+    private JPasswordField      campoSenha;
 
     public PainelCadastroCliente(CadastroFrame frame, ClienteService clienteService) {
         this.frame          = frame;
@@ -31,7 +33,7 @@ public class PainelCadastroCliente extends JPanel {
         setBackground(AppColors.CINZA_FUNDO);
         setBorder(new EmptyBorder(20, 30, 20, 30));
 
-        add(criarFormulario(), BorderLayout.CENTER);
+        add(criarFormulario(),   BorderLayout.CENTER);
         add(criarPainelBotoes(), BorderLayout.SOUTH);
     }
 
@@ -42,16 +44,16 @@ public class PainelCadastroCliente extends JPanel {
         painel.setBackground(AppColors.CINZA_FUNDO);
         painel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(),
-                "Cadastro — Cliente",
+                "Cadastro de Cliente",
                 TitledBorder.DEFAULT_JUSTIFICATION,
                 TitledBorder.DEFAULT_POSITION,
-                AppFonts.LABEL,
-                AppColors.TEXTO_SECUNDARIO));
+                AppFonts.TITULO,
+                AppColors.CINZA_BORDA));
 
         campoNome     = new JTextField();
         campoEmail    = new JTextField();
-        campoCPF      = new JTextField();
-        campoTelefone = new JTextField();
+        campoCPF      = criarCampoMascarado("###.###.###-##");
+        campoTelefone = criarCampoMascarado("(##) #####-####");
         campoSenha    = new JPasswordField();
 
         campoNome.setFont(AppFonts.CAMPO);
@@ -113,6 +115,18 @@ public class PainelCadastroCliente extends JPanel {
         painel.add(btnCancelar);
         painel.add(btnCadastrar);
         return painel;
+    }
+
+    // ── helper de máscara ─────────────────────────────────────────────────────
+
+    private JFormattedTextField criarCampoMascarado(String mascara) {
+        try {
+            MaskFormatter fmt = new MaskFormatter(mascara);
+            fmt.setPlaceholderCharacter('_');
+            return new JFormattedTextField(fmt);
+        } catch (ParseException e) {
+            return new JFormattedTextField();
+        }
     }
 
     // ── ações ─────────────────────────────────────────────────────────────────
