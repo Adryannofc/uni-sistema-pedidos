@@ -13,7 +13,7 @@ public class AdminFrame extends BaseFrame {
     private final Usuario usuario;
 
     public AdminFrame(Usuario usuario) {
-        super("Sistema de Delivery — Painel Administrativo", 700, 500);
+        super("Sistema de Delivery — Painel Administrativo");
         this.usuario = usuario;
         construirInterface();
     }

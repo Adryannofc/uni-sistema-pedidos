@@ -94,7 +94,7 @@ public class ClienteFrame extends BaseFrame {
                         PedidoService pedidoService,
                         CarrinhoManager carrinho,
                         Runnable acaoLogout) {
-        super("Sistema Delivery — " + usuario.getNome() + " | Cliente", 1200, 750);
+        super("Sistema Delivery — " + usuario.getNome() + " | Cliente");
         this.usuario            = usuario;
         this.cliente            = cliente;
         this.clienteService     = clienteService;

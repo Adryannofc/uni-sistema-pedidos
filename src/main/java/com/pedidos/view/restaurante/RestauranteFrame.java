@@ -27,7 +27,7 @@ public class RestauranteFrame extends BaseFrame {
                             AreaEntregaService areaEntregaService,
                             HorarioService horarioService,
                             PedidoService pedidoService) {
-        super("Sistema de Delivery — Painel do Restaurante", 1000, 800);
+        super("Sistema de Delivery — Painel do Restaurante");
         this.usuario = usuario;
         this.categoriaService = categoriaService;
         this.produtoService = produtoService;
