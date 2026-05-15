@@ -10,6 +10,8 @@ import com.pedidos.view.util.session.CarrinhoManager;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -18,7 +20,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -39,6 +45,9 @@ public class ClienteFrame extends BaseFrame {
 
     // ─── Sessão de carrinho ───────────────────────────────────────
     private final CarrinhoManager carrinho;
+
+    // ─── Callback de logout ───────────────────────────────────────
+    private final Runnable acaoLogout;
 
     // ─── Formatação ───────────────────────────────────────────────
     private final NumberFormat       moedaBR = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
@@ -83,7 +92,8 @@ public class ClienteFrame extends BaseFrame {
                         RestauranteService restauranteService,
                         ProdutoService produtoService,
                         PedidoService pedidoService,
-                        CarrinhoManager carrinho) {
+                        CarrinhoManager carrinho,
+                        Runnable acaoLogout) {
         super("Sistema Delivery — " + usuario.getNome() + " | Cliente", 1200, 750);
         this.usuario            = usuario;
         this.cliente            = cliente;
@@ -93,6 +103,7 @@ public class ClienteFrame extends BaseFrame {
         this.produtoService     = produtoService;
         this.pedidoService      = pedidoService;
         this.carrinho           = carrinho;
+        this.acaoLogout         = acaoLogout;
         construirInterface();
     }
 
@@ -114,13 +125,35 @@ public class ClienteFrame extends BaseFrame {
         menuBar.setBackground(Color.WHITE);
         menuBar.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
 
-        for (String nome : new String[]{"Pedido", "Histórico", "Perfil", "Logout"}) {
-            JMenu m = new JMenu(nome);
-            m.setBackground(Color.WHITE);
-            m.setForeground(Color.BLACK);
-            m.setFont(AppFonts.MENU);
-            menuBar.add(m);
-        }
+        JMenu menuHistorico = new JMenu("Histórico");
+        menuHistorico.setBackground(Color.WHITE);
+        menuHistorico.setForeground(Color.BLACK);
+        menuHistorico.setFont(AppFonts.MENU);
+
+        JMenu menuLogout = new JMenu("Logout");
+        menuLogout.setBackground(Color.WHITE);
+        menuLogout.setForeground(Color.BLACK);
+        menuLogout.setFont(AppFonts.MENU);
+        menuLogout.addMenuListener(new MenuListener() {
+            @Override public void menuDeselected(MenuEvent e) {}
+            @Override public void menuCanceled(MenuEvent e) {}
+            @Override
+            public void menuSelected(MenuEvent e) {
+                menuLogout.setPopupMenuVisible(false);
+                Object[] opcoes = {"Sim", "Não"};
+                int r = JOptionPane.showOptionDialog(ClienteFrame.this,
+                        "Deseja sair do sistema?", "Confirmar Logout",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+                        null, opcoes, opcoes[0]);
+                if (r == JOptionPane.YES_OPTION) {
+                    carrinho.esvaziar();
+                    SwingUtilities.invokeLater(() -> acaoLogout.run());
+                }
+            }
+        });
+
+        menuBar.add(menuHistorico);
+        menuBar.add(menuLogout);
         setJMenuBar(menuBar);
 
         JPanel header = new JPanel(new BorderLayout());
@@ -240,7 +273,7 @@ public class ClienteFrame extends BaseFrame {
         titulo.setFont(AppFonts.TITULO);
         titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 6, 0));
 
-        String[] colunas = {"Restaurante", "Categoria", "★"};
+        String[] colunas = {"Restaurante", "Categoria", "Status", "Horário hoje"};
         modelRestaurantes = new DefaultTableModel(colunas, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -254,18 +287,20 @@ public class ClienteFrame extends BaseFrame {
         tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         configurarHeader(tabela);
-        tabela.getColumnModel().getColumn(0).setPreferredWidth(340);
-        tabela.getColumnModel().getColumn(1).setPreferredWidth(200);
-        tabela.getColumnModel().getColumn(2).setPreferredWidth(40);
+        tabela.getColumnModel().getColumn(0).setPreferredWidth(280);
+        tabela.getColumnModel().getColumn(1).setPreferredWidth(150);
+        tabela.getColumnModel().getColumn(2).setPreferredWidth(100);
+        tabela.getColumnModel().getColumn(3).setPreferredWidth(120);
 
-        // Renderer estrela favorito
+        // Renderer coluna Status — ●Aberto verde / ●Fechado vermelho
         tabela.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable t, Object value,
                                                            boolean sel, boolean foc, int row, int col) {
                 JLabel lbl = (JLabel) super.getTableCellRendererComponent(t, value, sel, foc, row, col);
                 lbl.setHorizontalAlignment(SwingConstants.CENTER);
-                lbl.setForeground("★".equals(value) ? new Color(255, 160, 0) : Color.LIGHT_GRAY);
+                boolean aberto = "● Aberto".equals(value);
+                lbl.setForeground(aberto ? new Color(0, 150, 0) : new Color(200, 0, 0));
                 return lbl;
             }
         });
@@ -282,17 +317,8 @@ public class ClienteFrame extends BaseFrame {
                 if (row >= restaurantes.size()) return;
                 Restaurante r = restaurantes.get(row);
 
-                if (col == 2) {
-                    // Toggle favorito — igual ao MenuCliente.acaoEscolherRestaurante opção 2
-                    clienteService.favoritar(cliente, r);
-                    boolean agora = cliente.getFavoritos().contains(r);
-                    modelRestaurantes.setValueAt(agora ? "★" : " ", row, 2);
-                    return;
-                }
-
-                // Clique simples em qualquer outra coluna → seleciona restaurante e abre cardápio
-                // (equivalente ao duplo-clique anterior, simplificado conforme MenuCliente)
-                if (e.getClickCount() >= 1 && col != 2) {
+                // Clique simples → seleciona restaurante e abre cardápio
+                if (e.getClickCount() >= 1) {
                     if (!carrinho.estaVazio() &&
                             !carrinho.getRestauranteId().equals(r.getId())) {
                         int op = JOptionPane.showConfirmDialog(ClienteFrame.this,
@@ -316,10 +342,10 @@ public class ClienteFrame extends BaseFrame {
         scroll.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
 
         // Botões de ação abaixo da lista
-        JButton btnVerCardapio = new JButton("Ver Cardápio");
-        JButton btnFavoritar   = new JButton("☆ Favoritar");
+        JButton btnVerCardapio  = new JButton("Ver Cardápio");
+        JButton btnVerHorarios  = new JButton("● Ver Horários");
         btnVerCardapio.setFont(AppFonts.BOTAO);
-        btnFavoritar.setFont(AppFonts.BOTAO);
+        btnVerHorarios.setFont(AppFonts.BOTAO);
 
         btnVerCardapio.addActionListener(e -> {
             int row = tabela.getSelectedRow();
@@ -345,37 +371,33 @@ public class ClienteFrame extends BaseFrame {
             cardLayoutFazerPedido.show(centroPainelFazerPedido, "CARDAPIO");
         });
 
-        btnFavoritar.addActionListener(e -> {
+        btnVerHorarios.addActionListener(e -> {
             int row = tabela.getSelectedRow();
             if (row < 0) {
                 JOptionPane.showMessageDialog(ClienteFrame.this,
-                        "Selecione um restaurante para favoritar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                        "Selecione um restaurante para ver os horários.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             List<Restaurante> restaurantes = restauranteService.buscarRestaurantesAtivos();
             if (row >= restaurantes.size()) return;
             Restaurante r = restaurantes.get(row);
-            clienteService.favoritar(cliente, r);
-            boolean agora = cliente.getFavoritos().contains(r);
-            modelRestaurantes.setValueAt(agora ? "★" : " ", row, 2);
-            btnFavoritar.setText(agora ? "★ Desfavoritar" : "☆ Favoritar");
-        });
-
-        tabela.getSelectionModel().addListSelectionListener(e -> {
-            if (e.getValueIsAdjusting()) return;
-            int row = tabela.getSelectedRow();
-            if (row < 0) { btnFavoritar.setText("☆ Favoritar"); return; }
-            List<Restaurante> restaurantes = restauranteService.buscarRestaurantesAtivos();
-            if (row < restaurantes.size()) {
-                boolean fav = cliente.getFavoritos().contains(restaurantes.get(row));
-                btnFavoritar.setText(fav ? "★ Desfavoritar" : "☆ Favoritar");
-            }
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm");
+            StringBuilder sb = new StringBuilder("Horários de funcionamento — ").append(r.getNome()).append("\n\n");
+            r.getHorarios().stream()
+                    .sorted(Comparator.comparing(HorarioFuncionamento::getDiaSemana))
+                    .forEach(h -> sb.append(String.format("%-16s %s – %s%n",
+                            traduzirDia(h.getDiaSemana()),
+                            h.getHoraInicio().format(fmt),
+                            h.getHoraFim().format(fmt))));
+            if (r.getHorarios().isEmpty()) sb.append("Sem horários cadastrados.");
+            JOptionPane.showMessageDialog(ClienteFrame.this, sb.toString(),
+                    "Horários", JOptionPane.INFORMATION_MESSAGE);
         });
 
         JPanel acoesBaixo = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         acoesBaixo.setBackground(Color.WHITE);
         acoesBaixo.add(btnVerCardapio);
-        acoesBaixo.add(btnFavoritar);
+        acoesBaixo.add(btnVerHorarios);
 
         painel.add(titulo,     BorderLayout.NORTH);
         painel.add(scroll,     BorderLayout.CENTER);
@@ -385,16 +407,41 @@ public class ClienteFrame extends BaseFrame {
         return painel;
     }
 
-    /** Carrega restaurantes ativos no model — equivalente ao acaoEscolherRestaurante do MenuCliente. */
+    /** Carrega restaurantes ativos no model com status e horário de hoje. */
     private void carregarRestaurantes() {
         modelRestaurantes.setRowCount(0);
+        DayOfWeek hoje = LocalDate.now().getDayOfWeek();
+        LocalTime agora = LocalTime.now();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm");
+
         for (Restaurante r : restauranteService.buscarRestaurantesAtivos()) {
-            // getCategoriaGlobal().getNome() conforme MenuCliente
             String categoria = r.getCategoriaGlobal() != null
                     ? r.getCategoriaGlobal().getNome() : "N/A";
-            String estrela = cliente.getFavoritos().contains(r) ? "★" : " ";
-            modelRestaurantes.addRow(new Object[]{r.getNome(), categoria, estrela});
+
+            Optional<HorarioFuncionamento> horarioHoje = r.getHorarios().stream()
+                    .filter(h -> h.getDiaSemana() == hoje)
+                    .findFirst();
+
+            boolean aberto  = horarioHoje.map(h -> h.contemHorario(agora)).orElse(false);
+            String status   = aberto ? "● Aberto" : "● Fechado";
+            String horario  = horarioHoje.map(h ->
+                    h.getHoraInicio().format(fmt) + " – " + h.getHoraFim().format(fmt))
+                    .orElse("–");
+
+            modelRestaurantes.addRow(new Object[]{r.getNome(), categoria, status, horario});
         }
+    }
+
+    private String traduzirDia(DayOfWeek dia) {
+        return switch (dia) {
+            case MONDAY    -> "Segunda-feira";
+            case TUESDAY   -> "Terça-feira";
+            case WEDNESDAY -> "Quarta-feira";
+            case THURSDAY  -> "Quinta-feira";
+            case FRIDAY    -> "Sexta-feira";
+            case SATURDAY  -> "Sábado";
+            case SUNDAY    -> "Domingo";
+        };
     }
 
     // ── Painel Carrinho (direita) ─────────────────────────────────

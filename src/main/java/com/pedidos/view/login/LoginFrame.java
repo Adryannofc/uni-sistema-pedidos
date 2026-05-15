@@ -302,7 +302,8 @@ public class LoginFrame extends BaseFrame {
                         restauranteService,
                         produtoService,
                         pedidoService,
-                        carrinho);
+                        carrinho,
+                        this::abrirTelaLogin);
             }
             default -> {
                 JOptionPane.showMessageDialog(this,
@@ -313,6 +314,17 @@ public class LoginFrame extends BaseFrame {
         }
 
         SessionManager.getInstance().trocarFrame(proximo);
+    }
+
+    private void abrirTelaLogin() {
+        SessionManager.getInstance().encerrarSessao();
+        LoginFrame novoLogin = new LoginFrame(
+                autenticacaoService, adminService, clienteService,
+                enderecoService, categoriaService, produtoService,
+                restauranteService, pedidoService, carrinho,
+                restauranteRepo, areaEntregaService, horarioService);
+        novoLogin.setVisible(true);
+        SessionManager.getInstance().trocarFrame(novoLogin);
     }
 
     private void cancelar() {

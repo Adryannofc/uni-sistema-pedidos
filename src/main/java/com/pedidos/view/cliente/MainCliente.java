@@ -41,19 +41,19 @@ public class MainCliente {
         HorarioFuncionamentoRepositoryJPA horarioRepo     = new HorarioFuncionamentoRepositoryJPA(em);
         EnderecoRepositoryJPA        enderecoRepo        = new EnderecoRepositoryJPA(em);
 
-        AutenticacaoService authService       = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
-        ClienteService      clienteService    = new ClienteService(clienteRepo, authService, adminRepo, restauranteRepo, enderecoRepo);
+        AutenticacaoService authService        = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
+        ClienteService      clienteService     = new ClienteService(clienteRepo, authService, adminRepo, restauranteRepo, enderecoRepo);
         RestauranteService  restauranteService = new RestauranteService(restauranteRepo, categoriaGlobalRepo, authService);
-        ProdutoService      produtoService    = new ProdutoService(produtoRepo, restauranteRepo);
-        PedidoService       pedidoService     = new PedidoService(pedidoRepo, horarioRepo);
+        ProdutoService      produtoService     = new ProdutoService(produtoRepo, restauranteRepo);
+        PedidoService       pedidoService      = new PedidoService(pedidoRepo, horarioRepo);
+        EnderecoService     enderecoService    = new EnderecoService(enderecoRepo);
+        CarrinhoManager     carrinho           = new CarrinhoManager();
 
         Usuario usuario = authService.autenticar(DEV_EMAIL, DEV_SENHA);
 
         if (!(usuario instanceof Cliente cliente)) {
             throw new RuntimeException("Usuário não é um Cliente. Email: " + DEV_EMAIL);
         }
-
-        CarrinhoManager carrinho = new CarrinhoManager();
 
         SwingUtilities.invokeLater(() -> {
             try {
@@ -64,11 +64,12 @@ public class MainCliente {
                     usuario,
                     cliente,
                     clienteService,
-                    new EnderecoService(enderecoRepo),
+                    enderecoService,
                     restauranteService,
                     produtoService,
                     pedidoService,
-                    carrinho
+                    carrinho,
+                    () -> { carrinho.esvaziar(); System.exit(0); }
             );
             frame.setVisible(true);
         });
