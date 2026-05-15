@@ -13,7 +13,6 @@ import javax.swing.*;
 public class MainSwing {
     public static void main(String[] args) {
 
-        // 1. Infraestrutura fora da EDT (operação pesada — conecta ao banco)
         try {
             FlyWayconfig.migrate();
         } catch (Exception e) {
@@ -44,7 +43,6 @@ public class MainSwing {
         HorarioService horarioService = new HorarioService(horarioFuncionamentoRepo);
         AreaEntregaService areaEntregaService = new AreaEntregaService(areaRepo);
 
-        // 2. UI na EDT
         SwingUtilities.invokeLater(() -> {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
