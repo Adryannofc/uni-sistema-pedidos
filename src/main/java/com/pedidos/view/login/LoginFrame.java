@@ -28,6 +28,10 @@ public class LoginFrame extends BaseFrame {
     public LoginFrame(AutenticacaoService autenticacaoService) {
         super("Sistema de Delivery - Login", 500, 310);
         this.autenticacaoService = autenticacaoService;
+
+        if (this.autenticacaoService == null) {
+            System.err.println("ERRO CRÍTICO: O serviço chegou nulo no LoginFrame!");
+        }
         construirInterface();
     }
 
@@ -236,7 +240,7 @@ public class LoginFrame extends BaseFrame {
         JFrame proximo;
 
         switch (tipo) {
-            case ADMIN       -> proximo = new AdminFrame(usuario);
+            case ADMIN       -> proximo = new AdminFrame(usuario, autenticacaoService);
             case RESTAURANTE -> proximo = new RestauranteFrame(usuario);
             case CLIENTE     -> proximo = new ClienteFrame(usuario);
             default -> {
