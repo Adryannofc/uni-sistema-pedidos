@@ -42,6 +42,7 @@ public class MainSwing {
         PedidoService pedidoService = new PedidoService(pedidoRepo, horarioFuncionamentoRepo);
         HorarioService horarioService = new HorarioService(horarioFuncionamentoRepo);
         AreaEntregaService areaEntregaService = new AreaEntregaService(areaRepo);
+        CarrinhoManager carrinhoManager = new CarrinhoManager();
 
         SwingUtilities.invokeLater(() -> {
             try {
@@ -57,7 +58,7 @@ public class MainSwing {
                     produtoService,
                     restauranteService,
                     pedidoService,
-                    new CarrinhoManager(),
+                    carrinhoManager,
                     restauranteRepo,
                     areaEntregaService,
                     horarioService);
