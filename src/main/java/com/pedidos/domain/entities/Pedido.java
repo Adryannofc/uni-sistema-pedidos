@@ -86,9 +86,10 @@ public class Pedido {
     }
 
     public BigDecimal calcularTotal() {
-        return itens.stream()
-                .map(item -> item.calcularSubtotal())
+        this.total = itens.stream()
+                .map(ItemPedido::calcularSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .add(taxaEntrega);
+        return this.total;
     }
 }

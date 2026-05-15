@@ -105,6 +105,7 @@ $RECYCLE.BIN/
 .idea/.claude/
 CLAUDE.md
 .anthropic/
+.claude
 
 # =============================================
 # IA EM GERAL (Cursor, Codeium, Tabnine...)

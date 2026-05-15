@@ -16,22 +16,11 @@ public class EnderecoRepositoryJPA implements EnderecoRepository {
     public void salvar(Endereco endereco) {
         try {
             em.getTransaction().begin();
-            em.persist(endereco);
-            em.getTransaction().commit();
-        } catch (Exception e){
-            em.getTransaction().rollback();
-            throw new RuntimeException("Erro ao salvar o usuário", e);
-        }
-    }
-
-    public void atualizar(Endereco endereco) {
-        try {
-            em.getTransaction().begin();
             em.merge(endereco);
             em.getTransaction().commit();
         } catch (Exception e){
             em.getTransaction().rollback();
-            throw new RuntimeException("Erro em atualizar o usuário", e);
+            throw new RuntimeException("Erro ao salvar o usuário", e);
         }
     }
 
@@ -55,6 +44,19 @@ public class EnderecoRepositoryJPA implements EnderecoRepository {
     public Optional<Endereco> buscarPorCliente(String clienteId) {
         try {
             return Optional.ofNullable(em.createQuery("select e from Endereco e where e.cliente.id = :cid", Endereco.class)
+                    .setParameter("cid", clienteId)
+                    .getSingleResult()
+            );
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+
+    }
+
+    @Override
+    public Optional<Endereco> buscarPadraoDoCliente(String clienteId) {
+        try {
+            return Optional.ofNullable(em.createQuery("select e from Endereco e where e.cliente.id = :cid and e.isPadrao = true", Endereco.class)
                     .setParameter("cid", clienteId)
                     .getSingleResult()
             );
