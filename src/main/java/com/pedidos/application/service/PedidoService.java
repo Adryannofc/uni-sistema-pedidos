@@ -2,8 +2,8 @@ package com.pedidos.application.service;
 
 import com.pedidos.domain.enums.StatusPedido;
 import com.pedidos.domain.entities.*;
+import com.pedidos.domain.repository.HorarioFuncionamentoRepository;
 import com.pedidos.domain.repository.PedidoRepository;
-import com.pedidos.infra.repository.impl.PedidoRepositoryJPA;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
@@ -188,5 +188,34 @@ public class PedidoService {
         return pedidoRepository.buscarHistoricoFinalizado(restauranteId);
     }
 
+    /**
+     * Verifica se um restaurante está aberto no momento atual.
+     *
+     * @param restauranteId id do restaurante
+     * @return true se o restaurante está aberto, false caso contrário
+     */
+    private boolean isRestauranteAberto(String restauranteId) {
+        try {
+            DayOfWeek hoje = LocalDate.now().getDayOfWeek();
+            LocalTime agora = LocalTime.now();
 
+            List<HorarioFuncionamento> horarios = horarioRepository.buscarPorRestauranteId(restauranteId);
+
+            if (horarios == null || horarios.isEmpty()) {
+                throw new IllegalStateException("Restaurante sem horários de funcionamento cadastrados. Tente novamente mais tarde.");
+            }
+
+            boolean temHorarioHoje = horarios.stream()
+                    .filter(h -> h.getDiaSemana() == hoje)
+                    .anyMatch(h -> h.contemHorario(agora));
+
+            if (!temHorarioHoje) {
+                throw new IllegalStateException("Restaurante fechado no momento. Consulte os horários de funcionamento.");
+            }
+
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao verificar horário de funcionamento: " + e.getMessage(), e);
+        }
+    }
 }
