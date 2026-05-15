@@ -1,6 +1,7 @@
 package com.pedidos.view.login;
 
 import com.pedidos.application.service.*;
+import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.domain.entities.Usuario;
 import com.pedidos.domain.enums.TipoUsuario;
 import com.pedidos.domain.repository.RestauranteRepository;
@@ -283,7 +284,8 @@ public class LoginFrame extends BaseFrame {
                     restauranteService,
                     areaEntregaService,
                     horarioService,
-                    pedidoService);
+                    pedidoService,
+                    autenticacaoService);
             case CLIENTE     -> proximo = new ClienteFrame(usuario);
             default -> {
                 JOptionPane.showMessageDialog(this,

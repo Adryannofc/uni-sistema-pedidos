@@ -1,6 +1,7 @@
 package com.pedidos.view.restaurante;
 
 import com.pedidos.application.service.*;
+import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.domain.entities.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -19,6 +20,7 @@ public class RestauranteFrame extends BaseFrame {
     private final AreaEntregaService areaEntregaService;
     private final HorarioService horarioService;
     private final PedidoService pedidoService;
+    private final AutenticacaoService autenticacaoService;
 
     public RestauranteFrame(Usuario usuario,
                             CategoriaService categoriaService,
@@ -26,7 +28,8 @@ public class RestauranteFrame extends BaseFrame {
                             RestauranteService restauranteService,
                             AreaEntregaService areaEntregaService,
                             HorarioService horarioService,
-                            PedidoService pedidoService) {
+                            PedidoService pedidoService,
+                            AutenticacaoService autenticacaoService) {
         super("Sistema de Delivery — Painel do Restaurante", 1000, 800);
         this.usuario = usuario;
         this.categoriaService = categoriaService;
@@ -35,6 +38,7 @@ public class RestauranteFrame extends BaseFrame {
         this.areaEntregaService = areaEntregaService;
         this.horarioService = horarioService;
         this.pedidoService = pedidoService;
+        this.autenticacaoService = autenticacaoService;
         construirInterface();
         criarAbas();
     }
@@ -85,7 +89,7 @@ public class RestauranteFrame extends BaseFrame {
         abas.addTab("Pedidos",                   new PainelPedidos(usuario, pedidoService));
         abas.addTab("Áreas de Entrega",          new JPanel());
         abas.addTab("Horários de funcionamento", new JPanel());
-        abas.addTab("Perfil",                    new JPanel());
+        abas.addTab("Perfil",                    new PainelPerfil(usuario, autenticacaoService, restauranteService));
 
         add(abas, BorderLayout.CENTER);
     }
