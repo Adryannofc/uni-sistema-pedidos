@@ -36,7 +36,7 @@ public class PainelPedidos extends JPanel {
         // Filtro de status
         JComboBox<String> filtroStatus = new JComboBox<>();
         filtroStatus.addItem("Todos");
-        filtroStatus.addItem("PENDENTE");
+        filtroStatus.addItem("AGUARDANDO_CONFIMACAO");
         filtroStatus.addItem("EM_PREPARO");
         filtroStatus.addItem("SAIU_PARA_ENTREGA");
         filtroStatus.addItem("ENTREGUE");
@@ -47,6 +47,7 @@ public class PainelPedidos extends JPanel {
 
         // Atualização de status
         JComboBox<String> novoStatus = new JComboBox<>();
+        novoStatus.addItem("CANCELADO");
         novoStatus.addItem("EM_PREPARO");
         novoStatus.addItem("SAIU_PARA_ENTREGA");
         novoStatus.addItem("ENTREGUE");
