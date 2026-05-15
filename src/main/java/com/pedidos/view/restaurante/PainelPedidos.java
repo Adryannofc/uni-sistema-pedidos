@@ -167,7 +167,10 @@ public class PainelPedidos extends JPanel {
 
     private JTable criarTabelaDetalhes(Pedido pedido) {
         String[] atributos = { "Produto", "Quantidade", "Preço Unitário", "Subtotal" };
-        DefaultTableModel model = new DefaultTableModel(atributos, 0);
+        DefaultTableModel model = new DefaultTableModel(atributos, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }};
+
         JTable tabela = new JTable(model);
         tabela.setFont(AppFonts.LABEL);
         tabela.getTableHeader().setFont(AppFonts.LABEL);

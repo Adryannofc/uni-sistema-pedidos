@@ -153,11 +153,11 @@ public class PainelProdutos extends JPanel {
             if (option != JOptionPane.OK_OPTION) return;
 
             if (form.campoNome.getText().isBlank()) {
-                JOptionPane.showMessageDialog(this, "Nome obrigatório", "AVISO", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Nome obrigatório!", "AVISO", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             if (form.campoPreco.getText().isBlank()) {
-                JOptionPane.showMessageDialog(this, "Preço obrigatório", "AVISO", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Preço obrigatório!", "AVISO", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -165,6 +165,9 @@ public class PainelProdutos extends JPanel {
             produtoService.criarProduto(form.campoNome.getText(), form.campoDescricao.getText(),
                     new BigDecimal(form.campoPreco.getText()), categoriaId, usuario.getId());
             carregarProdutos(categoriaSelecionada);
+
+            JOptionPane.showMessageDialog(painel, "Produto criado!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
         });
 
         // Editar produto
@@ -191,14 +194,25 @@ public class PainelProdutos extends JPanel {
             int option = JOptionPane.showConfirmDialog(this, form.painel, "Editar Produto", JOptionPane.OK_CANCEL_OPTION);
             if (option != JOptionPane.OK_OPTION) return;
 
-            int confirmacao = JOptionPane.showConfirmDialog(this, "Salvar alterações do produto?",
-                    "Confirmar edição", JOptionPane.OK_CANCEL_OPTION);
-            if (confirmacao != JOptionPane.OK_OPTION) return;
+            if (form.campoNome.getText().equals(produto.getNome()) && form.campoDescricao.getText().equals(produto.getDescricao()) &&
+                    form.campoPreco.getText().equals(produto.getPreco().toString()) &&
+                    form.selecionadorCategoria.getSelectedItem().equals(categoriaAtual)) {
+                JOptionPane.showMessageDialog(this, "Nenhuma alteração detectada!", "AVISO", JOptionPane.WARNING_MESSAGE);
+                return;
+            } else {
+                int confirmacao = JOptionPane.showConfirmDialog(this, "Salvar alterações do produto?",
+                        "Confirmar edição", JOptionPane.OK_CANCEL_OPTION);
+
+                if (confirmacao != JOptionPane.OK_OPTION) return;
+            }
 
             String novaCategoriaId = resolverCategoriaId(form);
             produtoService.editarProduto(produtoId, usuario.getId(), form.campoNome.getText(),
                     form.campoDescricao.getText(), new BigDecimal(form.campoPreco.getText()), novaCategoriaId);
             carregarProdutos(categoriaSelecionada);
+
+            JOptionPane.showMessageDialog(painel, "Produto modificado!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
         });
 
         // Ativar/Desativar produto
@@ -206,8 +220,16 @@ public class PainelProdutos extends JPanel {
             int linha = lerLinhaSelecionada(tabelaProdutos);
             if (linha == -1) return;
 
+            int option = JOptionPane.showConfirmDialog(this,
+                    "Ativar ou Desativar este produto?",
+                    "Ativar/Desativar Produto", JOptionPane.OK_CANCEL_OPTION);
+            if (option != JOptionPane.OK_OPTION) return;
+
             produtoService.ativarInativar((String) tabelaProdutos.getValueAt(linha, 0), usuario.getId());
             carregarProdutos(categoriaSelecionada);
+
+            JOptionPane.showMessageDialog(painel, "Ativação/Desativação realiza!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
         });
 
         // Remover produto
@@ -218,10 +240,13 @@ public class PainelProdutos extends JPanel {
             int option = JOptionPane.showConfirmDialog(this,
                     "Tem certeza que deseja remover este produto?",
                     "Remover Produto", JOptionPane.OK_CANCEL_OPTION);
+
             if (option != JOptionPane.OK_OPTION) return;
 
             produtoService.removerProduto((String) tabelaProdutos.getValueAt(linha, 0), usuario.getId());
             carregarProdutos(categoriaSelecionada);
+
+            JOptionPane.showMessageDialog(painel, "Produto removido!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
         });
 
         return painel;
@@ -237,11 +262,11 @@ public class PainelProdutos extends JPanel {
 
         form.painel.add(new JLabel("Nome:"));
         form.painel.add(form.campoNome);
-        form.painel.add(new JLabel("Descrição:"));
+        form.painel.add(new JLabel("Descrição(Opcional):"));
         form.painel.add(form.campoDescricao);
         form.painel.add(new JLabel("Preço:"));
         form.painel.add(form.campoPreco);
-        form.painel.add(new JLabel("Categoria:"));
+        form.painel.add(new JLabel("Categoria(Opcional):"));
         form.painel.add(form.selecionadorCategoria);
         return form;
     }

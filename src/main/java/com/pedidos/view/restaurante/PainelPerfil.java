@@ -4,8 +4,11 @@ import com.pedidos.application.service.AutenticacaoService;
 import com.pedidos.application.service.RestauranteService;
 import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.domain.entities.Usuario;
+import com.pedidos.view.util.AppColors;
+import com.pedidos.view.util.AppFonts;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 
 public class PainelPerfil extends JPanel {
@@ -23,6 +26,7 @@ public class PainelPerfil extends JPanel {
 
     private void criarAbas() {
         JTabbedPane abasDados = new JTabbedPane();
+        abasDados.setFont(AppFonts.LABEL);
 
         restaurante = restauranteService.buscarRestaurantePorId(usuario.getId());
 
@@ -36,20 +40,26 @@ public class PainelPerfil extends JPanel {
     private JPanel criarFormularioDados() {
 
         JPanel painel = new JPanel();
+        painel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+                "Dados:",
+                TitledBorder.DEFAULT_JUSTIFICATION,
+                TitledBorder.DEFAULT_POSITION,
+                AppFonts.LABEL,
+                AppColors.TEXTO_SECUNDARIO));
 
-        painel.add(new JLabel("Nome:"));
-        JTextField campoNome = new JTextField(usuario.getNome());
+        painel.add(rotulo("Nome:"));
+        JTextField campoNome = campo(restaurante.getNome());
         painel.add(campoNome);
 
-        painel.add(new JLabel("CNPJ:"));
-        JTextField campoCnpj = new JTextField(restaurante.getCnpj());
+        painel.add(rotulo("CNPJ:"));
+        JTextField campoCnpj = campo(restaurante.getCnpj());
         painel.add(campoCnpj);
 
-        painel.add(new JLabel("Telefone:"));
-        JTextField campoTelefone = new JTextField(restaurante.getTelefone());
+        painel.add(rotulo("Telefone:"));
+        JTextField campoTelefone = campo(restaurante.getTelefone());
         painel.add(campoTelefone);
 
-        JButton btnSalvar = new JButton("Salvar");
+        JButton btnSalvar = criarButtonSalvar();
         painel.add(btnSalvar);
 
         btnSalvar.addActionListener( e -> {
@@ -94,44 +104,46 @@ public class PainelPerfil extends JPanel {
     private JPanel criarFormularioEmail() {
 
         JPanel painel = new JPanel();
+        painel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+                "E-mail:",
+                TitledBorder.DEFAULT_JUSTIFICATION,
+                TitledBorder.DEFAULT_POSITION,
+                AppFonts.LABEL,
+                AppColors.TEXTO_SECUNDARIO));
 
-        painel.add(new JLabel("E-mail atual:"));
-        JTextField campoEmailAtual = new JTextField(usuario.getEmail(), 20);
+        painel.add(rotulo("E-mail atual:"));
+        JTextField campoEmailAtual = campo(restaurante.getEmail());
+        campoEmailAtual.setEditable(false);
         painel.add(campoEmailAtual);
 
-        painel.add(new JLabel("Novo e-mail:"));
-        JTextField campoEmailNovo = new JTextField(20);
+        painel.add(rotulo("Novo e-mail:"));;
+        JTextField campoEmailNovo = campo("");
         painel.add(campoEmailNovo);
 
         painel.add(new JLabel("Confirmar:"));
-        JTextField campoEmailConfirmar = new JTextField(20);
+        JTextField campoEmailConfirmar = campo("");
         painel.add(campoEmailConfirmar);
 
-        JButton btnSalvarEmail = new JButton("Salvar");
-        painel.add(btnSalvarEmail);
+        JButton btnSalvar = criarButtonSalvar();
+        painel.add(btnSalvar);
 
-        btnSalvarEmail.addActionListener(e -> {
-            String emailAtual = campoEmailAtual.getText().trim();
+        btnSalvar.addActionListener(e -> {
+            String emailAtual = campo(restaurante.getEmail()).getText().trim();
             String emailNovo = campoEmailNovo.getText().trim();
             String emailConfirmar = campoEmailConfirmar.getText().trim();
 
             if (emailNovo.isEmpty()) {
-                JOptionPane.showMessageDialog(painel, "Informe o novo e-mail", "Erro", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(painel, "Informe o novo e-mail!", "Erro", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             if (!emailNovo.equals(emailConfirmar)) {
-                JOptionPane.showMessageDialog(painel, "Os e-mails não batem", "Erro", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            if (!emailAtual.equals(usuario.getEmail())) {
-                JOptionPane.showMessageDialog(painel, "O e-mail atual incorreto", "Erro", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(painel, "O e-mail a confirmar não corresponde ao novo!", "Erro", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             if (emailAtual.equals(emailNovo)) {
-                JOptionPane.showMessageDialog(painel, "O novo email deve ser diferente do atual", "Erro", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(painel, "O novo email deve ser diferente do atual!", "Erro", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -148,9 +160,9 @@ public class PainelPerfil extends JPanel {
 
             JOptionPane.showMessageDialog(painel, "E-mail atualizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
 
-            campoEmailAtual.setText(emailNovo);
-            campoEmailNovo.setText("");
-            campoEmailConfirmar.setText("");
+            campoEmailAtual.setText(restaurante.getEmail());
+            limparCampo(campoEmailNovo);
+            limparCampo(campoEmailConfirmar);
         });
 
         return painel;
@@ -160,28 +172,40 @@ public class PainelPerfil extends JPanel {
     private JPanel criarFormularioSenha() {
 
         JPanel painel = new JPanel();
+        painel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+                "Senha:",
+                TitledBorder.DEFAULT_JUSTIFICATION,
+                TitledBorder.DEFAULT_POSITION,
+                AppFonts.LABEL,
+                AppColors.TEXTO_SECUNDARIO));
 
-        painel.add(new JLabel("Senha atual:"));
+        painel.add(rotulo("Senha atual:"));
         JPasswordField campoSenhaAtual = new JPasswordField(20);
+        campoSenhaAtual.setFont(AppFonts.CAMPO);
         painel.add(campoSenhaAtual);
 
-        painel.add(new JLabel("Nova senha:"));
-        JTextField campoNovaSenha = new JTextField(20);
+        painel.add(rotulo("Nova senha:"));
+        JTextField campoNovaSenha = campo("");
         painel.add(campoNovaSenha);
 
-        painel.add(new JLabel("Confirmar:"));
-        JTextField campoConfirmarSenha = new JTextField(20);
+        painel.add(rotulo("Confirmar:"));
+        JTextField campoConfirmarSenha = campo("");
         painel.add(campoConfirmarSenha);
 
-        JButton btnSalvarSenha = new JButton("Salvar");
-        painel.add(btnSalvarSenha);
+        JButton btnSalvar = criarButtonSalvar();
+        painel.add(btnSalvar);
 
-        btnSalvarSenha.addActionListener(e -> {
+        btnSalvar.addActionListener(e -> {
             String senhaAtual = new String(campoSenhaAtual.getPassword()).trim();
             String novaSenha = campoNovaSenha.getText().trim();
             String confirmarSenha = campoConfirmarSenha.getText().trim();
 
             String senhaAtualHash = pegarSenhaHash(senhaAtual);
+
+            if (senhaAtual.isEmpty()) {
+                JOptionPane.showMessageDialog(painel, "Informe a senha atual!", "Erro", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
             if (!senhaAtualHash.equals(restaurante.getSenhaHash())) {
                 JOptionPane.showMessageDialog(painel, "Senha atual incorreta!", "Erro", JOptionPane.WARNING_MESSAGE);
@@ -189,17 +213,22 @@ public class PainelPerfil extends JPanel {
             }
 
             if (novaSenha.isEmpty()) {
-                JOptionPane.showMessageDialog(painel, "Informe a nova senha", "Erro", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(painel, "Informe a nova senha!", "Erro", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             if (!novaSenha.equals(confirmarSenha)) {
-                JOptionPane.showMessageDialog(painel, "Nova senha e confirmação não batem", "Erro", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(painel, "Nova senha e confirmação não correspondem!", "Erro", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             if (novaSenha.equals(senhaAtual)) {
-                JOptionPane.showMessageDialog(painel, "A nova senha deve ser diferente da atual", "Erro", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(painel, "A nova senha deve ser diferente da atual!", "Erro", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (novaSenha.length() < 6) {
+                JOptionPane.showMessageDialog(painel, "A nova senha deve conter pelo menos 6 caracteres!", "Erro", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -216,8 +245,8 @@ public class PainelPerfil extends JPanel {
             JOptionPane.showMessageDialog(painel, "Senha atualizada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
 
             campoSenhaAtual.setText("");
-            campoNovaSenha.setText("");
-            campoConfirmarSenha.setText("");
+            limparCampo(campoNovaSenha);
+            limparCampo(campoConfirmarSenha);
         });
 
         return painel;
@@ -228,7 +257,35 @@ public class PainelPerfil extends JPanel {
         String senhaAtualHash = autenticacaoService.hashSenha(senhaAtual);
 
         return senhaAtualHash;
+    }
 
+    private void limparCampo(JTextField campo) {
+        campo.setText("");
+    }
+
+    private JTextField campo(String texto) {
+        JTextField c = new JTextField(texto, 20);
+        c.setFont(AppFonts.CAMPO);
+        return c;
+    }
+
+
+    private JLabel rotulo(String texto) {
+        JLabel l = new JLabel(texto);
+        l.setFont(AppFonts.LABEL);
+        return l;
+    }
+
+    private JButton criarButtonSalvar () {
+        JButton btnSalvar = new JButton("Salvar");
+        btnSalvar.setFont(AppFonts.BOTAO);
+        btnSalvar.setForeground(AppColors.TEXTO_BRANCO);
+        btnSalvar.setBackground(AppColors.AZUL_PRIMARIO);
+        btnSalvar.setOpaque(true);
+        btnSalvar.setBorderPainted(false);
+        btnSalvar.setFocusPainted(false);
+        btnSalvar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return btnSalvar;
     }
 
 }
