@@ -17,7 +17,7 @@ import javax.swing.*;
  */
 public class MainRestaurante {
 
-    private static final String DEV_RESTAURANTE_ID = "u-rest-01";
+    private static final String DEV_RESTAURANTE_ID = "6e5a11fb-f343-41ad-9de6-175817abcc06";
 
     public static void main(String[] args) {
         try {

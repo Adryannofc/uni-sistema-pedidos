@@ -82,4 +82,8 @@ public class Restaurante extends Usuario {
     public String toString() {
         return "Restaurante{nome=" + getNome() + ", status=" + isStatusAtivo() + "}";
     }
+
+    public List<CategoriaCardapio> getCategorias() {
+        return categorias;
+    }
 }

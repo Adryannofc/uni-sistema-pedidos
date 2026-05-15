@@ -5,6 +5,8 @@ import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.domain.entities.Usuario;
 import com.pedidos.domain.repository.CategoriaGlobalRepository;
 import com.pedidos.domain.repository.RestauranteRepository;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class RestauranteService {
 
@@ -113,6 +115,16 @@ public class RestauranteService {
             }
 
             return (Restaurante) usuario;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public List<Restaurante> buscarRestaurantesAtivos() {
+        try {
+            return restauranteRepository.listarRestaurantes().stream()
+                    .filter(Restaurante::isStatusAtivo)
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
