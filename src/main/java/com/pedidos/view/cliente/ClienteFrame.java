@@ -55,6 +55,24 @@ public class ClienteFrame extends BaseFrame {
     private JLabel lblStatusPedidos;
     private JLabel lblStatusEndereco;
 
+    // Carrinho — refs para atualização dinâmica
+    private TitledBorder  borderCarrinho;
+    private JPanel        painelCarrinho;
+    private JLabel        lblSubtotalValor;
+    private JLabel        lblTaxaValor;
+    private JTable        tabelaCarrinho;
+
+    // Checkout — refs para atualização dinâmica
+    private DefaultTableModel modelCheckout;
+    private JLabel            lblCheckoutSubtotal;
+    private JLabel            lblCheckoutTaxa;
+    private JLabel            lblCheckoutTotal;
+
+    // Cardápio inline — CardLayout alterna entre lista de restaurantes e painel de produtos
+    private PainelCardapio painelCardapio;
+    private CardLayout     cardLayoutFazerPedido;
+    private JPanel         centroPainelFazerPedido;
+
     // ═════════════════════════════════════════════════════════════
     // CONSTRUTOR
     // ═════════════════════════════════════════════════════════════
@@ -66,7 +84,7 @@ public class ClienteFrame extends BaseFrame {
                         ProdutoService produtoService,
                         PedidoService pedidoService,
                         CarrinhoManager carrinho) {
-        super("Sistema Delivery | Cliente", 1200, 750);
+        super("Sistema Delivery — " + usuario.getNome() + " | Cliente", 1200, 750);
         this.usuario            = usuario;
         this.cliente            = cliente;
         this.clienteService     = clienteService;
@@ -100,7 +118,7 @@ public class ClienteFrame extends BaseFrame {
             JMenu m = new JMenu(nome);
             m.setBackground(Color.WHITE);
             m.setForeground(Color.BLACK);
-            m.setFont(AppFonts.STATUS);
+            m.setFont(AppFonts.MENU);
             menuBar.add(m);
         }
         setJMenuBar(menuBar);
@@ -137,7 +155,7 @@ public class ClienteFrame extends BaseFrame {
                 .orElse("Nenhum endereço cadastrado");
 
         lblStatusPedidos  = new JLabel(pedidosAtivos + " pedido(s) ativo(s)");
-        lblStatusEndereco = new JLabel("📍 " + infoEndereco);
+        lblStatusEndereco = new JLabel(infoEndereco);
 
         for (JLabel l : new JLabel[]{
                 new JLabel(cliente.getNome() + " | Cliente"),
@@ -157,7 +175,7 @@ public class ClienteFrame extends BaseFrame {
     private void atualizarStatusBar() {
         int total = pedidoService.listarPorCliente(cliente.getId()).size();
         lblStatusPedidos.setText(total + " pedido(s) ativo(s)");
-        lblStatusEndereco.setText("📍 " + cliente.getEnderecoPadrao()
+        lblStatusEndereco.setText(cliente.getEnderecoPadrao()
                 .map(e -> e.getRua() + ", " + e.getNumero() + " - " + e.getCidade())
                 .orElse("Nenhum endereço cadastrado"));
     }
@@ -167,7 +185,7 @@ public class ClienteFrame extends BaseFrame {
     // ═════════════════════════════════════════════════════════════
     private JTabbedPane criarAbas() {
         tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-        tabbedPane.setFont(AppFonts.STATUS);
+        tabbedPane.setFont(AppFonts.MENU);
         tabbedPane.setBackground(Color.WHITE);
 
         tabbedPane.addTab("Fazer Pedido", criarPainelFazerPedido());
@@ -181,8 +199,9 @@ public class ClienteFrame extends BaseFrame {
     }
 
     private void atualizarTituloFazerPedido() {
-        int qtd = !carrinho.estaVazio() ? carrinho.getItens().size() : 0;
-        tabbedPane.setTitleAt(0, qtd > 0 ? "Fazer Pedido (" + qtd + ")" : "Fazer Pedido");
+        int total = carrinho.estaVazio() ? 0
+                : carrinho.getItens().stream().mapToInt(CarrinhoManager.ItemCarrinho::getQuantidade).sum();
+        tabbedPane.setTitleAt(0, total > 0 ? "Fazer Pedido (" + total + ")" : "Fazer Pedido");
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -193,8 +212,22 @@ public class ClienteFrame extends BaseFrame {
         painel.setBackground(Color.WHITE);
         painel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 
-        painel.add(criarListaRestaurantes(), BorderLayout.CENTER);
-        painel.add(criarPainelCarrinho(),    BorderLayout.EAST);
+        cardLayoutFazerPedido   = new CardLayout();
+        centroPainelFazerPedido = new JPanel(cardLayoutFazerPedido);
+        centroPainelFazerPedido.setBackground(Color.WHITE);
+
+        painelCardapio = new PainelCardapio(
+                produtoService,
+                carrinho,
+                () -> cardLayoutFazerPedido.show(centroPainelFazerPedido, "RESTAURANTES"),
+                () -> { sincronizarCarrinho(); atualizarTituloFazerPedido(); }
+        );
+
+        centroPainelFazerPedido.add(criarListaRestaurantes(), "RESTAURANTES");
+        centroPainelFazerPedido.add(painelCardapio,           "CARDAPIO");
+
+        painel.add(centroPainelFazerPedido, BorderLayout.CENTER);
+        painel.add(criarPainelCarrinho(),   BorderLayout.EAST);
         return painel;
     }
 
@@ -204,7 +237,7 @@ public class ClienteFrame extends BaseFrame {
         painel.setBackground(Color.WHITE);
 
         JLabel titulo = new JLabel("Restaurantes disponíveis");
-        titulo.setFont(AppFonts.STATUS.deriveFont(Font.BOLD, 13f));
+        titulo.setFont(AppFonts.TITULO);
         titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 6, 0));
 
         String[] colunas = {"Restaurante", "Categoria", "★"};
@@ -213,7 +246,7 @@ public class ClienteFrame extends BaseFrame {
         };
 
         JTable tabela = new JTable(modelRestaurantes);
-        tabela.setFont(AppFonts.STATUS);
+        tabela.setFont(AppFonts.LABEL);
         tabela.setRowHeight(30);
         tabela.setGridColor(new Color(220, 220, 220));
         tabela.setShowGrid(true);
@@ -273,14 +306,8 @@ public class ClienteFrame extends BaseFrame {
                     restauranteSelecionado = r;
                     carrinho.iniciar(cliente.getId(), r.getId(), new BigDecimal("5.00"));
 
-                    // Abre o CardapioDialog — equivalente ao acaoNavegarCardapio do MenuCliente
-                    CardapioDialog dialog = new CardapioDialog(
-                            ClienteFrame.this, produtoService, restauranteSelecionado, carrinho);
-                    dialog.setVisible(true);
-
-                    // Após fechar o cardápio, atualiza carrinho e aba
-                    sincronizarCarrinho();
-                    atualizarTituloFazerPedido();
+                    painelCardapio.configurar(restauranteSelecionado);
+                    cardLayoutFazerPedido.show(centroPainelFazerPedido, "CARDAPIO");
                 }
             }
         });
@@ -288,14 +315,71 @@ public class ClienteFrame extends BaseFrame {
         JScrollPane scroll = new JScrollPane(tabela);
         scroll.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
 
-        JLabel dica = new JLabel("💡 Clique para ver o cardápio · Clique em ★ para favoritar/desfavoritar");
-        dica.setFont(AppFonts.STATUS.deriveFont(Font.ITALIC, 11f));
-        dica.setForeground(Color.GRAY);
-        dica.setBorder(BorderFactory.createEmptyBorder(4, 2, 0, 0));
+        // Botões de ação abaixo da lista
+        JButton btnVerCardapio = new JButton("Ver Cardápio");
+        JButton btnFavoritar   = new JButton("☆ Favoritar");
+        btnVerCardapio.setFont(AppFonts.BOTAO);
+        btnFavoritar.setFont(AppFonts.BOTAO);
 
-        painel.add(titulo, BorderLayout.NORTH);
-        painel.add(scroll,  BorderLayout.CENTER);
-        painel.add(dica,    BorderLayout.SOUTH);
+        btnVerCardapio.addActionListener(e -> {
+            int row = tabela.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(ClienteFrame.this,
+                        "Selecione um restaurante para ver o cardápio.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            List<Restaurante> restaurantes = restauranteService.buscarRestaurantesAtivos();
+            if (row >= restaurantes.size()) return;
+            Restaurante r = restaurantes.get(row);
+            if (!carrinho.estaVazio() && !carrinho.getRestauranteId().equals(r.getId())) {
+                int op = JOptionPane.showConfirmDialog(ClienteFrame.this,
+                        "Você já tem itens de outro restaurante no carrinho.\n" +
+                        "Deseja esvaziá-lo e selecionar \"" + r.getNome() + "\"?",
+                        "Trocar restaurante", JOptionPane.YES_NO_OPTION);
+                if (op != JOptionPane.YES_OPTION) return;
+                carrinho.esvaziar();
+            }
+            restauranteSelecionado = r;
+            carrinho.iniciar(cliente.getId(), r.getId(), new BigDecimal("5.00"));
+            painelCardapio.configurar(restauranteSelecionado);
+            cardLayoutFazerPedido.show(centroPainelFazerPedido, "CARDAPIO");
+        });
+
+        btnFavoritar.addActionListener(e -> {
+            int row = tabela.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(ClienteFrame.this,
+                        "Selecione um restaurante para favoritar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            List<Restaurante> restaurantes = restauranteService.buscarRestaurantesAtivos();
+            if (row >= restaurantes.size()) return;
+            Restaurante r = restaurantes.get(row);
+            clienteService.favoritar(cliente, r);
+            boolean agora = cliente.getFavoritos().contains(r);
+            modelRestaurantes.setValueAt(agora ? "★" : " ", row, 2);
+            btnFavoritar.setText(agora ? "★ Desfavoritar" : "☆ Favoritar");
+        });
+
+        tabela.getSelectionModel().addListSelectionListener(e -> {
+            if (e.getValueIsAdjusting()) return;
+            int row = tabela.getSelectedRow();
+            if (row < 0) { btnFavoritar.setText("☆ Favoritar"); return; }
+            List<Restaurante> restaurantes = restauranteService.buscarRestaurantesAtivos();
+            if (row < restaurantes.size()) {
+                boolean fav = cliente.getFavoritos().contains(restaurantes.get(row));
+                btnFavoritar.setText(fav ? "★ Desfavoritar" : "☆ Favoritar");
+            }
+        });
+
+        JPanel acoesBaixo = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        acoesBaixo.setBackground(Color.WHITE);
+        acoesBaixo.add(btnVerCardapio);
+        acoesBaixo.add(btnFavoritar);
+
+        painel.add(titulo,     BorderLayout.NORTH);
+        painel.add(scroll,     BorderLayout.CENTER);
+        painel.add(acoesBaixo, BorderLayout.SOUTH);
 
         carregarRestaurantes();
         return painel;
@@ -315,56 +399,70 @@ public class ClienteFrame extends BaseFrame {
 
     // ── Painel Carrinho (direita) ─────────────────────────────────
     private JPanel criarPainelCarrinho() {
-        JPanel painel = new JPanel(new BorderLayout(0, 6));
-        painel.setPreferredSize(new Dimension(320, 0));
-        painel.setBackground(Color.WHITE);
-        painel.setBorder(titledBorder("🛒 Meu Carrinho"));
+        painelCarrinho = new JPanel(new BorderLayout(0, 0));
+        painelCarrinho.setPreferredSize(new Dimension(280, 0));
+        painelCarrinho.setBackground(Color.WHITE);
+        borderCarrinho = titledBorder("Meu Carrinho");
+        painelCarrinho.setBorder(borderCarrinho);
 
         String[] colunas = {"Produto", "Qtd", "Subtotal"};
         modelCarrinho = new DefaultTableModel(colunas, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
 
-        JTable tabela = new JTable(modelCarrinho);
-        tabela.setFont(AppFonts.STATUS);
-        tabela.setRowHeight(28);
-        tabela.setGridColor(new Color(220, 220, 220));
-        tabela.setShowGrid(true);
-        tabela.setSelectionBackground(new Color(220, 235, 255));
+        tabelaCarrinho = new JTable(modelCarrinho);
+        tabelaCarrinho.setFont(AppFonts.LABEL);
+        tabelaCarrinho.setRowHeight(28);
+        tabelaCarrinho.setGridColor(new Color(220, 220, 220));
+        tabelaCarrinho.setShowGrid(true);
+        tabelaCarrinho.setSelectionBackground(new Color(220, 235, 255));
 
-        configurarHeader(tabela);
-        tabela.getColumnModel().getColumn(0).setPreferredWidth(130);
-        tabela.getColumnModel().getColumn(1).setPreferredWidth(35);
-        tabela.getColumnModel().getColumn(2).setPreferredWidth(90);
+        configurarHeader(tabelaCarrinho);
+        tabelaCarrinho.getColumnModel().getColumn(0).setPreferredWidth(120);
+        tabelaCarrinho.getColumnModel().getColumn(1).setPreferredWidth(30);
+        tabelaCarrinho.getColumnModel().getColumn(2).setPreferredWidth(80);
 
         DefaultTableCellRenderer centro = new DefaultTableCellRenderer();
         centro.setHorizontalAlignment(SwingConstants.CENTER);
-        tabela.getColumnModel().getColumn(1).setCellRenderer(centro);
+        tabelaCarrinho.getColumnModel().getColumn(1).setCellRenderer(centro);
 
-        // Duplo-clique remove item — equivalente ao acaoVerCarrinho opção 1 do MenuCliente
-        tabela.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    int row = tabela.rowAtPoint(e.getPoint());
-                    if (row < 0 || carrinho.estaVazio()) return;
-                    String nome = (String) modelCarrinho.getValueAt(row, 0);
-                    carrinho.getItens().stream()
-                            .filter(it -> it.getProduto().getNome().equals(nome))
-                            .findFirst()
-                            .ifPresent(it -> {
-                                carrinho.removerItem(it.getProduto().getId());
-                                sincronizarCarrinho();
-                                atualizarTituloFazerPedido();
-                            });
-                }
-            }
-        });
+        // ── Totais (subtotal + taxa) ──────────────────────────────
+        JPanel totaisPanel = new JPanel(new GridBagLayout());
+        totaisPanel.setBackground(Color.WHITE);
+        totaisPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(220, 220, 220)),
+                BorderFactory.createEmptyBorder(8, 8, 6, 8)));
 
-        // Botões — equivalentes às opções do acaoVerCarrinho do MenuCliente
-        JButton btnRemover = criarBotaoSecundario("Remover item");
+        GridBagConstraints g = new GridBagConstraints();
+        g.insets = new Insets(2, 4, 2, 4);
+
+        g.gridx = 0; g.gridy = 0; g.anchor = GridBagConstraints.WEST; g.weightx = 1.0; g.fill = GridBagConstraints.HORIZONTAL;
+        JLabel lblSubt = new JLabel("Subtotal:");
+        lblSubt.setFont(AppFonts.LABEL);
+        totaisPanel.add(lblSubt, g);
+
+        g.gridx = 1; g.weightx = 0; g.fill = GridBagConstraints.NONE; g.anchor = GridBagConstraints.EAST;
+        lblSubtotalValor = new JLabel("R$ 0,00");
+        lblSubtotalValor.setFont(AppFonts.BOTAO);
+        totaisPanel.add(lblSubtotalValor, g);
+
+        g.gridx = 0; g.gridy = 1; g.anchor = GridBagConstraints.WEST; g.weightx = 1.0; g.fill = GridBagConstraints.HORIZONTAL;
+        JLabel lblTaxa = new JLabel("Taxa entrega:");
+        lblTaxa.setFont(AppFonts.LABEL);
+        totaisPanel.add(lblTaxa, g);
+
+        g.gridx = 1; g.weightx = 0; g.fill = GridBagConstraints.NONE; g.anchor = GridBagConstraints.EAST;
+        lblTaxaValor = new JLabel("R$ 0,00");
+        lblTaxaValor.setFont(AppFonts.LABEL);
+        lblTaxaValor.setForeground(Color.DARK_GRAY);
+        totaisPanel.add(lblTaxaValor, g);
+
+        // ── Botões menores ────────────────────────────────────────
+        JButton btnRemover  = criarBotaoSecundario("Remover");
+        JButton btnEsvaziar = criarBotaoSecundario("Esvaziar");
+
         btnRemover.addActionListener(e -> {
-            int row = tabela.getSelectedRow();
+            int row = tabelaCarrinho.getSelectedRow();
             if (row < 0) {
                 JOptionPane.showMessageDialog(this, "Selecione um item para remover.",
                         "Atenção", JOptionPane.WARNING_MESSAGE);
@@ -381,38 +479,90 @@ public class ClienteFrame extends BaseFrame {
                     });
         });
 
-        JButton btnLimpar = criarBotaoSecundario("Limpar");
-        btnLimpar.addActionListener(e -> {
+        btnEsvaziar.addActionListener(e -> {
             if (carrinho.estaVazio()) return;
-            carrinho.esvaziar(); // equivalente ao acaoVerCarrinho opção 2
+            carrinho.esvaziar();
             sincronizarCarrinho();
             atualizarTituloFazerPedido();
         });
 
-        JPanel btnPanel = new JPanel(new GridLayout(1, 2, 6, 0));
-        btnPanel.setBackground(Color.WHITE);
-        btnPanel.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
-        btnPanel.add(btnRemover);
-        btnPanel.add(btnLimpar);
+        JPanel botoesPanel = new JPanel(new GridLayout(1, 2, 6, 0));
+        botoesPanel.setBackground(Color.WHITE);
+        botoesPanel.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+        botoesPanel.add(btnRemover);
+        botoesPanel.add(btnEsvaziar);
+
+        // ── Finalizar Pedido ──────────────────────────────────────
+        JButton btnFinalizar = criarBotaoPrimario("Finalizar Pedido →", 260, 40);
+        btnFinalizar.addActionListener(e -> {
+            sincronizarCheckout();
+            tabbedPane.setSelectedIndex(1);
+        });
+        JPanel finalizarPanel = new JPanel(new BorderLayout());
+        finalizarPanel.setBackground(Color.WHITE);
+        finalizarPanel.setBorder(BorderFactory.createEmptyBorder(4, 8, 8, 8));
+        finalizarPanel.add(btnFinalizar, BorderLayout.CENTER);
+
+        JPanel rodape = new JPanel(new BorderLayout(0, 0));
+        rodape.setBackground(Color.WHITE);
+        rodape.add(totaisPanel,   BorderLayout.NORTH);
+        rodape.add(botoesPanel,   BorderLayout.CENTER);
+        rodape.add(finalizarPanel, BorderLayout.SOUTH);
 
         sincronizarCarrinho();
 
-        painel.add(new JScrollPane(tabela), BorderLayout.CENTER);
-        painel.add(btnPanel,                BorderLayout.SOUTH);
-        return painel;
+        painelCarrinho.add(new JScrollPane(tabelaCarrinho), BorderLayout.CENTER);
+        painelCarrinho.add(rodape,                           BorderLayout.SOUTH);
+        return painelCarrinho;
     }
 
-    /** Sincroniza modelCarrinho com CarrinhoManager — equivalente ao acaoVerCarrinho do MenuCliente. */
+    /** Sincroniza modelCarrinho, totais e título do border com o estado atual do CarrinhoManager. */
     private void sincronizarCarrinho() {
         modelCarrinho.setRowCount(0);
-        if (carrinho.estaVazio()) return;
-        for (CarrinhoManager.ItemCarrinho item : carrinho.getItens()) {
-            modelCarrinho.addRow(new Object[]{
-                    item.getProduto().getNome(),
-                    item.getQuantidade(),
-                    moedaBR.format(item.calcularSubtotal())
-            });
+
+        if (!carrinho.estaVazio()) {
+            for (CarrinhoManager.ItemCarrinho item : carrinho.getItens()) {
+                modelCarrinho.addRow(new Object[]{
+                        item.getProduto().getNome(),
+                        item.getQuantidade(),
+                        moedaBR.format(item.calcularSubtotal())
+                });
+            }
         }
+
+        // Atualiza totais
+        BigDecimal subtotal = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.calcularSubtotal();
+        BigDecimal taxa     = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.getTaxaEntrega();
+        if (lblSubtotalValor != null) lblSubtotalValor.setText(moedaBR.format(subtotal));
+        if (lblTaxaValor     != null) lblTaxaValor.setText(moedaBR.format(taxa));
+
+        // Atualiza título do border com contagem de itens distintos
+        if (borderCarrinho != null && painelCarrinho != null) {
+            int qtd = carrinho.estaVazio() ? 0 : carrinho.getItens().size();
+            borderCarrinho.setTitle("Meu Carrinho" + (qtd > 0 ? " (" + qtd + ")" : ""));
+            painelCarrinho.repaint();
+        }
+    }
+
+    /** Sincroniza modelCheckout e totais do checkout com o estado atual do CarrinhoManager. */
+    private void sincronizarCheckout() {
+        modelCheckout.setRowCount(0);
+        if (!carrinho.estaVazio()) {
+            for (CarrinhoManager.ItemCarrinho item : carrinho.getItens()) {
+                modelCheckout.addRow(new Object[]{
+                        item.getProduto().getNome(),
+                        item.getQuantidade(),
+                        moedaBR.format(item.getProduto().getPreco()),
+                        moedaBR.format(item.calcularSubtotal())
+                });
+            }
+        }
+        BigDecimal sub   = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.calcularSubtotal();
+        BigDecimal taxa  = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.getTaxaEntrega();
+        BigDecimal total = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.calcularTotal();
+        if (lblCheckoutSubtotal != null) lblCheckoutSubtotal.setText(moedaBR.format(sub));
+        if (lblCheckoutTaxa     != null) lblCheckoutTaxa.setText(moedaBR.format(taxa));
+        if (lblCheckoutTotal    != null) lblCheckoutTotal.setText(moedaBR.format(total));
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -434,24 +584,12 @@ public class ClienteFrame extends BaseFrame {
         painel.setBorder(titledBorder("Resumo do Pedido"));
 
         String[] colunas = {"Produto", "Qtd", "Preço unit.", "Subtotal"};
-        DefaultTableModel model = new DefaultTableModel(colunas, 0) {
+        modelCheckout = new DefaultTableModel(colunas, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
 
-        // Itens do CarrinhoManager — mesmo conteúdo exibido no acaoCheckout do MenuCliente
-        if (!carrinho.estaVazio()) {
-            for (CarrinhoManager.ItemCarrinho item : carrinho.getItens()) {
-                model.addRow(new Object[]{
-                        item.getProduto().getNome(),
-                        item.getQuantidade(),
-                        moedaBR.format(item.getProduto().getPreco()),
-                        moedaBR.format(item.calcularSubtotal())
-                });
-            }
-        }
-
-        JTable tabela = new JTable(model);
-        tabela.setFont(AppFonts.STATUS);
+        JTable tabela = new JTable(modelCheckout);
+        tabela.setFont(AppFonts.LABEL);
         tabela.setRowHeight(30);
         tabela.setGridColor(new Color(220, 220, 220));
         tabela.setShowGrid(true);
@@ -469,10 +607,7 @@ public class ClienteFrame extends BaseFrame {
     }
 
     private JPanel criarTotaisCheckout() {
-        // Usa os métodos do CarrinhoManager — equivalente ao acaoCheckout do MenuCliente
-        BigDecimal subtotal  = carrinho.calcularSubtotal();
-        BigDecimal taxa      = carrinho.getTaxaEntrega();
-        BigDecimal total     = carrinho.calcularTotal();
+        String zero = moedaBR.format(BigDecimal.ZERO);
 
         JPanel painel = new JPanel(new GridBagLayout());
         painel.setBackground(Color.WHITE);
@@ -481,8 +616,8 @@ public class ClienteFrame extends BaseFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(3, 12, 3, 12);
 
-        adicionarLinhaTotal(painel, gbc, "Subtotal:",        moedaBR.format(subtotal), false, 0);
-        adicionarLinhaTotal(painel, gbc, "Taxa de entrega:", moedaBR.format(taxa),     false, 1);
+        lblCheckoutSubtotal = adicionarLinhaTotal(painel, gbc, "Subtotal:",        zero, false, 0);
+        lblCheckoutTaxa     = adicionarLinhaTotal(painel, gbc, "Taxa de entrega:", zero, false, 1);
 
         gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -491,7 +626,7 @@ public class ClienteFrame extends BaseFrame {
         painel.add(sep, gbc);
         gbc.gridwidth = 1; gbc.fill = GridBagConstraints.NONE;
 
-        adicionarLinhaTotal(painel, gbc, "TOTAL:", moedaBR.format(total), true, 3);
+        lblCheckoutTotal = adicionarLinhaTotal(painel, gbc, "TOTAL:", zero, true, 3);
 
         JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         wrapper.setBackground(Color.WHITE);
@@ -499,10 +634,10 @@ public class ClienteFrame extends BaseFrame {
         return wrapper;
     }
 
-    private void adicionarLinhaTotal(JPanel painel, GridBagConstraints gbc,
-                                     String label, String valor,
-                                     boolean negrito, int linha) {
-        Font fonte = negrito ? AppFonts.STATUS.deriveFont(Font.BOLD, 14f) : AppFonts.STATUS;
+    private JLabel adicionarLinhaTotal(JPanel painel, GridBagConstraints gbc,
+                                       String label, String valor,
+                                       boolean negrito, int linha) {
+        Font fonte = negrito ? AppFonts.TITULO : AppFonts.LABEL;
 
         gbc.gridy = linha;
         gbc.gridx = 0; gbc.anchor = GridBagConstraints.EAST;
@@ -514,6 +649,7 @@ public class ClienteFrame extends BaseFrame {
         JLabel val = new JLabel(valor);
         val.setFont(fonte);
         painel.add(val, gbc);
+        return val;
     }
 
     private JPanel criarRodapeCheckout() {
@@ -533,7 +669,7 @@ public class ClienteFrame extends BaseFrame {
         JLabel icone = new JLabel("📍");
         icone.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14));
         JLabel endLabel = new JLabel(enderecoTexto);
-        endLabel.setFont(AppFonts.STATUS);
+        endLabel.setFont(AppFonts.LABEL);
 
         enderecoPanel.add(icone);
         enderecoPanel.add(endLabel);
@@ -651,7 +787,7 @@ public class ClienteFrame extends BaseFrame {
         };
 
         JTable tabela = new JTable(modelMeusPedidos);
-        tabela.setFont(AppFonts.STATUS);
+        tabela.setFont(AppFonts.LABEL);
         tabela.setRowHeight(30);
         tabela.setGridColor(new Color(220, 220, 220));
         tabela.setShowGrid(true);
@@ -734,7 +870,7 @@ public class ClienteFrame extends BaseFrame {
         painel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 
         JTabbedPane subAbas = new JTabbedPane(JTabbedPane.TOP);
-        subAbas.setFont(AppFonts.STATUS);
+        subAbas.setFont(AppFonts.MENU);
         subAbas.setBackground(Color.WHITE);
 
         subAbas.addTab("Dados",     criarSubAbaDados());
@@ -776,7 +912,7 @@ public class ClienteFrame extends BaseFrame {
             gbc.gridx = 0; gbc.gridy = i;
             gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
             JLabel lbl = new JLabel(labels[i]);
-            lbl.setFont(AppFonts.STATUS);
+            lbl.setFont(AppFonts.LABEL);
             lbl.setPreferredSize(new Dimension(75, 24));
             form.add(lbl, gbc);
 
@@ -847,7 +983,7 @@ public class ClienteFrame extends BaseFrame {
             gbc.gridx = 0; gbc.gridy = i;
             gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
             JLabel lbl = new JLabel(labels[i]);
-            lbl.setFont(AppFonts.STATUS);
+            lbl.setFont(AppFonts.LABEL);
             lbl.setPreferredSize(new Dimension(140, 24));
             form.add(lbl, gbc);
 
@@ -898,7 +1034,7 @@ public class ClienteFrame extends BaseFrame {
         painel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         JLabel titulo = new JLabel("Restaurantes favoritos");
-        titulo.setFont(AppFonts.STATUS.deriveFont(Font.BOLD, 13f));
+        titulo.setFont(AppFonts.TITULO);
         titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 6, 0));
 
         String[] colunas = {"Restaurante", "Categoria", "Status", "★ Remover"};
@@ -916,7 +1052,7 @@ public class ClienteFrame extends BaseFrame {
         }
 
         JTable tabela = new JTable(model);
-        tabela.setFont(AppFonts.STATUS);
+        tabela.setFont(AppFonts.LABEL);
         tabela.setRowHeight(30);
         tabela.setGridColor(new Color(220, 220, 220));
         tabela.setShowGrid(true);
@@ -988,7 +1124,7 @@ public class ClienteFrame extends BaseFrame {
         scroll.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
 
         JLabel info = new JLabel("💡 Clique em ★ para remover um restaurante dos favoritos.");
-        info.setFont(AppFonts.STATUS.deriveFont(Font.ITALIC, 11f));
+        info.setFont(AppFonts.HINT);
         info.setForeground(Color.GRAY);
         info.setBorder(BorderFactory.createEmptyBorder(6, 2, 0, 0));
 
@@ -1032,13 +1168,13 @@ public class ClienteFrame extends BaseFrame {
             gbc.gridx = 0; gbc.gridy = linha;
             gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
             JLabel lbl = new JLabel(labels[i]);
-            lbl.setFont(AppFonts.STATUS);
+            lbl.setFont(AppFonts.LABEL);
             lbl.setPreferredSize(new Dimension(185, 24));
             form.add(lbl, gbc);
 
             gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1;
             fields[i] = new JPasswordField();
-            fields[i].setFont(AppFonts.STATUS);
+            fields[i].setFont(AppFonts.CAMPO);
             fields[i].setPreferredSize(new Dimension(300, 28));
             fields[i].setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(new Color(180, 180, 180)),
@@ -1051,7 +1187,7 @@ public class ClienteFrame extends BaseFrame {
         gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
         gbc.insets = new Insets(4, 10, 8, 10);
         JLabel dica = new JLabel("💡 Use letras, números e caracteres especiais para maior segurança.");
-        dica.setFont(AppFonts.STATUS.deriveFont(Font.ITALIC, 11f));
+        dica.setFont(AppFonts.HINT);
         dica.setForeground(Color.GRAY);
         form.add(dica, gbc);
 
@@ -1092,7 +1228,7 @@ public class ClienteFrame extends BaseFrame {
 
     private void configurarHeader(JTable tabela) {
         JTableHeader th = tabela.getTableHeader();
-        th.setFont(AppFonts.STATUS.deriveFont(Font.BOLD));
+        th.setFont(AppFonts.TITULO);
         th.setBackground(new Color(245, 245, 245));
         th.setForeground(Color.DARK_GRAY);
         th.setReorderingAllowed(false);
@@ -1100,7 +1236,7 @@ public class ClienteFrame extends BaseFrame {
 
     private JTextField criarCampoTexto(String valor) {
         JTextField f = new JTextField(valor);
-        f.setFont(AppFonts.STATUS);
+        f.setFont(AppFonts.CAMPO);
         f.setPreferredSize(new Dimension(450, 28));
         f.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(180, 180, 180)),
@@ -1112,7 +1248,7 @@ public class ClienteFrame extends BaseFrame {
     private JButton criarBotaoPrimario(String texto, int largura, int altura) {
         JButton btn = new JButton(texto);
         btn.setPreferredSize(new Dimension(largura, altura));
-        btn.setFont(AppFonts.STATUS.deriveFont(Font.BOLD));
+        btn.setFont(AppFonts.BOTAO);
         btn.setBackground(AppColors.AZUL_PRIMARIO);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
@@ -1124,7 +1260,7 @@ public class ClienteFrame extends BaseFrame {
 
     private JButton criarBotaoSecundario(String texto) {
         JButton btn = new JButton(texto);
-        btn.setFont(AppFonts.STATUS);
+        btn.setFont(AppFonts.BOTAO);
         btn.setBackground(new Color(220, 220, 220));
         btn.setForeground(Color.DARK_GRAY);
         btn.setFocusPainted(false);
@@ -1140,7 +1276,7 @@ public class ClienteFrame extends BaseFrame {
                 titulo,
                 TitledBorder.LEFT,
                 TitledBorder.TOP,
-                AppFonts.STATUS.deriveFont(Font.BOLD)
+                AppFonts.TITULO
         );
     }
 }
