@@ -1,8 +1,7 @@
 package com.pedidos.view.login;
 
 import com.pedidos.application.service.*;
-import com.pedidos.domain.entities.Restaurante;
-import com.pedidos.domain.entities.Usuario;
+import com.pedidos.domain.entities.*;
 import com.pedidos.domain.enums.TipoUsuario;
 import com.pedidos.domain.repository.RestauranteRepository;
 import com.pedidos.view.admin.AdminFrame;
@@ -10,6 +9,7 @@ import com.pedidos.view.cadastro.CadastroFrame;
 import com.pedidos.view.cliente.ClienteFrame;
 import com.pedidos.view.restaurante.RestauranteFrame;
 import com.pedidos.view.util.base.BaseFrame;
+import com.pedidos.view.util.session.CarrinhoManager;
 import com.pedidos.view.util.session.SessionManager;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -19,58 +19,62 @@ import javax.swing.border.*;
 import java.awt.*;
 
 public class LoginFrame extends BaseFrame {
-    private final AutenticacaoService autenticacaoService;
-    private final AdminService adminService;
-    private final ClienteService clienteService;
-    private final CategoriaService categoriaService;
-    private final ProdutoService produtoService;
-    private final RestauranteService restauranteService;
-    private final PedidoService pedidoService;
-    private final CarrinhoService carrinhoService;
-    private final RestauranteRepository restauranteRepo;
-    private final AreaEntregaService areaEntregaService;
-    private final HorarioService horarioService;
 
-    private JTextField campoEmail;
+    private final AutenticacaoService autenticacaoService;
+    private final AdminService        adminService;
+    private final ClienteService      clienteService;
+    private final EnderecoService     enderecoService;
+    private final CategoriaService    categoriaService;
+    private final ProdutoService      produtoService;
+    private final RestauranteService  restauranteService;
+    private final PedidoService       pedidoService;
+    private final CarrinhoManager     carrinho;
+    private final RestauranteRepository restauranteRepo;
+    private final AreaEntregaService  areaEntregaService;
+    private final HorarioService      horarioService;
+
+    private JTextField     campoEmail;
     private JPasswordField campoSenha;
-    private JCheckBox checkLembrar;
-    private JButton botaoCancelar;
-    private JButton botaoEntrar;
-    private JLabel labelConexao;
-    private JLabel linkCadastrar;  // ← linha que faltava
+    private JCheckBox      checkLembrar;
+    private JButton        botaoCancelar;
+    private JButton        botaoEntrar;
+    private JLabel         labelConexao;
+    private JLabel         linkCadastrar;
 
     public LoginFrame(AutenticacaoService autenticacaoService,
                       AdminService adminService,
                       ClienteService clienteService,
+                      EnderecoService enderecoService,
                       CategoriaService categoriaService,
                       ProdutoService produtoService,
                       RestauranteService restauranteService,
                       PedidoService pedidoService,
-                      CarrinhoService carrinhoService,
+                      CarrinhoManager carrinho,
                       RestauranteRepository restauranteRepo,
                       AreaEntregaService areaEntregaService,
                       HorarioService horarioService) {
         super("Sistema de Delivery - Login", 500, 310);
         this.autenticacaoService = autenticacaoService;
-        this.adminService = adminService;
-        this.clienteService = clienteService;
-        this.categoriaService = categoriaService;
-        this.produtoService = produtoService;
-        this.restauranteService = restauranteService;
-        this.carrinhoService = carrinhoService;
-        this.restauranteRepo = restauranteRepo;
-        this.areaEntregaService = areaEntregaService;
-        this.horarioService = horarioService;
-        this.pedidoService = pedidoService;
+        this.adminService        = adminService;
+        this.clienteService      = clienteService;
+        this.enderecoService     = enderecoService;
+        this.categoriaService    = categoriaService;
+        this.produtoService      = produtoService;
+        this.restauranteService  = restauranteService;
+        this.pedidoService       = pedidoService;
+        this.carrinho            = carrinho;
+        this.restauranteRepo     = restauranteRepo;
+        this.areaEntregaService  = areaEntregaService;
+        this.horarioService      = horarioService;
         construirInterface();
     }
 
-    // CONSTRUCAO
+    // CONSTRUÇÃO
 
     private void construirInterface() {
         setLayout(new BorderLayout());
         add(criarPainelCentral(), BorderLayout.CENTER);
-        add(criarStatusBar(), BorderLayout.SOUTH);
+        add(criarStatusBar(),     BorderLayout.SOUTH);
         configurarMenuBar();
     }
 
@@ -79,7 +83,7 @@ public class LoginFrame extends BaseFrame {
         externo.setBackground(AppColors.CINZA_FUNDO);
         externo.setBorder(new EmptyBorder(10, 15, 8, 15));
         externo.add(criarPainelFormulario(), BorderLayout.CENTER);
-        externo.add(criarLabelHint(), BorderLayout.SOUTH);
+        externo.add(criarLabelHint(),        BorderLayout.SOUTH);
         return externo;
     }
 
@@ -141,20 +145,18 @@ public class LoginFrame extends BaseFrame {
                         .addComponent(labelEmail)
                         .addComponent(labelSenha))
                 .addGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(campoEmail,   GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
-                        .addComponent(campoSenha,   GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
+                        .addComponent(campoEmail,    GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
+                        .addComponent(campoSenha,    GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
                         .addComponent(checkLembrar)
                         .addComponent(linkCadastrar)
-                        .addComponent(painelBotoes, GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
+                        .addComponent(painelBotoes,  GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
         );
 
         gl.setVerticalGroup(gl.createSequentialGroup()
                 .addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(labelEmail)
-                        .addComponent(campoEmail))
+                        .addComponent(labelEmail).addComponent(campoEmail))
                 .addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(labelSenha)
-                        .addComponent(campoSenha))
+                        .addComponent(labelSenha).addComponent(campoSenha))
                 .addGap(4)
                 .addComponent(checkLembrar)
                 .addComponent(linkCadastrar)
@@ -212,7 +214,7 @@ public class LoginFrame extends BaseFrame {
         setJMenuBar(menuBar);
     }
 
-    // ACOES
+    // AÇÕES
 
     private void abrirCadastro() {
         new CadastroFrame(clienteService, restauranteService).setVisible(true);
@@ -276,7 +278,7 @@ public class LoginFrame extends BaseFrame {
         JFrame proximo;
 
         switch (tipo) {
-            case ADMIN       -> proximo = new AdminFrame(usuario);
+            case ADMIN -> proximo = new AdminFrame(usuario);
             case RESTAURANTE -> proximo = new RestauranteFrame(
                     usuario,
                     categoriaService,
@@ -284,9 +286,25 @@ public class LoginFrame extends BaseFrame {
                     restauranteService,
                     areaEntregaService,
                     horarioService,
-                    pedidoService,
-                    autenticacaoService);
-            case CLIENTE     -> proximo = new ClienteFrame(usuario);
+                    pedidoService);
+            case CLIENTE -> {
+                if (!(usuario instanceof Cliente)) {
+                    JOptionPane.showMessageDialog(this,
+                            "Usuário autenticado não é um Cliente válido.",
+                            "Erro", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                proximo = new ClienteFrame(
+                        usuario,
+                        (Cliente) usuario,
+                        clienteService,
+                        enderecoService,
+                        restauranteService,
+                        produtoService,
+                        pedidoService,
+                        carrinho,
+                        this::abrirTelaLogin);
+            }
             default -> {
                 JOptionPane.showMessageDialog(this,
                         "Tipo de usuário desconhecido: " + tipo,
@@ -296,6 +314,17 @@ public class LoginFrame extends BaseFrame {
         }
 
         SessionManager.getInstance().trocarFrame(proximo);
+    }
+
+    private void abrirTelaLogin() {
+        SessionManager.getInstance().encerrarSessao();
+        LoginFrame novoLogin = new LoginFrame(
+                autenticacaoService, adminService, clienteService,
+                enderecoService, categoriaService, produtoService,
+                restauranteService, pedidoService, carrinho,
+                restauranteRepo, areaEntregaService, horarioService);
+        novoLogin.setVisible(true);
+        SessionManager.getInstance().trocarFrame(novoLogin);
     }
 
     private void cancelar() {
