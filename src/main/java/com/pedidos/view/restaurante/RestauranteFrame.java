@@ -1,6 +1,7 @@
 package com.pedidos.view.restaurante;
 
 import com.pedidos.application.service.*;
+import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.domain.entities.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -19,6 +20,7 @@ public class RestauranteFrame extends BaseFrame {
     private final AreaEntregaService areaEntregaService;
     private final HorarioService horarioService;
     private final PedidoService pedidoService;
+    private final AutenticacaoService autenticacaoService;
 
     public RestauranteFrame(Usuario usuario,
                             CategoriaService categoriaService,
@@ -35,6 +37,7 @@ public class RestauranteFrame extends BaseFrame {
         this.areaEntregaService = areaEntregaService;
         this.horarioService = horarioService;
         this.pedidoService = pedidoService;
+        this.autenticacaoService = autenticacaoService;
         construirInterface();
         criarAbas();
     }

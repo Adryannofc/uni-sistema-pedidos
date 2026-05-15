@@ -257,6 +257,9 @@ public class PainelProdutos extends JPanel {
             if (row < 0) return;
             produtoService.ativarInativar(produtosCarregados.get(row).getId(), usuario.getId());
             carregarProdutos(categoriaSelecionada);
+
+            JOptionPane.showMessageDialog(painel, "Produto criado!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
         });
 
         btnRemover.addActionListener(e -> {
