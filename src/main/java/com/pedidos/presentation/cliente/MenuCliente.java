@@ -685,7 +685,7 @@ public class MenuCliente {
 
             carrinhoService.encerrarCarrinho();
 
-            TerminalUtils.sucesso("Pedido realizado! ID: " + pedido.getId().substring(0, 8)
+            TerminalUtils.sucesso("Pedido realizado! ID: " + pedido.getId()
                     + " | Total: " + moeda.format(pedido.calcularTotal()));
             System.out.println("  Seu codigo de confirmacao de entrega: [ " + codigo + " ]");
 
