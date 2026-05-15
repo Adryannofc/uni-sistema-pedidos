@@ -138,10 +138,9 @@ Para trocar a persistência (ex.: de JPA para JDBC puro), basta implementar as i
 src/main/java/com/pedidos/
 │
 ├── Main.java                          # Ponto de entrada — modo terminal
-├── MainSwing.java                     # Ponto de entrada — modo Swing GUI
 │
 ├── domain/
-│   ├── model/
+│   ├── entities/
 │   │   ├── Usuario.java               # Entidade base abstrata (JOINED inheritance)
 │   │   ├── Admin.java
 │   │   ├── Cliente.java               # CPF, telefone, enderecos, favoritos
@@ -188,17 +187,18 @@ src/main/java/com/pedidos/
 │   ├── config/
 │   │   ├── JPAUtil.java               # Singleton EntityManagerFactory
 │   │   └── FlyWayConfig.java          # Executa migrations ao iniciar
-│   └── repository/jpa/
-│       ├── AdminRepositoryJPA.java
-│       ├── ClienteRepositoryJPA.java
-│       ├── RestauranteRepositoryJPA.java
-│       ├── ProdutoRepositoryJPA.java
-│       ├── PedidoRepositoryJPA.java
-│       ├── CategoriaGlobalRepositoryJPA.java
-│       ├── CategoriaCardapioRepositoryJPA.java
-│       ├── EnderecoRepositoryJPA.java
-│       ├── HorarioFuncionamentoRepositoryJPA.java
-│       └── AreaEntregaRepositoryJPA.java
+│   └── repository/
+│       └── impl/
+│           ├── AdminRepositoryJPA.java
+│           ├── ClienteRepositoryJPA.java
+│           ├── RestauranteRepositoryJPA.java
+│           ├── ProdutoRepositoryJPA.java
+│           ├── PedidoRepositoryJPA.java
+│           ├── CategoriaGlobalRepositoryJPA.java
+│           ├── CategoriaCardapioRepositoryJPA.java
+│           ├── EnderecoRepositoryJPA.java
+│           ├── HorarioFuncionamentoRepositoryJPA.java
+│           └── AreaEntregaRepositoryJPA.java
 │
 ├── presentation/                      # UI Terminal
 │   ├── menu/
@@ -219,20 +219,35 @@ src/main/java/com/pedidos/
 │       └── EntradaSegura.java         # Leitura validada de int e String
 │
 └── view/                              # UI Swing GUI
-    ├── LoginFrame.java
-    ├── CadastroFrame.java
-    ├── AdminFrame.java
-    ├── RestauranteFrame.java
-    ├── ClienteFrame.java
-    ├── painel/
+    ├── MainSwing.java                 # Ponto de entrada — modo Swing GUI
+    ├── login/
+    │   └── LoginFrame.java
+    ├── cadastro/
+    │   ├── MainCadastro.java
+    │   ├── CadastroFrame.java
+    │   ├── PainelTipo.java
+    │   ├── PainelCadastroCliente.java
+    │   └── PainelCadastroRestaurante.java
+    ├── admin/
+    │   └── AdminFrame.java
+    ├── restaurante/
+    │   ├── RestauranteFrame.java
+    │   ├── MainRestaurante.java
     │   ├── PainelProdutos.java
     │   ├── PainelPedidos.java
     │   ├── PainelAreaEntrega.java
-    │   ├── PainelHorarios.java
-    │   └── PainelCategorias.java
+    │   └── PainelHorarios.java
+    ├── cliente/
+    │   ├── ClienteFrame.java
+    │   ├── MainCliente.java
+    │   ├── CardapioDialog.java
+    │   └── PainelCardapio.java
     └── util/
-        ├── SessionManager.java        # Usuário logado na sessão Swing
-        ├── CarrinhoManager.java       # Carrinho na sessão Swing
+        ├── base/
+        │   └── BaseFrame.java
+        ├── session/
+        │   ├── SessionManager.java    # Usuário logado na sessão Swing
+        │   └── CarrinhoManager.java   # Carrinho na sessão Swing
         ├── AppColors.java
         └── AppFonts.java
 
@@ -375,7 +390,7 @@ mvn compile exec:java -Dexec.mainClass="com.pedidos.Main"
 **Modo Swing GUI:**
 
 ```bash
-mvn compile exec:java -Dexec.mainClass="com.pedidos.MainSwing"
+mvn compile exec:java -Dexec.mainClass="com.pedidos.view.MainSwing"
 ```
 
 ### 3. Compilar sem Maven (opcional)
