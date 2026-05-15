@@ -1,6 +1,7 @@
 package com.pedidos.view.restaurante;
 
 import com.pedidos.application.service.*;
+import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.domain.entities.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -27,8 +28,7 @@ public class RestauranteFrame extends BaseFrame {
                             RestauranteService restauranteService,
                             AreaEntregaService areaEntregaService,
                             HorarioService horarioService,
-                            PedidoService pedidoService,
-                            AutenticacaoService autenticacaoService) {
+                            PedidoService pedidoService) {
         super("Sistema de Delivery — Painel do Restaurante");
         this.usuario = usuario;
         this.categoriaService = categoriaService;
@@ -88,7 +88,7 @@ public class RestauranteFrame extends BaseFrame {
         abas.addTab("Pedidos",                   new PainelPedidos(usuario, pedidoService));
         abas.addTab("Áreas de Entrega",          new PainelAreaEntrega(usuario, areaEntregaService));
         abas.addTab("Horários de funcionamento", new PainelHorarios(usuario, horarioService));
-        abas.addTab("Perfil",                    new PainelPerfil(usuario,autenticacaoService, restauranteService));
+        abas.addTab("Perfil",                    new JPanel());
 
         add(abas, BorderLayout.CENTER);
     }

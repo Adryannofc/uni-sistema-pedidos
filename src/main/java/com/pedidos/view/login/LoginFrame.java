@@ -286,8 +286,7 @@ public class LoginFrame extends BaseFrame {
                     restauranteService,
                     areaEntregaService,
                     horarioService,
-                    pedidoService,
-                    autenticacaoService);
+                    pedidoService);
             case CLIENTE -> {
                 if (!(usuario instanceof Cliente)) {
                     JOptionPane.showMessageDialog(this,
