@@ -8,6 +8,7 @@ import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.presentation.util.EntradaSegura;
 import com.pedidos.presentation.util.TerminalUtils;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -103,8 +104,158 @@ public class MenuRestaurante {
 
     private void menuPedidos(Restaurante restauranteLogado) {
         TerminalUtils.limparTela();
-        TerminalUtils.cabecalho("PEDIDOS", restauranteLogado.getNome());
+        System.out.println("╔══════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                            MENU DE PEDIDOS                                   ║");
+        System.out.println("╠══════════════════════════════════════════════════════════════════════════════╣");
+        System.out.println("║                                                                              ║");
+        System.out.println("║  [1] VER PEDIDOS ATIVOS                                                      ║");
+        System.out.println("║  [2] HISTÓRICO COMPLETO                                                      ║");
+        System.out.println("║  [3] FILTRAR POR STATUS                                                      ║");
+        System.out.println("║  [0] VOLTAR                                                                  ║");
+        System.out.println("║                                                                              ║");
+        System.out.println("╚══════════════════════════════════════════════════════════════════════════════╝");
+        System.out.print("ESCOLHA UMA OPÇÃO: ");
 
+        int opcao = EntradaSegura.lerOpcao(scanner, 0, 3);
+
+        switch (opcao) {
+            case 1 -> exibirPedidos(restauranteLogado);
+            case 2 -> {
+                List<Pedido> listaParaExibir = pedidoService.obterHistoricoFinalizado(restauranteLogado.getId());
+
+                historicoPedidos(listaParaExibir);
+
+            }
+            case 3 -> {
+                TerminalUtils.limparTela();
+                TerminalUtils.cabecalho("=== FILTRAR POR STATUS ===");
+                System.out.println("[1] AGUARDANDO CONFIRMAÇÃO");
+                System.out.println("[2] CONFIRMADO");
+                System.out.println("[3] EM PREPARO");
+                System.out.println("[4] SAIU_PARA_ENTREGA");
+                System.out.println("[5] ENTREGUE");
+                System.out.println("[6] CANCELADO");
+                System.out.println("[0] VOLTAR");
+
+                int escolha = EntradaSegura.lerOpcao(scanner,0, 6);
+
+                if (escolha != 0)
+                {
+                    StatusPedido status = converterParaStatus(escolha);
+
+                    List<Pedido> filtrando = pedidoService.filtrarPorStatus(restauranteLogado.getId(), status);
+
+                    exibirTodosOsPedidos(filtrando);
+
+                };
+            }
+            case 0 -> { return; }
+        }
+
+
+
+    }
+    private void historicoPedidos(List<Pedido> historico){
+        TerminalUtils.limparTela();
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        if (historico.isEmpty())
+        {
+            System.out.println("╔════════════════════════════════════════════════════════════════════════════════╗");
+            System.out.println("║                        HISTÓRICO COMPLETO DE PEDIDOS                           ║");
+            System.out.println("╠════════════════════════════════════════════════════════════════════════════════╣");
+            System.out.println("║       ID      |    CLIENTE    |      DATA      |   TOTAL (R$)  |   STATUS      ║");
+            TerminalUtils.aviso("╟─SEM HISTÓRICO─┼─SEM HISTÓRICO─┼─SEM HISTÓRICO──┼─SEM HISTÓRICO─┼─SEM HISTÓRICO─╢");
+            return;
+        };
+
+
+        System.out.println("╔══════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                        HISTÓRICO COMPLETO DE PEDIDOS                         ║");
+        System.out.println("╠══════════════════════════════════════════════════════════════════════════════╣");
+        System.out.println("║ ID    | CLIENTE             | DATA       | TOTAL (R$)  | STATUS              ║");
+        System.out.println("╟───────┼─────────────────────┼────────────┼─────────────┼─────────────────────║ ");
+
+
+
+        for (Pedido p : historico)
+        {
+            String idTratado = p.getId();
+
+            if(idTratado.length() > 5){
+                idTratado = idTratado.substring(0,5) + "...";
+            }
+            String dataFormatada = p.getDataPedido().format(fmt);
+            System.out.printf("║%-5s | %-19s | %-10s | %-11.2f | %-19s\n",
+                    idTratado,
+                    p.getCliente().getNome(),
+                    dataFormatada,
+                    p.getTotal(),
+                    p.getStatus());
+
+
+        };
+        System.out.println("╚══════════════════════════════════════════════════════════════════════════════");
+        System.out.println("  ESCOLHA UMA OPÇÃO (0 para voltar): ");
+
+        int num = EntradaSegura.lerOpcao(scanner, 0, historico.size());
+        if (num == 0) return;
+
+        Pedido pedido = historico.get(num - 1);
+
+        exibirDetalhes(pedido);
+
+        TerminalUtils.pausar();
+    };
+
+
+
+
+    private void exibirTodosOsPedidos(List<Pedido> pedidos){
+        TerminalUtils.limparTela();
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        if (pedidos.isEmpty())
+            {
+                System.out.println("╔════════════════════════════════════════════════════════════════════════════════╗");
+                System.out.println("║                        HISTÓRICO COMPLETO DE PEDIDOS                           ║");
+                System.out.println("╠════════════════════════════════════════════════════════════════════════════════╣");
+                System.out.println("║       ID      |    CLIENTE    |      DATA      |   TOTAL (R$)  |   STATUS      ║");
+                System.out.println("╟─SEM HISTÓRICO─┼─SEM HISTÓRICO─┼─SEM HISTÓRICO──┼─SEM HISTÓRICO─┼─SEM HISTÓRICO─╢");
+                return;
+            };
+
+
+        System.out.println("╔══════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                        HISTÓRICO COMPLETO DE PEDIDOS                         ║");
+        System.out.println("╠══════════════════════════════════════════════════════════════════════════════╣");
+        System.out.println("║ ID    | CLIENTE             | DATA       | TOTAL (R$)  | STATUS              ║");
+        System.out.println("╟───────┼─────────────────────┼────────────┼─────────────┼─────────────────────║ ");
+
+        for (Pedido p : pedidos)
+        {
+            String idTratado = p.getId();
+
+            if(idTratado.length() > 5){
+                idTratado = idTratado.substring(0,5) + "...";
+            }
+            String dataFormatada = p.getDataPedido().format(fmt);
+                    System.out.printf("║%-5s | %-19s | %-10s | %-11.2f | %-19s\n",
+                    idTratado,
+                    p.getCliente().getNome(),
+                    dataFormatada,
+                    p.getTotal(),
+                    p.getStatus());
+
+
+        };
+        System.out.println("╚══════════════════════════════════════════════════════════════════════════════");
+        TerminalUtils.pausar();
+    };
+
+    private void exibirPedidos(Restaurante restauranteLogado){
+        TerminalUtils.limparTela();
+        TerminalUtils.cabecalho("PEDIDOS", restauranteLogado.getNome());
         List<Pedido> todos = pedidoService.listarPorRestaurante(restauranteLogado.getId());
         List<Pedido> ativos = new ArrayList<>();
         for (Pedido p : todos) {
@@ -137,7 +288,24 @@ public class MenuRestaurante {
 
         Pedido pedido = ativos.get(num - 1);
         avancarStatus(pedido);
-    }
+    };
+
+    private StatusPedido converterParaStatus(int opcao)
+    {
+        return switch (opcao)
+        {
+            case 1 -> StatusPedido.AGUARDANDO_CONFIRMACAO;
+            case 2 -> StatusPedido.CONFIRMADO;
+            case 3 -> StatusPedido.EM_PREPARO;
+            case 4 -> StatusPedido.SAIU_PARA_ENTREGA;
+            case 5 -> StatusPedido.ENTREGUE;
+            case 6 -> StatusPedido.CANCELADO;
+            default -> throw new IllegalArgumentException("Status Inválido");
+
+        };
+    };
+
+
 
     private void avancarStatus(Pedido pedido) {
         TerminalUtils.limparTela();
@@ -209,6 +377,38 @@ public class MenuRestaurante {
             }
         }
     }
+
+    private void exibirDetalhes(Pedido detalhePedido)
+    {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        TerminalUtils.limparTela();
+
+        if (detalhePedido == null)
+        {
+            TerminalUtils.aviso("[!] Nenhum detalhe encontrado para o pedido selecionado");
+            return;
+        }
+
+            System.out.println("╔══════════════════════════════════════════════════════════════════════════════╗");
+            System.out.printf(" ║ DETALHES DO PEDIDO: %-56s ║\n", detalhePedido.getId());
+            System.out.println("╠══════════════════════════════════════════════════════════════════════════════╣");
+
+            System.out.printf("║ CLIENTE: %-67s ║\n", detalhePedido.getCliente().getNome());
+            System.out.printf("║ EMAIL:   %-67s ║\n", detalhePedido.getCliente().getEmail());
+            System.out.printf("║ DATA:    %-67s ║\n", detalhePedido.getDataPedido().format(fmt));
+            System.out.printf("║ STATUS:  %-67s ║\n", detalhePedido.getStatus());
+
+
+            System.out.println("╟──────────────────────────────────────────────────────────────────────────────╢");
+            System.out.println("║ ITENS DO PEDIDO:                                                             ║");
+            System.out.printf(" ║- Total do Pedido: R$ %-54.2f ║\n", detalhePedido.getTotal());
+            System.out.println("║                                                                              ║");
+            System.out.println("╚══════════════════════════════════════════════════════════════════════════════╝");
+
+            TerminalUtils.pausar();
+
+    };
 
     // ─── Acoes do perfil ──────────────────────────────────────────────────────
 
