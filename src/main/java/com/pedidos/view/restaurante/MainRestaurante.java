@@ -1,19 +1,25 @@
-package com.pedidos.view;
+package com.pedidos.view.restaurante;
 
 import com.pedidos.application.service.*;
+import com.pedidos.domain.entities.Usuario;
 import com.pedidos.infra.config.FlyWayconfig;
 import com.pedidos.infra.config.JPAUtil;
 import com.pedidos.infra.repository.impl.*;
-import com.pedidos.view.login.LoginFrame;
-import com.pedidos.view.util.session.CarrinhoManager;
 import jakarta.persistence.EntityManager;
 
 import javax.swing.*;
 
-public class MainSwing {
-    public static void main(String[] args) {
+/**
+ * Entry point alternativo para desenvolvimento — abre o RestauranteFrame diretamente,
+ * sem passar pelo fluxo de autenticação.
+ *
+ * NÃO usar em produção.
+ */
+public class MainRestaurante {
 
-        // 1. Infraestrutura fora da EDT (operação pesada — conecta ao banco)
+    private static final String DEV_RESTAURANTE_ID = "u-rest-01";
+
+    public static void main(String[] args) {
         try {
             FlyWayconfig.migrate();
         } catch (Exception e) {
@@ -36,33 +42,32 @@ public class MainSwing {
         AutenticacaoService authService = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
         AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo);
         ClienteService clienteService = new ClienteService(clienteRepo, authService, adminRepo, restauranteRepo, enderecoRepo);
-        EnderecoService enderecoService = new EnderecoService(enderecoRepo);
         CategoriaService categoriaService = new CategoriaService(categoriaGlobalRepo, categoriaCardapioRepo, restauranteRepo, produtoRepo);
         ProdutoService produtoService = new ProdutoService(produtoRepo, restauranteRepo);
         RestauranteService restauranteService = new RestauranteService(restauranteRepo, categoriaGlobalRepo, authService);
         PedidoService pedidoService = new PedidoService(pedidoRepo, horarioFuncionamentoRepo);
+        CarrinhoService carrinhoService = new CarrinhoService();
         HorarioService horarioService = new HorarioService(horarioFuncionamentoRepo);
         AreaEntregaService areaEntregaService = new AreaEntregaService(areaRepo);
 
-        // 2. UI na EDT
+        Usuario restaurante = restauranteRepo.buscarPorId(DEV_RESTAURANTE_ID)
+                .orElseThrow(() -> new RuntimeException(
+                        "Restaurante de dev não encontrado. ID: " + DEV_RESTAURANTE_ID));
+
         SwingUtilities.invokeLater(() -> {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             } catch (Exception ignored) {}
 
-            LoginFrame frame = new LoginFrame(
-                    authService,
-                    adminService,
-                    clienteService,
-                    enderecoService,
+            RestauranteFrame frame = new RestauranteFrame(
+                    restaurante,
                     categoriaService,
                     produtoService,
                     restauranteService,
-                    pedidoService,
-                    new CarrinhoManager(),
-                    restauranteRepo,
                     areaEntregaService,
-                    horarioService);
+                    horarioService,
+                    pedidoService
+            );
             frame.setVisible(true);
         });
     }

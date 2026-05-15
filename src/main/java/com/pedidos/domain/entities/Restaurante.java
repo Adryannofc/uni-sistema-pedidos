@@ -84,6 +84,6 @@ public class Restaurante extends Usuario {
     }
 
     public List<CategoriaCardapio> getCategorias() {
-        return List.of();
+        return categorias;
     }
 }

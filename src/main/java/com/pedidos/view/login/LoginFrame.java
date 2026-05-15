@@ -3,7 +3,9 @@ package com.pedidos.view.login;
 import com.pedidos.application.service.*;
 import com.pedidos.domain.entities.*;
 import com.pedidos.domain.enums.TipoUsuario;
+import com.pedidos.domain.repository.RestauranteRepository;
 import com.pedidos.view.admin.AdminFrame;
+import com.pedidos.view.cadastro.CadastroFrame;
 import com.pedidos.view.cliente.ClienteFrame;
 import com.pedidos.view.restaurante.RestauranteFrame;
 import com.pedidos.view.util.base.BaseFrame;
@@ -18,13 +20,18 @@ import java.awt.*;
 
 public class LoginFrame extends BaseFrame {
 
-    private final AutenticacaoService  autenticacaoService;
-    private final ClienteService       clienteService;
-    private final EnderecoService      enderecoService;
-    private final RestauranteService   restauranteService;
-    private final ProdutoService       produtoService;
-    private final PedidoService        pedidoService;
-    private final CarrinhoManager      carrinho;
+    private final AutenticacaoService autenticacaoService;
+    private final AdminService        adminService;
+    private final ClienteService      clienteService;
+    private final EnderecoService     enderecoService;
+    private final CategoriaService    categoriaService;
+    private final ProdutoService      produtoService;
+    private final RestauranteService  restauranteService;
+    private final PedidoService       pedidoService;
+    private final CarrinhoManager     carrinho;
+    private final RestauranteRepository restauranteRepo;
+    private final AreaEntregaService  areaEntregaService;
+    private final HorarioService      horarioService;
 
     private JTextField     campoEmail;
     private JPasswordField campoSenha;
@@ -32,24 +39,37 @@ public class LoginFrame extends BaseFrame {
     private JButton        botaoCancelar;
     private JButton        botaoEntrar;
     private JLabel         labelConexao;
+    private JLabel         linkCadastrar;
 
     public LoginFrame(AutenticacaoService autenticacaoService,
+                      AdminService adminService,
                       ClienteService clienteService,
                       EnderecoService enderecoService,
-                      RestauranteService restauranteService,
+                      CategoriaService categoriaService,
                       ProdutoService produtoService,
+                      RestauranteService restauranteService,
                       PedidoService pedidoService,
-                      CarrinhoManager carrinho) {
+                      CarrinhoManager carrinho,
+                      RestauranteRepository restauranteRepo,
+                      AreaEntregaService areaEntregaService,
+                      HorarioService horarioService) {
         super("Sistema de Delivery - Login", 500, 310);
         this.autenticacaoService = autenticacaoService;
+        this.adminService        = adminService;
         this.clienteService      = clienteService;
         this.enderecoService     = enderecoService;
-        this.restauranteService  = restauranteService;
+        this.categoriaService    = categoriaService;
         this.produtoService      = produtoService;
+        this.restauranteService  = restauranteService;
         this.pedidoService       = pedidoService;
         this.carrinho            = carrinho;
+        this.restauranteRepo     = restauranteRepo;
+        this.areaEntregaService  = areaEntregaService;
+        this.horarioService      = horarioService;
         construirInterface();
     }
+
+    // CONSTRUÇÃO
 
     private void construirInterface() {
         setLayout(new BorderLayout());
@@ -70,8 +90,7 @@ public class LoginFrame extends BaseFrame {
     private JPanel criarPainelFormulario() {
         JPanel painel = new JPanel();
         painel.setBackground(AppColors.CINZA_FUNDO);
-        painel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(),
+        painel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
                 "Acesso ao Sistema",
                 TitledBorder.DEFAULT_JUSTIFICATION,
                 TitledBorder.DEFAULT_POSITION,
@@ -90,6 +109,16 @@ public class LoginFrame extends BaseFrame {
         checkLembrar = new JCheckBox("Lembrar acesso");
         checkLembrar.setFont(AppFonts.LABEL);
         checkLembrar.setOpaque(false);
+
+        linkCadastrar = new JLabel("<html><a href='#'>Não tem conta? Cadastre-se</a></html>");
+        linkCadastrar.setFont(AppFonts.LABEL);
+        linkCadastrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        linkCadastrar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                abrirCadastro();
+            }
+        });
 
         botaoCancelar = botaoSecundario("Cancelar");
         botaoCancelar.addActionListener(e -> cancelar());
@@ -116,10 +145,11 @@ public class LoginFrame extends BaseFrame {
                         .addComponent(labelEmail)
                         .addComponent(labelSenha))
                 .addGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(campoEmail,   GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
-                        .addComponent(campoSenha,   GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
+                        .addComponent(campoEmail,    GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
+                        .addComponent(campoSenha,    GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
                         .addComponent(checkLembrar)
-                        .addComponent(painelBotoes, GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
+                        .addComponent(linkCadastrar)
+                        .addComponent(painelBotoes,  GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
         );
 
         gl.setVerticalGroup(gl.createSequentialGroup()
@@ -129,6 +159,7 @@ public class LoginFrame extends BaseFrame {
                         .addComponent(labelSenha).addComponent(campoSenha))
                 .addGap(4)
                 .addComponent(checkLembrar)
+                .addComponent(linkCadastrar)
                 .addGap(8)
                 .addComponent(painelBotoes)
         );
@@ -183,6 +214,12 @@ public class LoginFrame extends BaseFrame {
         setJMenuBar(menuBar);
     }
 
+    // AÇÕES
+
+    private void abrirCadastro() {
+        new CadastroFrame(clienteService, restauranteService).setVisible(true);
+    }
+
     private void autenticarUsuario() {
         String email = campoEmail.getText().trim();
         String senha = new String(campoSenha.getPassword());
@@ -213,29 +250,43 @@ public class LoginFrame extends BaseFrame {
 
     private boolean validarCampos(String email, String senha) {
         if (email.isEmpty() && senha.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Preencha o e-mail e a senha para continuar.",
+            JOptionPane.showMessageDialog(this,
+                    "Preencha o e-mail e a senha para continuar.",
                     "Campos obrigatórios", JOptionPane.WARNING_MESSAGE);
-            campoEmail.requestFocus(); return false;
+            campoEmail.requestFocus();
+            return false;
         }
         if (email.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "O campo E-mail é obrigatório.",
+            JOptionPane.showMessageDialog(this,
+                    "O campo E-mail é obrigatório.",
                     "Campo obrigatório", JOptionPane.WARNING_MESSAGE);
-            campoEmail.requestFocus(); return false;
+            campoEmail.requestFocus();
+            return false;
         }
         if (senha.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "O campo Senha é obrigatório.",
+            JOptionPane.showMessageDialog(this,
+                    "O campo Senha é obrigatório.",
                     "Campo obrigatório", JOptionPane.WARNING_MESSAGE);
-            campoSenha.requestFocus(); return false;
+            campoSenha.requestFocus();
+            return false;
         }
         return true;
     }
 
     private void redirecionarConformalPapel(Usuario usuario) {
+        TipoUsuario tipo = usuario.getTipoUsuario();
         JFrame proximo;
 
-        switch (usuario.getTipoUsuario()) {
-            case ADMIN       -> proximo = new AdminFrame(usuario);
-            case RESTAURANTE -> proximo = new RestauranteFrame(usuario);
+        switch (tipo) {
+            case ADMIN -> proximo = new AdminFrame(usuario);
+            case RESTAURANTE -> proximo = new RestauranteFrame(
+                    usuario,
+                    categoriaService,
+                    produtoService,
+                    restauranteService,
+                    areaEntregaService,
+                    horarioService,
+                    pedidoService);
             case CLIENTE -> {
                 if (!(usuario instanceof Cliente)) {
                     JOptionPane.showMessageDialog(this,
@@ -251,12 +302,11 @@ public class LoginFrame extends BaseFrame {
                         restauranteService,
                         produtoService,
                         pedidoService,
-                        carrinho
-                );
+                        carrinho);
             }
             default -> {
                 JOptionPane.showMessageDialog(this,
-                        "Tipo de usuário desconhecido: " + usuario.getTipoUsuario(),
+                        "Tipo de usuário desconhecido: " + tipo,
                         "Erro de Configuração", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -272,6 +322,8 @@ public class LoginFrame extends BaseFrame {
         if (r == JOptionPane.YES_OPTION) System.exit(0);
     }
 
+    // Helpers de componentes
+
     private JLabel rotulo(String texto) {
         JLabel l = new JLabel(texto);
         l.setFont(AppFonts.LABEL);
@@ -286,7 +338,7 @@ public class LoginFrame extends BaseFrame {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 Color cor = getModel().isPressed()  ? AppColors.AZUL_PRESSIONADO
                         : getModel().isRollover() ? AppColors.AZUL_HOVER
-                        :                          AppColors.AZUL_PRIMARIO;
+                        :                           AppColors.AZUL_PRIMARIO;
                 g2.setColor(cor);
                 g2.fillRect(0, 0, getWidth(), getHeight());
                 g2.dispose();
