@@ -28,7 +28,8 @@ public class RestauranteFrame extends BaseFrame {
                             RestauranteService restauranteService,
                             AreaEntregaService areaEntregaService,
                             HorarioService horarioService,
-                            PedidoService pedidoService) {
+                            PedidoService pedidoService,
+                            AutenticacaoService autenticacaoService) {
         super("Sistema de Delivery — Painel do Restaurante");
         this.usuario = usuario;
         this.categoriaService = categoriaService;
@@ -88,7 +89,7 @@ public class RestauranteFrame extends BaseFrame {
         abas.addTab("Pedidos",                   new PainelPedidos(usuario, pedidoService));
         abas.addTab("Áreas de Entrega",          new PainelAreaEntrega(usuario, areaEntregaService));
         abas.addTab("Horários de funcionamento", new PainelHorarios(usuario, horarioService));
-        abas.addTab("Perfil",                    new JPanel());
+        abas.addTab("Perfil",                    new PainelPerfil(usuario, autenticacaoService, restauranteService));
 
         add(abas, BorderLayout.CENTER);
     }
