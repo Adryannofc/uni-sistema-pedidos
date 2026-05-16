@@ -31,7 +31,7 @@ public class PainelCadastroCliente extends JPanel {
         setBackground(AppColors.CINZA_FUNDO);
         setBorder(new EmptyBorder(20, 30, 20, 30));
 
-        add(criarFormulario(), BorderLayout.CENTER);
+        add(criarFormulario(),    BorderLayout.CENTER);
         add(criarPainelBotoes(), BorderLayout.SOUTH);
     }
 
@@ -42,11 +42,11 @@ public class PainelCadastroCliente extends JPanel {
         painel.setBackground(AppColors.CINZA_FUNDO);
         painel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(),
-                "Cadastro — Cliente",
+                "Cadastro de Cliente",
                 TitledBorder.DEFAULT_JUSTIFICATION,
                 TitledBorder.DEFAULT_POSITION,
-                AppFonts.LABEL,
-                AppColors.TEXTO_SECUNDARIO));
+                AppFonts.TITULO,
+                AppColors.CINZA_BORDA));
 
         campoNome     = new JTextField();
         campoEmail    = new JTextField();
