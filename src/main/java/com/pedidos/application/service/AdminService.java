@@ -3,6 +3,7 @@ package com.pedidos.application.service;
 import com.pedidos.domain.entities.Admin;
 import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.domain.entities.Usuario;
+import com.pedidos.domain.enums.StatusRestaurante;
 import com.pedidos.domain.repository.AdminRepository;
 import com.pedidos.domain.repository.RestauranteRepository;
 
@@ -99,7 +100,7 @@ public class AdminService {
     public void aprovarRestaurante(String id) {
         try {
             Restaurante restaurante = buscarRestaurantePorId(id);
-            restaurante.setStatusAtivo(true);
+            restaurante.setStatus(StatusRestaurante.ATIVO);
             restauranteRepository.salvar(restaurante);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -116,7 +117,7 @@ public class AdminService {
     public void bloquearRestaurante(String id) {
         try {
             Restaurante restaurante = buscarRestaurantePorId(id);
-            restaurante.setStatusAtivo(false);
+            restaurante.setStatus(StatusRestaurante.BLOQUEADO);
             restauranteRepository.salvar(restaurante);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);

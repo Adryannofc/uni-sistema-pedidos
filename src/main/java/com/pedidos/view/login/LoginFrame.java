@@ -278,7 +278,7 @@ public class LoginFrame extends BaseFrame {
         JFrame proximo;
 
         switch (tipo) {
-            case ADMIN -> proximo = new AdminFrame(usuario);
+            case ADMIN -> proximo = new AdminFrame(usuario, adminService, categoriaService);
             case RESTAURANTE -> proximo = new RestauranteFrame(
                     usuario,
                     categoriaService,
