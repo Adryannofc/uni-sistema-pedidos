@@ -151,9 +151,9 @@ public class AdminFrame extends BaseFrame {
         nav.setBackground(Color.WHITE);
         nav.setBorder(new MatteBorder(1, 0, 0, 0, AppColors.CINZA_BORDA));
 
-        NavItem iRestaurantes = new NavItem("  🍽  Restaurantes",    CARD_RESTAURANTES);
-        NavItem iCategorias   = new NavItem("  🏷  Categorias Globais", CARD_CATEGORIAS);
-        NavItem iPerfil       = new NavItem("  👤  Meu Perfil",      CARD_PERFIL);
+        NavItem iRestaurantes = new NavItem("    Restaurantes",    CARD_RESTAURANTES);
+        NavItem iCategorias   = new NavItem("    Categorias Globais", CARD_CATEGORIAS);
+        NavItem iPerfil       = new NavItem("    Meu Perfil",      CARD_PERFIL);
 
         navItems.add(iRestaurantes);
         navItems.add(iCategorias);
@@ -333,5 +333,7 @@ public class AdminFrame extends BaseFrame {
             setBackground(ativo ? AppColors.CINZA_STATUS : Color.WHITE);
             repaint();
         }
+
+
     }
 }
