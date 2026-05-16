@@ -55,24 +55,25 @@ public class PedidoRepositoryJPA implements PedidoRepository {
 
     @Override
     public List<Pedido> filtrarPorStatus(String restauranteId, StatusPedido status) {
-        return em.createQuery(
-                        "SELECT p FROM Pedido p WHERE p.restaurante.id = :rid AND p.status = :status", Pedido.class)
-                .setParameter("rid", restauranteId)
-                .setParameter("status", status)
-                .getResultList();
+        try {
+            return em.createQuery(
+                            "SELECT p FROM Pedido p WHERE p.restaurante.id = :rid AND p.status = :status", Pedido.class)
+
+                    .setParameter("rid", restauranteId)
+                    .setParameter("status", status)
+                    .getResultList();
+        }catch (Exception e)
+        {throw new RuntimeException("Erro em filtrar Pedidos" + e.getMessage());}
     }
+
+
+
+
 
     @Override
     public List<Pedido> buscarPorRestaurante(String restauranteId) {
         return em.createQuery("SELECT p FROM Pedido p WHERE p.restaurante.id = :rid", Pedido.class)
                 .setParameter("rid", restauranteId)
-                .getResultList();
-    }
-
-    @Override
-    public List<Pedido> buscarPorStatus(StatusPedido status) {
-        return em.createQuery("SELECT p FROM Pedido p WHERE p.status = :status", Pedido.class)
-                .setParameter("status", status)
                 .getResultList();
     }
 
@@ -91,4 +92,14 @@ public class PedidoRepositoryJPA implements PedidoRepository {
         }
     }
 
+    @Override
+    public List<Pedido> buscarHistoricoFinalizado(String restauranteId) {
+        return em.createQuery(
+                        "SELECT p FROM Pedido p WHERE p.restaurante.id = :rid AND p.status IN (:s1, :s2)",
+                        Pedido.class)
+                .setParameter("rid", restauranteId)
+                .setParameter("s1", StatusPedido.ENTREGUE)
+                .setParameter("s2", StatusPedido.CANCELADO)
+                .getResultList();
+    }
 }

@@ -278,7 +278,7 @@ public class LoginFrame extends BaseFrame {
         JFrame proximo;
 
         switch (tipo) {
-            case ADMIN -> proximo = new AdminFrame(usuario);
+            case ADMIN -> proximo = new AdminFrame(usuario, adminService, categoriaService);
             case RESTAURANTE -> proximo = new RestauranteFrame(
                     usuario,
                     categoriaService,
@@ -286,7 +286,9 @@ public class LoginFrame extends BaseFrame {
                     restauranteService,
                     areaEntregaService,
                     horarioService,
-                    pedidoService);
+                    pedidoService,
+                    autenticacaoService,
+                    this::abrirTelaLogin);
             case CLIENTE -> {
                 if (!(usuario instanceof Cliente)) {
                     JOptionPane.showMessageDialog(this,
@@ -302,7 +304,8 @@ public class LoginFrame extends BaseFrame {
                         restauranteService,
                         produtoService,
                         pedidoService,
-                        carrinho);
+                        carrinho,
+                        this::abrirTelaLogin);
             }
             default -> {
                 JOptionPane.showMessageDialog(this,
@@ -313,6 +316,17 @@ public class LoginFrame extends BaseFrame {
         }
 
         SessionManager.getInstance().trocarFrame(proximo);
+    }
+
+    private void abrirTelaLogin() {
+        SessionManager.getInstance().encerrarSessao();
+        LoginFrame novoLogin = new LoginFrame(
+                autenticacaoService, adminService, clienteService,
+                enderecoService, categoriaService, produtoService,
+                restauranteService, pedidoService, carrinho,
+                restauranteRepo, areaEntregaService, horarioService);
+        novoLogin.setVisible(true);
+        SessionManager.getInstance().trocarFrame(novoLogin);
     }
 
     private void cancelar() {
