@@ -1,5 +1,6 @@
 package com.pedidos.domain.entities;
 
+import com.pedidos.domain.enums.StatusRestaurante;
 import com.pedidos.domain.enums.TipoUsuario;
 import jakarta.persistence.*;
 import java.util.List;
@@ -14,6 +15,10 @@ public class Restaurante extends Usuario {
 
     @Column(name = "status_ativo")
     private boolean statusAtivo;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private StatusRestaurante status;
 
     @Column(name = "telefone")
     private String telefone;
@@ -37,11 +42,21 @@ public class Restaurante extends Usuario {
         super(nome, email, senhaHash, TipoUsuario.RESTAURANTE);
         this.cnpj = cnpj;
         this.statusAtivo = false;
+        this.status = StatusRestaurante.PENDENTE;
         this.telefone = telefone;
     }
 
-    public boolean isStatusAtivo() { return statusAtivo; }
-    public void setStatusAtivo(boolean statusAtivo) { this.statusAtivo = statusAtivo; }
+    public StatusRestaurante getStatus() { return status; }
+    public void setStatus(StatusRestaurante status) {
+        this.status = status;
+        this.statusAtivo = (status == StatusRestaurante.ATIVO);
+    }
+
+    public boolean isStatusAtivo() { return status == StatusRestaurante.ATIVO; }
+    public void setStatusAtivo(boolean statusAtivo) {
+        this.statusAtivo = statusAtivo;
+        this.status = statusAtivo ? StatusRestaurante.ATIVO : StatusRestaurante.PENDENTE;
+    }
 
     public String getCnpj() { return cnpj; }
 
@@ -80,7 +95,7 @@ public class Restaurante extends Usuario {
 
     @Override
     public String toString() {
-        return "Restaurante{nome=" + getNome() + ", status=" + isStatusAtivo() + "}";
+        return "Restaurante{nome=" + getNome() + ", status=" + status + "}";
     }
 
     public List<CategoriaCardapio> getCategorias() {

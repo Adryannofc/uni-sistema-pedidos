@@ -66,7 +66,10 @@ public class MainRestaurante {
                     restauranteService,
                     areaEntregaService,
                     horarioService,
-                    pedidoService
+                    pedidoService,
+                    authService,
+                    () -> {  System.exit(0); }
+
             );
             frame.setVisible(true);
         });

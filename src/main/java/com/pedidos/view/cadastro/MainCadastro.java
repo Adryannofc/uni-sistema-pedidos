@@ -11,7 +11,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import javax.swing.*;
 
-public class CadastroLauncher {
+public class MainCadastro {
 
     public static void main(String[] args) {
 

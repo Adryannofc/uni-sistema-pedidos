@@ -2,8 +2,8 @@ package com.pedidos.application.service;
 
 import com.pedidos.domain.enums.StatusPedido;
 import com.pedidos.domain.entities.*;
-import com.pedidos.domain.repository.PedidoRepository;
 import com.pedidos.domain.repository.HorarioFuncionamentoRepository;
+import com.pedidos.domain.repository.PedidoRepository;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
@@ -180,6 +180,13 @@ public class PedidoService {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+    public List<Pedido> filtrarPorStatus(String restauranteId, StatusPedido status) {
+        return pedidoRepository.filtrarPorStatus(restauranteId, status);
+    }
+
+    public List<Pedido> obterHistoricoFinalizado(String restauranteId) {
+        return pedidoRepository.buscarHistoricoFinalizado(restauranteId);
+    }
 
     /**
      * Verifica se um restaurante está aberto no momento atual.
@@ -194,12 +201,10 @@ public class PedidoService {
 
             List<HorarioFuncionamento> horarios = horarioRepository.buscarPorRestauranteId(restauranteId);
 
-            // RN-01: Se não houver horário cadastrado, rejeitar pedido com mensagem clara
             if (horarios == null || horarios.isEmpty()) {
                 throw new IllegalStateException("Restaurante sem horários de funcionamento cadastrados. Tente novamente mais tarde.");
             }
 
-            // Verificar se há horário disponível para o dia atual
             boolean temHorarioHoje = horarios.stream()
                     .filter(h -> h.getDiaSemana() == hoje)
                     .anyMatch(h -> h.contemHorario(agora));
