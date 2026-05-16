@@ -65,9 +65,13 @@ public class PainelRestaurantes extends JPanel {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         toolbar.setBackground(Color.WHITE);
 
-        btnAprovar = botaoAcao("✓ Aprovar", new Color(212, 237, 218), new Color(21, 87, 36));
-        btnBloquear = botaoAcao("✗ Bloquear", new Color(248, 215, 218), new Color(114, 28, 36));
-        btnRemover  = botaoAcao("⊘ Remover",  new Color(255, 243, 205), new Color(133, 100, 4));
+        btnAprovar = botaoAcao(" Aprovar", new Color(212, 237, 218), new Color(21, 87, 36));
+        btnBloquear = botaoAcao(" Bloquear", new Color(248, 215, 218), new Color(114, 28, 36));
+        btnRemover  = botaoAcao(" Remover",  new Color(255, 243, 205), new Color(133, 100, 4));
+
+        btnAprovar.setIcon(new ImageIcon(getClass().getResource("/icones/aprovar.png")));
+        btnBloquear.setIcon(new ImageIcon(getClass().getResource("/icones/bloquear.png")));
+        btnRemover.setIcon(new ImageIcon(getClass().getResource("/icones/remover.png")));
 
         btnAprovar.setEnabled(false);
         btnBloquear.setEnabled(false);

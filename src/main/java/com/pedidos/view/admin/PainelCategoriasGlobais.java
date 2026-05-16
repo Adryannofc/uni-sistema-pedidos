@@ -59,12 +59,15 @@ public class PainelCategoriasGlobais extends JPanel {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         toolbar.setBackground(Color.WHITE);
 
-        btnNova    = new JButton("+ Nova Categoria");
-        btnEditar  = new JButton("✎ Editar");
-        btnRemover = new JButton("✗ Remover");
+        btnNova    = new JButton(" Nova Categoria");
+        btnEditar  = new JButton(" Editar");
+        btnRemover = new JButton(" Remover");
         btnNova.setFont(AppFonts.BOTAO);
+        btnNova.setIcon(carregarIcone("/icones/criar.png"));
         btnEditar.setFont(AppFonts.BOTAO);
+        btnEditar.setIcon(carregarIcone("/icones/editar.png"));
         btnRemover.setFont(AppFonts.BOTAO);
+        btnRemover.setIcon(carregarIcone("/icones/remover.png"));
         btnEditar.setEnabled(false);
         btnRemover.setEnabled(false);
 
@@ -211,6 +214,12 @@ public class PainelCategoriasGlobais extends JPanel {
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private ImageIcon carregarIcone(String caminho) {
+        return new ImageIcon(
+                getClass().getResource(caminho)
+        );
     }
 
     // ─── helpers ──────────────────────────────────────────────────────────────
