@@ -11,6 +11,7 @@
 *.rar
 hs_err_pid*
 replay_pid*
+settings.local.json
 
 # =============================================
 # MAVEN
@@ -105,6 +106,7 @@ $RECYCLE.BIN/
 .idea/.claude/
 CLAUDE.md
 .anthropic/
+.claude
 
 # =============================================
 # IA EM GERAL (Cursor, Codeium, Tabnine...)

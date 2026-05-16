@@ -4,7 +4,6 @@ import com.pedidos.domain.enums.StatusPedido;
 import com.pedidos.domain.entities.*;
 import com.pedidos.domain.repository.PedidoRepository;
 import com.pedidos.domain.repository.HorarioFuncionamentoRepository;
-import com.pedidos.infra.repository.impl.PedidoRepositoryJPA;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
@@ -181,6 +180,13 @@ public class PedidoService {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+    public List<Pedido> filtrarPorStatus(String restauranteId, StatusPedido status) {
+        return pedidoRepository.filtrarPorStatus(restauranteId, status);
+    }
+
+    public List<Pedido> obterHistoricoFinalizado(String restauranteId) {
+        return pedidoRepository.buscarHistoricoFinalizado(restauranteId);
+    }
 
     /**
      * Verifica se um restaurante está aberto no momento atual.
@@ -214,13 +220,4 @@ public class PedidoService {
             throw new RuntimeException("Erro ao verificar horário de funcionamento: " + e.getMessage(), e);
         }
     }
-    public List<Pedido> filtrarPorStatus(String restauranteId, StatusPedido status) {
-        return pedidoRepository.filtrarPorStatus(restauranteId, status);
-    }
-
-    public List<Pedido> obterHistoricoFinalizado(String restauranteId) {
-        return pedidoRepository.buscarHistoricoFinalizado(restauranteId);
-    }
-
-
 }

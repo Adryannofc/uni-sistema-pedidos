@@ -145,7 +145,7 @@ public class MenuRestaurante {
 
                     List<Pedido> filtrando = pedidoService.filtrarPorStatus(restauranteLogado.getId(), status);
 
-                    ExibirTodosOsPedidos(filtrando);
+                    exibirTodosOsPedidos(filtrando);
 
                 };
             }
@@ -180,10 +180,6 @@ public class MenuRestaurante {
 
         for (Pedido p : historico)
         {
-            if (p.getStatus() != StatusPedido.ENTREGUE && p.getStatus() != StatusPedido.CANCELADO) {
-                continue;
-            }
-
             String idTratado = p.getId();
 
             if(idTratado.length() > 5){
@@ -215,7 +211,7 @@ public class MenuRestaurante {
 
 
 
-    private void ExibirTodosOsPedidos(List<Pedido> pedidos){
+    private void exibirTodosOsPedidos(List<Pedido> pedidos){
         TerminalUtils.limparTela();
 
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");

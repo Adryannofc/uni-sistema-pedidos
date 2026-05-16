@@ -1,0 +1,104 @@
+package com.pedidos.view.cadastro;
+
+import com.pedidos.application.service.ClienteService;
+import com.pedidos.application.service.RestauranteService;
+import com.pedidos.view.util.AppColors;
+import com.pedidos.view.util.AppFonts;
+import com.pedidos.view.util.base.BaseFrame;
+
+import javax.swing.*;
+import javax.swing.border.*;
+import java.awt.*;
+
+public class CadastroFrame extends BaseFrame {
+
+    // ── constantes dos cards ──────────────────────────────────────────────────
+    public static final String CARD_TIPO        = "TIPO";
+    public static final String CARD_CLIENTE     = "CLIENTE";
+    public static final String CARD_RESTAURANTE = "RESTAURANTE";
+
+    // ── atributos ─────────────────────────────────────────────────────────────
+    private CardLayout cardLayout;
+    private JPanel     painelPrincipal;
+
+    private final ClienteService     clienteService;
+    private final RestauranteService restauranteService;
+
+    // ── construtor ────────────────────────────────────────────────────────────
+    public CadastroFrame(ClienteService clienteService,
+                         RestauranteService restauranteService) {
+        super("Sistema de Delivery — Novo Cadastro | Cliente", 500, 420);
+        this.clienteService     = clienteService;
+        this.restauranteService = restauranteService;
+
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setJMenuBar(criarMenuBar());
+        inicializarComponentes();
+    }
+
+    // ── inicialização ─────────────────────────────────────────────────────────
+
+    private void inicializarComponentes() {
+        setLayout(new BorderLayout());
+
+        cardLayout      = new CardLayout();
+        painelPrincipal = new JPanel(cardLayout);
+
+        painelPrincipal.add(new PainelTipo(this),                                    CARD_TIPO);
+        painelPrincipal.add(new PainelCadastroCliente(this, clienteService),         CARD_CLIENTE);
+        painelPrincipal.add(new PainelCadastroRestaurante(this, restauranteService), CARD_RESTAURANTE);
+
+        add(painelPrincipal,  BorderLayout.CENTER);
+        add(criarStatusBar(), BorderLayout.SOUTH);
+    }
+
+    // ── navegação (chamado pelos painéis) ─────────────────────────────────────
+
+    public void mostrarCard(String nomeCard) {
+        cardLayout.show(painelPrincipal, nomeCard);
+    }
+
+    // ── status bar ────────────────────────────────────────────────────────────
+
+    private JPanel criarStatusBar() {
+        JPanel barra = new JPanel(new BorderLayout());
+        barra.setBackground(AppColors.CINZA_STATUS);
+        barra.setBorder(new CompoundBorder(
+                new MatteBorder(1, 0, 0, 0, AppColors.CINZA_BORDA),
+                new EmptyBorder(3, 8, 3, 8)
+        ));
+
+        JLabel labelVersao = new JLabel("Sistema de Delivery v1.0");
+        labelVersao.setFont(AppFonts.STATUS);
+
+        JLabel labelConexao = new JLabel("Desconectado");
+        labelConexao.setFont(AppFonts.STATUS);
+        labelConexao.setForeground(AppColors.TEXTO_SECUNDARIO);
+
+        barra.add(labelVersao,  BorderLayout.WEST);
+        barra.add(labelConexao, BorderLayout.EAST);
+        return barra;
+    }
+
+    // ── menu ──────────────────────────────────────────────────────────────────
+
+    private JMenuBar criarMenuBar() {
+        JMenuBar menuBar  = new JMenuBar();
+        JMenu menuSistema = new JMenu("Sistema");
+        menuSistema.setFont(AppFonts.MENU);
+
+        JMenuItem itemVoltar = new JMenuItem("Voltar ao Login");
+        itemVoltar.setFont(AppFonts.MENU);
+        itemVoltar.addActionListener(e -> dispose());
+
+        JMenuItem itemSair = new JMenuItem("Sair");
+        itemSair.setFont(AppFonts.MENU);
+        itemSair.addActionListener(e -> System.exit(0));
+
+        menuSistema.add(itemVoltar);
+        menuSistema.addSeparator();
+        menuSistema.add(itemSair);
+        menuBar.add(menuSistema);
+        return menuBar;
+    }
+}

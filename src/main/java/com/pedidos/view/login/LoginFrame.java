@@ -1,12 +1,15 @@
 package com.pedidos.view.login;
 
-import com.pedidos.application.service.AutenticacaoService;
-import com.pedidos.domain.entities.Usuario;
+import com.pedidos.application.service.*;
+import com.pedidos.domain.entities.*;
 import com.pedidos.domain.enums.TipoUsuario;
+import com.pedidos.domain.repository.RestauranteRepository;
 import com.pedidos.view.admin.AdminFrame;
+import com.pedidos.view.cadastro.CadastroFrame;
 import com.pedidos.view.cliente.ClienteFrame;
 import com.pedidos.view.restaurante.RestauranteFrame;
 import com.pedidos.view.util.base.BaseFrame;
+import com.pedidos.view.util.session.CarrinhoManager;
 import com.pedidos.view.util.session.SessionManager;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -16,41 +19,71 @@ import javax.swing.border.*;
 import java.awt.*;
 
 public class LoginFrame extends BaseFrame {
+
     private final AutenticacaoService autenticacaoService;
+    private final AdminService        adminService;
+    private final ClienteService      clienteService;
+    private final EnderecoService     enderecoService;
+    private final CategoriaService    categoriaService;
+    private final ProdutoService      produtoService;
+    private final RestauranteService  restauranteService;
+    private final PedidoService       pedidoService;
+    private final CarrinhoManager     carrinho;
+    private final RestauranteRepository restauranteRepo;
+    private final AreaEntregaService  areaEntregaService;
+    private final HorarioService      horarioService;
 
-    private JTextField campoEmail;
+    private JTextField     campoEmail;
     private JPasswordField campoSenha;
-    private JCheckBox checkLembrar;
-    private JButton botaoCancelar;
-    private JButton botaoEntrar;
-    private JLabel labelConexao;
+    private JCheckBox      checkLembrar;
+    private JButton        botaoCancelar;
+    private JButton        botaoEntrar;
+    private JLabel         labelConexao;
+    private JLabel         linkCadastrar;
 
-    public LoginFrame(AutenticacaoService autenticacaoService) {
+    public LoginFrame(AutenticacaoService autenticacaoService,
+                      AdminService adminService,
+                      ClienteService clienteService,
+                      EnderecoService enderecoService,
+                      CategoriaService categoriaService,
+                      ProdutoService produtoService,
+                      RestauranteService restauranteService,
+                      PedidoService pedidoService,
+                      CarrinhoManager carrinho,
+                      RestauranteRepository restauranteRepo,
+                      AreaEntregaService areaEntregaService,
+                      HorarioService horarioService) {
         super("Sistema de Delivery - Login", 500, 310);
         this.autenticacaoService = autenticacaoService;
-
-        if (this.autenticacaoService == null) {
-            System.err.println("ERRO CRÍTICO: O serviço chegou nulo no LoginFrame!");
-        }
+        this.adminService        = adminService;
+        this.clienteService      = clienteService;
+        this.enderecoService     = enderecoService;
+        this.categoriaService    = categoriaService;
+        this.produtoService      = produtoService;
+        this.restauranteService  = restauranteService;
+        this.pedidoService       = pedidoService;
+        this.carrinho            = carrinho;
+        this.restauranteRepo     = restauranteRepo;
+        this.areaEntregaService  = areaEntregaService;
+        this.horarioService      = horarioService;
         construirInterface();
     }
 
-    // CONSTRUCAO
+    // CONSTRUÇÃO
 
     private void construirInterface() {
         setLayout(new BorderLayout());
         add(criarPainelCentral(), BorderLayout.CENTER);
-        add(criarStatusBar(), BorderLayout.SOUTH);
+        add(criarStatusBar(),     BorderLayout.SOUTH);
         configurarMenuBar();
     }
 
     private JPanel criarPainelCentral() {
-        JPanel externo = new JPanel(new BorderLayout(0,6));
+        JPanel externo = new JPanel(new BorderLayout(0, 6));
         externo.setBackground(AppColors.CINZA_FUNDO);
         externo.setBorder(new EmptyBorder(10, 15, 8, 15));
         externo.add(criarPainelFormulario(), BorderLayout.CENTER);
-        externo.add(criarLabelHint(), BorderLayout.SOUTH);
-
+        externo.add(criarLabelHint(),        BorderLayout.SOUTH);
         return externo;
     }
 
@@ -62,8 +95,7 @@ public class LoginFrame extends BaseFrame {
                 TitledBorder.DEFAULT_JUSTIFICATION,
                 TitledBorder.DEFAULT_POSITION,
                 AppFonts.LABEL,
-                AppColors.TEXTO_SECUNDARIO
-                ));
+                AppColors.TEXTO_SECUNDARIO));
 
         JLabel labelEmail = rotulo("E-mail:");
         JLabel labelSenha = rotulo("Senha:");
@@ -77,6 +109,16 @@ public class LoginFrame extends BaseFrame {
         checkLembrar = new JCheckBox("Lembrar acesso");
         checkLembrar.setFont(AppFonts.LABEL);
         checkLembrar.setOpaque(false);
+
+        linkCadastrar = new JLabel("<html><a href='#'>Não tem conta? Cadastre-se</a></html>");
+        linkCadastrar.setFont(AppFonts.LABEL);
+        linkCadastrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        linkCadastrar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                abrirCadastro();
+            }
+        });
 
         botaoCancelar = botaoSecundario("Cancelar");
         botaoCancelar.addActionListener(e -> cancelar());
@@ -99,19 +141,25 @@ public class LoginFrame extends BaseFrame {
         gl.setAutoCreateContainerGaps(true);
 
         gl.setHorizontalGroup(gl.createSequentialGroup()
-                .addGroup(gl.createParallelGroup(GroupLayout.Alignment.TRAILING).addComponent(labelEmail).addComponent(labelSenha))
-                .addGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(campoEmail,   GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE).addComponent(campoSenha,   GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE).addComponent(checkLembrar).addComponent(painelBotoes, GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
+                .addGroup(gl.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                        .addComponent(labelEmail)
+                        .addComponent(labelSenha))
+                .addGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(campoEmail,    GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
+                        .addComponent(campoSenha,    GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
+                        .addComponent(checkLembrar)
+                        .addComponent(linkCadastrar)
+                        .addComponent(painelBotoes,  GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
         );
 
         gl.setVerticalGroup(gl.createSequentialGroup()
                 .addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(labelEmail)
-                        .addComponent(campoEmail))
+                        .addComponent(labelEmail).addComponent(campoEmail))
                 .addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(labelSenha)
-                        .addComponent(campoSenha))
+                        .addComponent(labelSenha).addComponent(campoSenha))
                 .addGap(4)
                 .addComponent(checkLembrar)
+                .addComponent(linkCadastrar)
                 .addGap(8)
                 .addComponent(painelBotoes)
         );
@@ -129,7 +177,6 @@ public class LoginFrame extends BaseFrame {
         hint.setFont(AppFonts.HINT);
         hint.setForeground(AppColors.TEXTO_SECUNDARIO);
         hint.setBorder(new EmptyBorder(4, 2, 0, 0));
-
         return hint;
     }
 
@@ -150,7 +197,6 @@ public class LoginFrame extends BaseFrame {
 
         barra.add(labelVersao,  BorderLayout.WEST);
         barra.add(labelConexao, BorderLayout.EAST);
-
         return barra;
     }
 
@@ -168,15 +214,11 @@ public class LoginFrame extends BaseFrame {
         setJMenuBar(menuBar);
     }
 
-    // ACOES
+    // AÇÕES
 
-    /**
-     * Fluxo: validarCampos → autenticacaoService.autenticar()
-     *        → SessionManager.iniciarSessao() → redirecionarConformalPapel()
-     *
-     * autenticar() lança RuntimeException em credenciais inválidas —
-     * a mensagem do catch distingue "email ou senha inválidos" de outros erros.
-     */
+    private void abrirCadastro() {
+        new CadastroFrame(clienteService, restauranteService).setVisible(true);
+    }
 
     private void autenticarUsuario() {
         String email = campoEmail.getText().trim();
@@ -186,24 +228,20 @@ public class LoginFrame extends BaseFrame {
 
         try {
             Usuario usuario = autenticacaoService.autenticar(email, senha);
-
             SessionManager.getInstance().iniciarSessao(usuario, this);
             labelConexao.setText("Conectado: " + usuario.getNome());
             redirecionarConformalPapel(usuario);
 
         } catch (RuntimeException ex) {
             String msg = ex.getMessage();
-            // AutenticacaoService lança "Email ou senha inválidos."
             if (msg != null && msg.toLowerCase().contains("inválido")) {
                 JOptionPane.showMessageDialog(this,
                         "E-mail ou senha inválidos.\nVerifique seus dados e tente novamente.",
-                        "Falha no Login",
-                        JOptionPane.ERROR_MESSAGE);
+                        "Falha no Login", JOptionPane.ERROR_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this,
                         "Erro ao conectar:\n" + msg,
-                        "Erro de Conexão",
-                        JOptionPane.ERROR_MESSAGE);
+                        "Erro de Conexão", JOptionPane.ERROR_MESSAGE);
             }
             campoSenha.setText("");
             campoSenha.requestFocus();
@@ -240,9 +278,35 @@ public class LoginFrame extends BaseFrame {
         JFrame proximo;
 
         switch (tipo) {
-            case ADMIN       -> proximo = new AdminFrame(usuario, autenticacaoService);
-            case RESTAURANTE -> proximo = new RestauranteFrame(usuario);
-            case CLIENTE     -> proximo = new ClienteFrame(usuario);
+            case ADMIN -> proximo = new AdminFrame(usuario, adminService, categoriaService);
+            case RESTAURANTE -> proximo = new RestauranteFrame(
+                    usuario,
+                    categoriaService,
+                    produtoService,
+                    restauranteService,
+                    areaEntregaService,
+                    horarioService,
+                    pedidoService,
+                    autenticacaoService,
+                    this::abrirTelaLogin);
+            case CLIENTE -> {
+                if (!(usuario instanceof Cliente)) {
+                    JOptionPane.showMessageDialog(this,
+                            "Usuário autenticado não é um Cliente válido.",
+                            "Erro", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                proximo = new ClienteFrame(
+                        usuario,
+                        (Cliente) usuario,
+                        clienteService,
+                        enderecoService,
+                        restauranteService,
+                        produtoService,
+                        pedidoService,
+                        carrinho,
+                        this::abrirTelaLogin);
+            }
             default -> {
                 JOptionPane.showMessageDialog(this,
                         "Tipo de usuário desconhecido: " + tipo,
@@ -252,6 +316,17 @@ public class LoginFrame extends BaseFrame {
         }
 
         SessionManager.getInstance().trocarFrame(proximo);
+    }
+
+    private void abrirTelaLogin() {
+        SessionManager.getInstance().encerrarSessao();
+        LoginFrame novoLogin = new LoginFrame(
+                autenticacaoService, adminService, clienteService,
+                enderecoService, categoriaService, produtoService,
+                restauranteService, pedidoService, carrinho,
+                restauranteRepo, areaEntregaService, horarioService);
+        novoLogin.setVisible(true);
+        SessionManager.getInstance().trocarFrame(novoLogin);
     }
 
     private void cancelar() {
@@ -302,4 +377,3 @@ public class LoginFrame extends BaseFrame {
         return btn;
     }
 }
-

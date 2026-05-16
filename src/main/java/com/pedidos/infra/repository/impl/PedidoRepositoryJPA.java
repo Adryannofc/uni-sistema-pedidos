@@ -94,11 +94,12 @@ public class PedidoRepositoryJPA implements PedidoRepository {
 
     @Override
     public List<Pedido> buscarHistoricoFinalizado(String restauranteId) {
-        String jpql = "SELECT p FROM Pedido p WHERE p.restaurante.id = :rid " +
-                "AND p.status IN ( com.pedidos.domain.enums.StatusPedido.ENTREGUE, com.pedidos.domain.enums.StatusPedido.CANCELADO)";
-
-        return em.createQuery(jpql, Pedido.class)
+        return em.createQuery(
+                        "SELECT p FROM Pedido p WHERE p.restaurante.id = :rid AND p.status IN (:s1, :s2)",
+                        Pedido.class)
                 .setParameter("rid", restauranteId)
+                .setParameter("s1", StatusPedido.ENTREGUE)
+                .setParameter("s2", StatusPedido.CANCELADO)
                 .getResultList();
     }
 }

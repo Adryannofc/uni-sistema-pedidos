@@ -20,7 +20,7 @@ public class BaseFrame extends JFrame {
 
     private void configurar() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(520, 400);
+        setSize(1200, 800);
         setLocationRelativeTo(null);
         setResizable(false);
         getContentPane().setBackground(AppColors.CINZA_FUNDO);
