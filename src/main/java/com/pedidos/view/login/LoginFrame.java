@@ -287,7 +287,8 @@ public class LoginFrame extends BaseFrame {
                     areaEntregaService,
                     horarioService,
                     pedidoService,
-                    autenticacaoService);
+                    autenticacaoService,
+                    this::abrirTelaLogin);
             case CLIENTE -> {
                 if (!(usuario instanceof Cliente)) {
                     JOptionPane.showMessageDialog(this,
