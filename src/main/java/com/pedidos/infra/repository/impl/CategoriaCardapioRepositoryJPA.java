@@ -6,7 +6,7 @@ import jakarta.persistence.EntityManager;
 
 import java.util.*;
 
-public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioRepository {
+public class    CategoriaCardapioRepositoryJPA implements CategoriaCardapioRepository {
 
     private EntityManager em;
 
@@ -27,15 +27,41 @@ public class CategoriaCardapioRepositoryJPA implements CategoriaCardapioReposito
     public void remover(String id) {
         try {
             em.getTransaction().begin();
-            CategoriaCardapio categoria = em.find(CategoriaCardapio.class, id);
-            if (categoria != null) {
-                em.remove(categoria);
-            }
+
+            em.createQuery("DELETE FROM cliente_restaurantes_favoritos WHERE CAST(restaurante_id AS varchar) = :restId")
+                    .setParameter("restId", id)
+                    .executeUpdate();
+
+            em.createQuery("DELETE FROM itens_pedido WHERE produto_id IN (" +
+                            "SELECT id FROM produtos WHERE categoria_cardapio_id IN (" +
+                            "SELECT id FROM categorias_cardapio WHERE CAST(restaurante_id AS varchar) = :restId))")
+                    .setParameter("restId", id)
+                    .executeUpdate();
+
+            em.createQuery("DELETE FROM produtos WHERE categoria_cardapio_id IN (SELECT id FROM categorias_cardapio WHERE CAST(restaurante_id AS varchar) = :restId)")
+                    .setParameter("restId", id)
+                    .executeUpdate();
+
+            em.createQuery("DELETE FROM categorias_cardapio WHERE CAST(restaurante_id AS varchar) = :restId")
+                    .setParameter("restId", id)
+                    .executeUpdate();
+
+            em.createQuery("DELETE FROM areas_entrega WHERE CAST(restaurante_id AS varchar) = :restId")
+                    .setParameter("restId", id)
+                    .executeUpdate();
+
+            em.createQuery("DELETE FROM horarios_funcionamento WHERE CAST(restaurante_id AS varchar) = :restId")
+                    .setParameter("restId", id)
+                    .executeUpdate();
+
             em.getTransaction().commit();
+            System.out.println("DEBUG: Todas as dependências do restaurante foram limpas com sucesso.");
         }
         catch (Exception e) {
-            em.getTransaction().rollback();
-            throw new RuntimeException("Erro ao remover a categoria no cardapio", e);
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Erro ao limpar dependências do restaurante: " + e.getMessage(), e);
         }
     }
 

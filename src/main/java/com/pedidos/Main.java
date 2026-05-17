@@ -23,6 +23,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         AdminRepositoryJPA adminRepo = new AdminRepositoryJPA(em);
+
         RestauranteRepositoryJPA restauranteRepo = new RestauranteRepositoryJPA(em);
         ClienteRepositoryJPA clienteRepo = new ClienteRepositoryJPA(em);
         CategoriaGlobalRepositoryJPA categoriaGlobalRepo = new CategoriaGlobalRepositoryJPA(em);
@@ -34,7 +35,7 @@ public class Main {
         EnderecoRepositoryJPA enderecoRepo = new EnderecoRepositoryJPA(em);
 
         AutenticacaoService authService = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
-        AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo);
+        AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo, categoriaCardapioRepo);
         ClienteService clienteService = new ClienteService(clienteRepo, authService, adminRepo, restauranteRepo, enderecoRepo);
         CategoriaService categoriaService = new CategoriaService(categoriaGlobalRepo, categoriaCardapioRepo, restauranteRepo, produtoRepo);
         ProdutoService produtoService = new ProdutoService(produtoRepo, restauranteRepo);

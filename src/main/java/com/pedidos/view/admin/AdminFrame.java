@@ -25,7 +25,7 @@ public class AdminFrame extends BaseFrame {
     private static final String CARD_PERFIL        = "perfil";
 
     private final Usuario         usuario;
-    private final AdminService    adminService;
+    private final AdminService adminService;
     private final CategoriaService categoriaService;
 
     private CardLayout cardLayout;

@@ -33,7 +33,7 @@ public class MainSwing {
         EnderecoRepositoryJPA enderecoRepo = new EnderecoRepositoryJPA(em);
 
         AutenticacaoService authService = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
-        AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo);
+        AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo, categoriaCardapioRepo);
         ClienteService clienteService = new ClienteService(clienteRepo, authService, adminRepo, restauranteRepo, enderecoRepo);
         EnderecoService enderecoService = new EnderecoService(enderecoRepo);
         CategoriaService categoriaService = new CategoriaService(categoriaGlobalRepo, categoriaCardapioRepo, restauranteRepo, produtoRepo);

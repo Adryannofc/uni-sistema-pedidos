@@ -27,7 +27,7 @@ public class Restaurante extends Usuario {
     @JoinColumn(name = "categoria_global_id")
     private CategoriaGlobal categoriaGlobal;
 
-    @OneToMany(mappedBy = "restaurante")
+    @OneToMany(mappedBy = "restaurante", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<CategoriaCardapio> categorias;
 
     @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -35,6 +35,8 @@ public class Restaurante extends Usuario {
 
     @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<HorarioFuncionamento> horarios;
+
+
 
     protected Restaurante() {}
 
