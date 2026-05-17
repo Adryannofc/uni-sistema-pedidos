@@ -1,18 +1,24 @@
 package com.pedidos.application.service;
 
 import com.pedidos.domain.entities.Admin;
+import com.pedidos.domain.entities.CategoriaCardapio;
 import com.pedidos.domain.entities.Restaurante;
 import com.pedidos.domain.entities.Usuario;
 import com.pedidos.domain.enums.StatusRestaurante;
 import com.pedidos.domain.repository.AdminRepository;
+import com.pedidos.domain.repository.CategoriaCardapioRepository;
 import com.pedidos.domain.repository.RestauranteRepository;
+import com.pedidos.infra.repository.impl.CategoriaCardapioRepositoryJPA;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 public class AdminService {
     private final AdminRepository adminRepository;
     private final AutenticacaoService autenticacaoService;
     private final RestauranteRepository restauranteRepository;
+    private CategoriaCardapioRepository categoriaCardapioRepository;
 
     /**
      * Construtor da classe
@@ -21,10 +27,11 @@ public class AdminService {
      * @param autenticacaoService   verifica se as credenciais estao corretas
      * @param restauranteRepository gerencia os dados dos restaurantes
      */
-    public AdminService(AdminRepository adminRepository, AutenticacaoService autenticacaoService, RestauranteRepository restauranteRepository) {
+    public AdminService(AdminRepository adminRepository, AutenticacaoService autenticacaoService, RestauranteRepository restauranteRepository, CategoriaCardapioRepository categoriaCardapioRepository) {
         this.adminRepository = adminRepository;
         this.autenticacaoService = autenticacaoService;
         this.restauranteRepository = restauranteRepository;
+        this.categoriaCardapioRepository = categoriaCardapioRepository;
     }
 
     /**
@@ -131,10 +138,14 @@ public class AdminService {
      * @param id identificador unico do restaurante
      * @throws IllegalArgumentException se nenhum restaurante for encontrado com id informado
      */
+    @jakarta.transaction.Transactional
     public void removerRestaurante(String id) {
         try {
             buscarRestaurantePorId(id);
-            restauranteRepository.deletar(id);
+            this.categoriaCardapioRepository.remover(id);
+
+            this.restauranteRepository.deletar(id);
+
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -156,4 +167,5 @@ public class AdminService {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
 }

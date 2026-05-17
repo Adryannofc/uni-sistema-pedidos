@@ -8,11 +8,13 @@ public interface CategoriaCardapioRepository {
 
     void salvar(CategoriaCardapio categoria);
 
+    void remover(String id);
+
     Optional<CategoriaCardapio> buscarPorId(String id)
             ;
     List<CategoriaCardapio> buscarPorRestauranteId(String restauranteId);
 
     List<CategoriaCardapio> listarTodos();
 
-    void remover(String id);
+
 }
