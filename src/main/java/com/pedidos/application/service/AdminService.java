@@ -138,13 +138,13 @@ public class AdminService {
      * @param id identificador unico do restaurante
      * @throws IllegalArgumentException se nenhum restaurante for encontrado com id informado
      */
-    @jakarta.transaction.Transactional
+    @Transactional
     public void removerRestaurante(String id) {
         try {
             buscarRestaurantePorId(id);
+
             this.categoriaCardapioRepository.remover(id);
 
-            this.restauranteRepository.deletar(id);
 
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);

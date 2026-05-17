@@ -28,34 +28,43 @@ public class    CategoriaCardapioRepositoryJPA implements CategoriaCardapioRepos
         try {
             em.getTransaction().begin();
 
-            em.createQuery("DELETE FROM cliente_restaurantes_favoritos WHERE CAST(restaurante_id AS varchar) = :restId")
+
+            em.createNativeQuery("DELETE FROM cliente_restaurantes_favoritos WHERE CAST(restaurante_id AS varchar) = :restId")
                     .setParameter("restId", id)
                     .executeUpdate();
 
-            em.createQuery("DELETE FROM itens_pedido WHERE produto_id IN (" +
+            em.createNativeQuery("DELETE FROM itens_pedido WHERE produto_id IN (" +
                             "SELECT id FROM produtos WHERE categoria_cardapio_id IN (" +
                             "SELECT id FROM categorias_cardapio WHERE CAST(restaurante_id AS varchar) = :restId))")
                     .setParameter("restId", id)
                     .executeUpdate();
 
-            em.createQuery("DELETE FROM produtos WHERE categoria_cardapio_id IN (SELECT id FROM categorias_cardapio WHERE CAST(restaurante_id AS varchar) = :restId)")
+            em.createNativeQuery("DELETE FROM produtos WHERE categoria_cardapio_id IN (SELECT id FROM categorias_cardapio WHERE CAST(restaurante_id AS varchar) = :restId)")
                     .setParameter("restId", id)
                     .executeUpdate();
 
-            em.createQuery("DELETE FROM categorias_cardapio WHERE CAST(restaurante_id AS varchar) = :restId")
+            em.createNativeQuery("DELETE FROM categorias_cardapio WHERE CAST(restaurante_id AS varchar) = :restId")
                     .setParameter("restId", id)
                     .executeUpdate();
 
-            em.createQuery("DELETE FROM areas_entrega WHERE CAST(restaurante_id AS varchar) = :restId")
+            em.createNativeQuery("DELETE FROM areas_entrega WHERE CAST(restaurante_id AS varchar) = :restId")
                     .setParameter("restId", id)
                     .executeUpdate();
 
-            em.createQuery("DELETE FROM horarios_funcionamento WHERE CAST(restaurante_id AS varchar) = :restId")
+            em.createNativeQuery("DELETE FROM horarios_funcionamento WHERE CAST(restaurante_id AS varchar) = :restId")
+                    .setParameter("restId", id)
+                    .executeUpdate();
+
+            em.createNativeQuery("DELETE FROM restaurantes WHERE CAST(usuario_id AS varchar) = :restId")
+                    .setParameter("restId", id)
+                    .executeUpdate();
+
+            em.createNativeQuery("DELETE FROM usuarios WHERE CAST(id AS varchar) = :restId")
                     .setParameter("restId", id)
                     .executeUpdate();
 
             em.getTransaction().commit();
-            System.out.println("DEBUG: Todas as dependências do restaurante foram limpas com sucesso.");
+            System.out.println("DEBUG: Restaurante e todas as dependências apagados com sucesso via SQL Nativo!");
         }
         catch (Exception e) {
             if (em.getTransaction().isActive()) {
