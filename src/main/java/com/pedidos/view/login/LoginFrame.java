@@ -39,7 +39,7 @@ public class LoginFrame extends BaseFrame {
     private JButton        botaoCancelar;
     private JButton        botaoEntrar;
     private JLabel         labelConexao;
-    private JLabel         linkCadastrar;
+    private JPanel         painelNovoCadastro;
 
     public LoginFrame(AutenticacaoService autenticacaoService,
                       AdminService adminService,
@@ -110,15 +110,7 @@ public class LoginFrame extends BaseFrame {
         checkLembrar.setFont(AppFonts.LABEL);
         checkLembrar.setOpaque(false);
 
-        linkCadastrar = new JLabel("<html><a href='#'>Não tem conta? Cadastre-se</a></html>");
-        linkCadastrar.setFont(AppFonts.LABEL);
-        linkCadastrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        linkCadastrar.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                abrirCadastro();
-            }
-        });
+        painelNovoCadastro = criarLinksNovoCadastro();
 
         botaoCancelar = botaoSecundario("Cancelar");
         botaoCancelar.addActionListener(e -> cancelar());
@@ -148,7 +140,7 @@ public class LoginFrame extends BaseFrame {
                         .addComponent(campoEmail,    GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
                         .addComponent(campoSenha,    GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
                         .addComponent(checkLembrar)
-                        .addComponent(linkCadastrar)
+                        .addComponent(painelNovoCadastro)
                         .addComponent(painelBotoes,  GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
         );
 
@@ -159,7 +151,7 @@ public class LoginFrame extends BaseFrame {
                         .addComponent(labelSenha).addComponent(campoSenha))
                 .addGap(4)
                 .addComponent(checkLembrar)
-                .addComponent(linkCadastrar)
+                .addComponent(painelNovoCadastro)
                 .addGap(8)
                 .addComponent(painelBotoes)
         );
@@ -216,8 +208,48 @@ public class LoginFrame extends BaseFrame {
 
     // AÇÕES
 
-    private void abrirCadastro() {
-        new CadastroFrame(clienteService, restauranteService).setVisible(true);
+    private JPanel criarLinksNovoCadastro() {
+        JPanel painel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        painel.setOpaque(false);
+
+        JLabel prefixo = new JLabel("Novo cadastro: ");
+        prefixo.setFont(AppFonts.LABEL);
+
+        JLabel linkCliente     = criarLinkCadastro("Cliente",     () -> abrirCadastroCliente());
+        JLabel separador       = new JLabel(" | ");
+        separador.setFont(AppFonts.LABEL);
+        JLabel linkRestaurante = criarLinkCadastro("Restaurante", () -> abrirCadastroRestaurante());
+
+        painel.add(prefixo);
+        painel.add(linkCliente);
+        painel.add(separador);
+        painel.add(linkRestaurante);
+        return painel;
+    }
+
+    private JLabel criarLinkCadastro(String texto, Runnable acao) {
+        JLabel link = new JLabel("<html><a href='#'>" + texto + "</a></html>");
+        link.setFont(AppFonts.LABEL);
+        link.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        link.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                acao.run();
+            }
+        });
+        return link;
+    }
+
+    private void abrirCadastroCliente() {
+        CadastroFrame f = new CadastroFrame(clienteService, restauranteService);
+        f.mostrarCard(CadastroFrame.CARD_CLIENTE);
+        f.setVisible(true);
+    }
+
+    private void abrirCadastroRestaurante() {
+        CadastroFrame f = new CadastroFrame(clienteService, restauranteService);
+        f.mostrarCard(CadastroFrame.CARD_RESTAURANTE);
+        f.setVisible(true);
     }
 
     private void autenticarUsuario() {
