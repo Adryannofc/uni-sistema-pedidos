@@ -1,6 +1,6 @@
 package com.pedidos.view.cadastro;
 
-import com.pedidos.application.service.RestauranteService;
+import com.pedidos.model.service.RestauranteService;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 

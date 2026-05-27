@@ -1,9 +1,9 @@
 package com.pedidos.view.login;
 
-import com.pedidos.application.service.*;
-import com.pedidos.domain.entities.*;
-import com.pedidos.domain.enums.TipoUsuario;
-import com.pedidos.domain.repository.RestauranteRepository;
+import com.pedidos.model.service.*;
+import com.pedidos.model.entity.*;
+import com.pedidos.model.enums.TipoUsuario;
+import com.pedidos.model.repository.RestauranteRepository;
 import com.pedidos.view.admin.AdminFrame;
 import com.pedidos.view.cadastro.CadastroFrame;
 import com.pedidos.view.cliente.ClienteFrame;

@@ -1,15 +1,14 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.application.service.PedidoService;
-import com.pedidos.domain.entities.Cliente;
-import com.pedidos.domain.entities.ItemPedido;
-import com.pedidos.domain.entities.Pedido;
-import com.pedidos.domain.enums.StatusPedido;
+import com.pedidos.model.service.PedidoService;
+import com.pedidos.model.entity.Cliente;
+import com.pedidos.model.entity.ItemPedido;
+import com.pedidos.model.entity.Pedido;
+import com.pedidos.model.enums.StatusPedido;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;

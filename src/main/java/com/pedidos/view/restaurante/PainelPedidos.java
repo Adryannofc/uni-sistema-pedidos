@@ -1,10 +1,9 @@
 package com.pedidos.view.restaurante;
 
-import com.pedidos.application.service.PedidoService;
-import com.pedidos.domain.entities.ItemPedido;
-import com.pedidos.domain.entities.Pedido;
-import com.pedidos.domain.entities.Usuario;
-import com.pedidos.domain.enums.StatusPedido;
+import com.pedidos.model.service.PedidoService;
+import com.pedidos.model.entity.Pedido;
+import com.pedidos.model.entity.Usuario;
+import com.pedidos.model.enums.StatusPedido;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 

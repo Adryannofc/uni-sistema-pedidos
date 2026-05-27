@@ -1,10 +1,10 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.application.service.ProdutoService;
-import com.pedidos.application.service.RestauranteService;
-import com.pedidos.domain.entities.Cliente;
-import com.pedidos.domain.entities.HorarioFuncionamento;
-import com.pedidos.domain.entities.Restaurante;
+import com.pedidos.model.service.ProdutoService;
+import com.pedidos.model.service.RestauranteService;
+import com.pedidos.model.entity.Cliente;
+import com.pedidos.model.entity.HorarioFuncionamento;
+import com.pedidos.model.entity.Restaurante;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 import com.pedidos.view.util.session.CarrinhoManager;

@@ -1,10 +1,10 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.application.service.PedidoService;
-import com.pedidos.domain.entities.Endereco;
-import com.pedidos.domain.entities.ItemPedido;
-import com.pedidos.domain.entities.Pedido;
-import com.pedidos.domain.enums.StatusPedido;
+import com.pedidos.model.service.PedidoService;
+import com.pedidos.model.entity.Endereco;
+import com.pedidos.model.entity.ItemPedido;
+import com.pedidos.model.entity.Pedido;
+import com.pedidos.model.enums.StatusPedido;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 

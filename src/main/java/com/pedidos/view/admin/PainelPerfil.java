@@ -1,7 +1,7 @@
 package com.pedidos.view.admin;
 
-import com.pedidos.application.service.AdminService;
-import com.pedidos.domain.entities.Usuario;
+import com.pedidos.model.service.AdminService;
+import com.pedidos.model.entity.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 

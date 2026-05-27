@@ -1,10 +1,10 @@
 package com.pedidos.view.restaurante;
 
-import com.pedidos.application.service.CategoriaService;
-import com.pedidos.application.service.ProdutoService;
-import com.pedidos.domain.entities.CategoriaCardapio;
-import com.pedidos.domain.entities.Produto;
-import com.pedidos.domain.entities.Usuario;
+import com.pedidos.model.service.CategoriaService;
+import com.pedidos.model.service.ProdutoService;
+import com.pedidos.model.entity.CategoriaCardapio;
+import com.pedidos.model.entity.Produto;
+import com.pedidos.model.entity.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 

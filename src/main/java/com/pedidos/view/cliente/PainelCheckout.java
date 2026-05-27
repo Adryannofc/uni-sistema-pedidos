@@ -1,8 +1,8 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.application.service.ClienteService;
-import com.pedidos.application.service.PedidoService;
-import com.pedidos.domain.entities.*;
+import com.pedidos.model.service.ClienteService;
+import com.pedidos.model.service.PedidoService;
+import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 import com.pedidos.view.util.session.CarrinhoManager;

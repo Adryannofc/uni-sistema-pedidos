@@ -1,7 +1,7 @@
 package com.pedidos.view.util.session;
 
-import com.pedidos.domain.entities.Usuario;
-import com.pedidos.domain.enums.TipoUsuario;
+import com.pedidos.model.entity.Usuario;
+import com.pedidos.model.enums.TipoUsuario;
 
 import javax.swing.*;
 
