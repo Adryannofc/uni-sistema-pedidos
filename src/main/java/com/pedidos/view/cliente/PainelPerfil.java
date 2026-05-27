@@ -28,11 +28,13 @@ public class PainelPerfil extends JPanel {
     private final Usuario usuario;
     private final Cliente cliente;
     private final ClienteService clienteService;
+    private final Runnable aoAtualizarEndereco;
 
-    public PainelPerfil(Usuario usuario, Cliente cliente, ClienteService clienteService) {
+    public PainelPerfil(Usuario usuario, Cliente cliente, ClienteService clienteService, Runnable aoAtualizarEndereco) {
         this.usuario = usuario;
         this.cliente = cliente;
         this.clienteService = clienteService;
+        this.aoAtualizarEndereco = aoAtualizarEndereco;
 
         construir();
     }
@@ -181,6 +183,7 @@ public class PainelPerfil extends JPanel {
                 );
                 JOptionPane.showMessageDialog(this, "Endereço salvo com sucesso!",
                         "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                if (aoAtualizarEndereco != null) aoAtualizarEndereco.run();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Erro ao salvar endereço:\n" + ex.getMessage(),

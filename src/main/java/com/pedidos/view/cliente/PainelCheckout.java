@@ -42,6 +42,9 @@ public class PainelCheckout extends JPanel {
     // Callback após confirmar pedido
     private Runnable aoConfirmarPedido;
 
+    // Label do endereço — atualizado externamente quando o cliente muda o endereço
+    private JLabel endLabel;
+
     public PainelCheckout(Usuario usuario,
                           Cliente cliente,
                           ClienteService clienteService,
@@ -147,19 +150,13 @@ public class PainelCheckout extends JPanel {
         JPanel rodape = new JPanel(new BorderLayout(0, 10));
         rodape.setBackground(Color.WHITE);
 
-        // Endereço padrão
-        String enderecoTexto = cliente.getEnderecoPadrao()
-                .map(e -> e.getRua() + ", " + e.getNumero() + " - " +
-                        e.getBairro() + ", " + e.getCidade() + " - " + e.getEstado())
-                .orElse("⚠ Nenhum endereço cadastrado. Acesse Perfil > Endereço.");
-
         JPanel enderecoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
         enderecoPanel.setBackground(Color.WHITE);
         enderecoPanel.setBorder(titledBorder("Endereço de Entrega"));
 
         JLabel icone = new JLabel("📍");
         icone.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14));
-        JLabel endLabel = new JLabel(enderecoTexto);
+        endLabel = new JLabel(textoEndereco());
         endLabel.setFont(AppFonts.LABEL);
 
         enderecoPanel.add(icone);
@@ -336,6 +333,18 @@ public class PainelCheckout extends JPanel {
         btn.setOpaque(true);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return btn;
+    }
+
+    /** Atualiza o label do endereço quando o cliente altera seu endereço padrão. */
+    public void atualizarEndereco() {
+        if (endLabel != null) endLabel.setText(textoEndereco());
+    }
+
+    private String textoEndereco() {
+        return cliente.getEnderecoPadrao()
+                .map(e -> e.getRua() + ", " + e.getNumero() + " - " +
+                        e.getBairro() + ", " + e.getCidade() + " - " + e.getEstado())
+                .orElse("⚠ Nenhum endereço cadastrado. Acesse Perfil > Endereço.");
     }
 
     private TitledBorder titledBorder(String titulo) {
