@@ -35,7 +35,6 @@ public class LoginFrame extends BaseFrame {
 
     private JTextField     campoEmail;
     private JPasswordField campoSenha;
-    private JCheckBox      checkLembrar;
     private JButton        botaoCancelar;
     private JButton        botaoEntrar;
     private JLabel         labelConexao;
@@ -106,10 +105,6 @@ public class LoginFrame extends BaseFrame {
         campoSenha = new JPasswordField(22);
         campoSenha.setFont(AppFonts.CAMPO);
 
-        checkLembrar = new JCheckBox("Lembrar acesso");
-        checkLembrar.setFont(AppFonts.LABEL);
-        checkLembrar.setOpaque(false);
-
         painelNovoCadastro = criarLinksNovoCadastro();
 
         botaoCancelar = botaoSecundario("Cancelar");
@@ -139,7 +134,6 @@ public class LoginFrame extends BaseFrame {
                 .addGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addComponent(campoEmail,    GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
                         .addComponent(campoSenha,    GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
-                        .addComponent(checkLembrar)
                         .addComponent(painelNovoCadastro)
                         .addComponent(painelBotoes,  GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
         );
@@ -149,8 +143,6 @@ public class LoginFrame extends BaseFrame {
                         .addComponent(labelEmail).addComponent(campoEmail))
                 .addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(labelSenha).addComponent(campoSenha))
-                .addGap(4)
-                .addComponent(checkLembrar)
                 .addComponent(painelNovoCadastro)
                 .addGap(8)
                 .addComponent(painelBotoes)
