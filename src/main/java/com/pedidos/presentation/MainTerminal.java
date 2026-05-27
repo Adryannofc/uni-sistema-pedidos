@@ -1,24 +1,19 @@
-package com.pedidos.view.restaurante;
+package com.pedidos.presentation;
 
 import com.pedidos.application.service.*;
-import com.pedidos.domain.entities.Usuario;
+import com.pedidos.domain.repository.AreaEntregaRepository;
 import com.pedidos.infra.config.FlyWayconfig;
 import com.pedidos.infra.config.JPAUtil;
 import com.pedidos.infra.repository.impl.*;
+import com.pedidos.presentation.MenuLogin;
+import com.pedidos.view.login.LoginFrame;
+import com.pedidos.view.util.session.CarrinhoManager;
 import jakarta.persistence.EntityManager;
 
 import javax.swing.*;
+import java.util.Scanner;
 
-/**
- * Entry point alternativo para desenvolvimento — abre o RestauranteFrame diretamente,
- * sem passar pelo fluxo de autenticação.
- *
- * NÃO usar em produção.
- */
-public class MainRestaurante {
-
-    private static final String DEV_RESTAURANTE_ID = "6e5a11fb-f343-41ad-9de6-175817abcc06";
-
+public class MainTerminal {
     public static void main(String[] args) {
         try {
             FlyWayconfig.migrate();
@@ -28,7 +23,10 @@ public class MainRestaurante {
 
         EntityManager em = JPAUtil.getEntityManager();
 
+        Scanner scanner = new Scanner(System.in);
+
         AdminRepositoryJPA adminRepo = new AdminRepositoryJPA(em);
+
         RestauranteRepositoryJPA restauranteRepo = new RestauranteRepositoryJPA(em);
         ClienteRepositoryJPA clienteRepo = new ClienteRepositoryJPA(em);
         CategoriaGlobalRepositoryJPA categoriaGlobalRepo = new CategoriaGlobalRepositoryJPA(em);
@@ -50,28 +48,13 @@ public class MainRestaurante {
         HorarioService horarioService = new HorarioService(horarioFuncionamentoRepo);
         AreaEntregaService areaEntregaService = new AreaEntregaService(areaRepo);
 
-        Usuario restaurante = restauranteRepo.buscarPorId(DEV_RESTAURANTE_ID)
-                .orElseThrow(() -> new RuntimeException(
-                        "Restaurante de dev não encontrado. ID: " + DEV_RESTAURANTE_ID));
 
-        SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception ignored) {}
+        new MenuLogin(
+                authService, adminService, clienteService,
+                categoriaService, produtoService, restauranteService,
+                pedidoService, carrinhoService, restauranteRepo, areaEntregaService, horarioService
+        ).iniciar();
 
-            RestauranteFrame frame = new RestauranteFrame(
-                    restaurante,
-                    categoriaService,
-                    produtoService,
-                    restauranteService,
-                    areaEntregaService,
-                    horarioService,
-                    pedidoService,
-                    authService,
-                    () -> {  System.exit(0); }
-
-            );
-            frame.setVisible(true);
-        });
+        JPAUtil.close();
     }
 }

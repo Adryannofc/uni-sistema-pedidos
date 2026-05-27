@@ -9,6 +9,8 @@ import com.pedidos.domain.repository.ClienteRepository;
 import com.pedidos.domain.repository.RestauranteRepository;
 import com.pedidos.domain.repository.EnderecoRepository;
 
+import java.util.Optional;
+
 public class ClienteService {
     private final ClienteRepository clienteRepository;
     private final AutenticacaoService autenticacaoService;
@@ -84,15 +86,23 @@ public class ClienteService {
 
     public void salvarEndereco(Cliente cliente, String rua, String numero, String bairro, String cidade, String estado, String cep) {
         try {
+            Optional<Endereco> padraoExistente = cliente.getEnderecoPadrao();
 
-            boolean jaPossuiPadrao = enderecoRepository.buscarPadraoDoCliente(cliente.getId()).isPresent();
+            if (padraoExistente.isPresent()) {
+                // Atualiza os campos do endereço padrão existente em vez de criar um novo
+                Endereco existente = padraoExistente.get();
+                existente.setRua(rua);
+                existente.setNumero(numero);
+                existente.setBairro(bairro);
+                existente.setCidade(cidade);
+                existente.setEstado(estado);
+                existente.setCep(cep);
+            } else {
+                Endereco endereco = new Endereco(rua, numero, bairro, cidade, estado, cep, true);
+                cliente.setEndereco(endereco);
+                cliente.setClienteAoEndereco(endereco);
+            }
 
-            boolean isPadrao = !jaPossuiPadrao;
-
-            Endereco endereco = new Endereco(rua, numero, bairro, cidade, estado, cep, isPadrao);
-
-            cliente.setEndereco(endereco);;
-            cliente.setClienteAoEndereco(endereco);
             clienteRepository.salvar(cliente);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);

@@ -31,22 +31,20 @@ public class PedidoService {
      * @param codigoConfirmacao código para confirmar a entrega
      * @return pedido criado
      */
-    public Pedido criarPedido(Cliente cliente, Restaurante restaurante, Carrinho carrinho, Endereco enderecoEntrega, String codigoConfirmacao) {
+    public Pedido criarPedido(Cliente cliente, Restaurante restaurante, Carrinho carrinho, Endereco enderecoEntrega, String codigoConfirmacao, BigDecimal taxaEntrega) {
         try {
             if (enderecoEntrega == null) {
                 throw new IllegalArgumentException("Informe um endereço de entrega antes de finalizar o pedido.");
             }
 
-            // Verificar se o restaurante está aberto no momento
-            if (!isRestauranteAberto(restaurante.getId())) {
-                throw new IllegalStateException("Restaurante fechado no momento.");
-            }
+            isRestauranteAberto(restaurante.getId());
 
             Pedido pedido = new Pedido();
             pedido.setCliente(cliente);
             pedido.setRestaurante(restaurante);
             pedido.setEnderecoEntrega(enderecoEntrega);
             pedido.setCodigoConfirmacao(codigoConfirmacao);
+            pedido.setTaxaEntrega(taxaEntrega != null ? taxaEntrega : BigDecimal.ZERO);
             carrinho.getItens().forEach(pedido::adicionarItem);
             pedido.calcularTotal();
             pedidoRepository.salvar(pedido);
@@ -72,7 +70,7 @@ public class PedidoService {
             if (pedido.getStatus() != StatusPedido.SAIU_PARA_ENTREGA) {
                 throw new IllegalStateException("Pedido nao esta em status de entrega.");
             }
-            if (!pedido.getCodigoConfirmacao().equals(codigoDigitado)) {
+            if (!codigoDigitado.equals(pedido.getCodigoConfirmacao())) {
                 throw new IllegalArgumentException("Codigo incorreto.");
             }
 

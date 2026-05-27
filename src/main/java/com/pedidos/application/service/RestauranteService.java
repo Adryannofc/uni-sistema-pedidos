@@ -132,27 +132,14 @@ public class RestauranteService {
 
     private String normalizarCnpj(String cnpj) {
         if (cnpj == null) {
-            throw new IllegalArgumentException("CNPJ inválido — deve conter 14 dígitos");
+            throw new IllegalArgumentException("CNPJ inválido — informe 14 dígitos numéricos");
         }
 
         String cnpjNormalizado = cnpj.replaceAll("[^0-9]", "");
         if (cnpjNormalizado.length() != 14 || cnpjNormalizado.matches("(\\d)\\1{13}")) {
-            throw new IllegalArgumentException("CNPJ inválido — deve conter 14 dígitos");
+            throw new IllegalArgumentException("CNPJ inválido — informe 14 dígitos numéricos");
         }
         return cnpjNormalizado;
-    }
-
-    private void validarCnpj(String cnpj) {
-
-        String regexCnpj = "^\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}$|^\\d{14}$";
-
-        try {
-            if (cnpj == null || !cnpj.matches(regexCnpj)) {
-                throw new IllegalArgumentException("CNPJ inválido. Informe 11 dígitos numéricos.");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
     }
 
     private boolean emailCadastrado(String email) {
@@ -165,7 +152,7 @@ public class RestauranteService {
 
     public void cadastrarRestaurante(String nomeRestaurante, String emailRestaurante, String senhaRestaurante, String cnpjRestaurante, String telefoneRestaurante) {
         try {
-            validarCnpj(cnpjRestaurante);
+            String cnpjNormalizado = normalizarCnpj(cnpjRestaurante);
             validarTelefone(telefoneRestaurante);
 
             if (emailCadastrado(emailRestaurante)) {
@@ -173,7 +160,7 @@ public class RestauranteService {
             }
 
             String hash = autenticacaoService.hashSenha(senhaRestaurante);
-            Restaurante restaurante = new Restaurante(nomeRestaurante, emailRestaurante, hash, cnpjRestaurante, telefoneRestaurante);
+            Restaurante restaurante = new Restaurante(nomeRestaurante, emailRestaurante, hash, cnpjNormalizado, telefoneRestaurante);
             restauranteRepository.salvar(restaurante);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);

@@ -119,6 +119,7 @@ public class PainelFazerPedido extends JPanel {
         tabela.setGridColor(new Color(220, 220, 220));
         tabela.setShowGrid(true);
         tabela.setSelectionBackground(new Color(220, 235, 255));
+        tabela.setSelectionForeground(AppColors.TEXTO_PRIMARIO);
         tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         configurarHeader(tabela);
@@ -134,8 +135,14 @@ public class PainelFazerPedido extends JPanel {
                                                            boolean sel, boolean foc, int row, int col) {
                 JLabel lbl = (JLabel) super.getTableCellRendererComponent(t, value, sel, foc, row, col);
                 lbl.setHorizontalAlignment(SwingConstants.CENTER);
-                boolean aberto = "● Aberto".equals(value);
-                lbl.setForeground(aberto ? new Color(0, 150, 0) : new Color(200, 0, 0));
+                if (sel) {
+                    lbl.setBackground(t.getSelectionBackground());
+                    lbl.setForeground(AppColors.TEXTO_PRIMARIO);
+                } else {
+                    lbl.setBackground(t.getBackground());
+                    boolean aberto = "● Aberto".equals(value);
+                    lbl.setForeground(aberto ? new Color(0, 150, 0) : new Color(200, 0, 0));
+                }
                 return lbl;
             }
         });

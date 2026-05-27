@@ -13,7 +13,7 @@ public class SessionManager {
 
     private SessionManager() {}
 
-    public static SessionManager getInstance() {
+    public static synchronized SessionManager getInstance() {
         if (instancia == null) instancia = new SessionManager();
         return instancia;
     }
@@ -25,6 +25,7 @@ public class SessionManager {
 
     public void encerrarSessao() {
         this.usuarioLogado = null;
+        this.frameAtual = null;
     }
 
     public void trocarFrame(JFrame novoFrame) {

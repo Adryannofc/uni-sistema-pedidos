@@ -178,7 +178,10 @@ public class ClienteFrame extends BaseFrame {
 
         painelMeusPedidos = new PainelMeusPedidos(cliente, pedidoService);
 
-        painelPerfil = new PainelPerfil(usuario, cliente, clienteService);
+        painelPerfil = new PainelPerfil(usuario, cliente, clienteService, () -> {
+            painelCheckout.atualizarEndereco();
+            atualizarStatusBar();
+        });
 
         tabbedPane.addTab("Fazer Pedido", painelFazerPedido);
         tabbedPane.addTab("Checkout",     painelCheckout);

@@ -39,7 +39,7 @@ public class PedidoRepositoryJPA implements PedidoRepository {
 
     @Override
     public List<Pedido> buscarPorCliente(String clienteId) {
-        return em.createQuery("SELECT p FROM Pedido p WHERE p.cliente.id = :cid", Pedido.class)
+        return em.createQuery("SELECT p FROM Pedido p WHERE p.cliente.id = :cid ORDER BY p.dataPedido DESC", Pedido.class)
                 .setParameter("cid", clienteId).getResultList();
     }
 
