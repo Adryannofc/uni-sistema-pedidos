@@ -677,7 +677,8 @@ public class MenuCliente {
                 return;
             }
 
-            String codigo = clienteLogado.getCpf().substring(0, 4);
+            String cpfDigitos = clienteLogado.getCpf().replaceAll("[^0-9]", "");
+            String codigo = cpfDigitos.substring(cpfDigitos.length() - 4);
             Restaurante restaurante = (Restaurante) restauranteRepo.buscarPorId(carrinho.getRestauranteId()).get();
 
             Pedido pedido = pedidoService.criarPedido(

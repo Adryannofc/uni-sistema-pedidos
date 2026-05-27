@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Painel responsável pela aba "Checkout".
@@ -249,10 +248,9 @@ public class PainelCheckout extends JPanel {
                 );
             }
 
-            // Código de confirmação de entrega
-            String codigoConfirmacao = cliente.getCpf() != null
-                    ? cliente.getCpf().replaceAll("[^0-9]", "").substring(0, Math.min(4, cliente.getCpf().replaceAll("[^0-9]", "").length()))
-                    : UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+            // Código de confirmação de entrega — últimos 4 dígitos do CPF
+            String cpfDigitos = cliente.getCpf().replaceAll("[^0-9]", "");
+            String codigoConfirmacao = cpfDigitos.substring(cpfDigitos.length() - 4);
 
             Pedido pedido = pedidoService.criarPedido(
                     cliente,
