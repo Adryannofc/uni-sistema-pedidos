@@ -132,12 +132,12 @@ public class RestauranteService {
 
     private String normalizarCnpj(String cnpj) {
         if (cnpj == null) {
-            throw new IllegalArgumentException("CNPJ inválido — deve conter 14 dígitos");
+            throw new IllegalArgumentException("CNPJ inválido — informe 14 dígitos numéricos");
         }
 
         String cnpjNormalizado = cnpj.replaceAll("[^0-9]", "");
         if (cnpjNormalizado.length() != 14 || cnpjNormalizado.matches("(\\d)\\1{13}")) {
-            throw new IllegalArgumentException("CNPJ inválido — deve conter 14 dígitos");
+            throw new IllegalArgumentException("CNPJ inválido — informe 14 dígitos numéricos");
         }
         return cnpjNormalizado;
     }
