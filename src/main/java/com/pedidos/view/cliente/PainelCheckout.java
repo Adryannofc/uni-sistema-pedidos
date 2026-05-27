@@ -259,7 +259,8 @@ public class PainelCheckout extends JPanel {
                     restauranteSelecionado,
                     carrinhoDominio,
                     enderecoPadrao.get(),
-                    codigoConfirmacao
+                    codigoConfirmacao,
+                    carrinho.getTaxaEntrega()
             );
 
             // Limpa sessão local

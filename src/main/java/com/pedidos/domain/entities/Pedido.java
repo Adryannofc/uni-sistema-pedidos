@@ -73,6 +73,7 @@ public class Pedido {
     public StatusPedido getStatus() { return status; }
     public void setStatus(StatusPedido status) { this.status = status; }
     public BigDecimal getTaxaEntrega() { return taxaEntrega; }
+    public void setTaxaEntrega(BigDecimal taxaEntrega) { this.taxaEntrega = taxaEntrega; }
     public BigDecimal getTotal() { return total; }
     public LocalDateTime getDataPedido() { return dataPedido; }
     public Endereco getEnderecoEntrega() { return enderecoEntrega; }

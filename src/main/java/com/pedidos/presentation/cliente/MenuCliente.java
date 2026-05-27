@@ -681,7 +681,7 @@ public class MenuCliente {
             Restaurante restaurante = (Restaurante) restauranteRepo.buscarPorId(carrinho.getRestauranteId()).get();
 
             Pedido pedido = pedidoService.criarPedido(
-                    clienteLogado, restaurante, carrinho, endereco.orElse(null), codigo);
+                    clienteLogado, restaurante, carrinho, endereco.orElse(null), codigo, java.math.BigDecimal.ZERO);
 
             carrinhoService.encerrarCarrinho();
 
