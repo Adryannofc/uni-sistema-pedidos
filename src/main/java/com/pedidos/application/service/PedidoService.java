@@ -70,7 +70,7 @@ public class PedidoService {
             if (pedido.getStatus() != StatusPedido.SAIU_PARA_ENTREGA) {
                 throw new IllegalStateException("Pedido nao esta em status de entrega.");
             }
-            if (!pedido.getCodigoConfirmacao().equals(codigoDigitado)) {
+            if (!codigoDigitado.equals(pedido.getCodigoConfirmacao())) {
                 throw new IllegalArgumentException("Codigo incorreto.");
             }
 
