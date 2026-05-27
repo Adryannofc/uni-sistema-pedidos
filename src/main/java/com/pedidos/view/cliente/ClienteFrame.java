@@ -1,7 +1,7 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.application.service.*;
-import com.pedidos.domain.entities.*;
+import com.pedidos.model.service.*;
+import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 import com.pedidos.view.util.base.BaseFrame;

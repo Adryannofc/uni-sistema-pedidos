@@ -1,7 +1,7 @@
 package com.pedidos.view.cadastro;
 
-import com.pedidos.application.service.ClienteService;
-import com.pedidos.application.service.RestauranteService;
+import com.pedidos.model.service.ClienteService;
+import com.pedidos.model.service.RestauranteService;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 import com.pedidos.view.util.base.BaseFrame;

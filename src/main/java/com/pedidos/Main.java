@@ -1,10 +1,10 @@
 package com.pedidos;
 
 
-import com.pedidos.application.service.*;
-import com.pedidos.infra.config.FlyWayconfig;
-import com.pedidos.infra.config.JPAUtil;
-import com.pedidos.infra.repository.impl.*;
+import com.pedidos.model.service.*;
+import com.pedidos.model.infra.config.FlyWayconfig;
+import com.pedidos.model.infra.config.JPAUtil;
+import com.pedidos.model.infra.repository.impl.*;
 import com.pedidos.view.login.LoginFrame;
 import com.pedidos.view.util.session.CarrinhoManager;
 import jakarta.persistence.EntityManager;

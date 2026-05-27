@@ -1,0 +1,73 @@
+package com.pedidos.model.infra.repository.impl;
+
+import com.pedidos.model.entity.CategoriaGlobal;
+import com.pedidos.model.repository.CategoriaGlobalRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+
+import java.util.*;
+
+public class CategoriaGlobalRepositoryJPA implements CategoriaGlobalRepository {
+    private EntityManager em;
+
+    public CategoriaGlobalRepositoryJPA (EntityManager em) { this.em = em; }
+
+    public void salvar(CategoriaGlobal categoria) {
+        try {
+            em.getTransaction().begin();
+            em.persist(categoria);
+            em.getTransaction().commit();
+        } catch (Exception e){
+            em.getTransaction().rollback();
+            throw new RuntimeException("Erro ao salvar o categoria global", e);
+        }
+    }
+
+    public void atualizar(CategoriaGlobal categoria) {
+        try {
+            em.getTransaction().begin();
+            em.merge(categoria);
+            em.getTransaction().commit();
+        } catch (Exception e){
+            em.getTransaction().rollback();
+            throw new RuntimeException("Erro em atualizar categoria global", e);
+        }
+    }
+
+    @Override
+    public void remover(String id) {
+        try {
+            em.getTransaction().begin();
+            CategoriaGlobal categoria = em.find(CategoriaGlobal.class, id);
+            if (categoria != null) {
+                em.remove(categoria);
+            }
+            em.getTransaction().commit();
+        }
+        catch (Exception e) {
+            em.getTransaction().rollback();
+            throw new RuntimeException("Erro ao remover categoria global", e);
+        }
+    }
+
+    @Override
+    public Optional<CategoriaGlobal> buscarPorId(String id) {
+        return Optional.ofNullable(em.find(CategoriaGlobal.class, id));
+    }
+
+    @Override
+    public Optional<CategoriaGlobal> buscarPorNome(String nome) {
+        try {
+            return Optional.of(em.createQuery("select c from CategoriaGlobal c where c.nome = :nome", CategoriaGlobal.class)
+                    .setParameter("nome", nome)
+                    .getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public List<CategoriaGlobal> listarTodos() {
+        return em.createQuery("select c from CategoriaGlobal c", CategoriaGlobal.class).getResultList();
+    }
+}

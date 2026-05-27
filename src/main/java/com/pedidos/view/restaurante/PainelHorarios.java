@@ -1,9 +1,9 @@
 package com.pedidos.view.restaurante;
 
-import com.pedidos.application.service.HorarioService;
-import com.pedidos.domain.entities.HorarioFuncionamento;
-import com.pedidos.domain.entities.Restaurante;
-import com.pedidos.domain.entities.Usuario;
+import com.pedidos.model.service.HorarioService;
+import com.pedidos.model.entity.HorarioFuncionamento;
+import com.pedidos.model.entity.Restaurante;
+import com.pedidos.model.entity.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 

@@ -1,10 +1,7 @@
 package com.pedidos.view.restaurante;
 
-import com.pedidos.application.service.*;
-import com.pedidos.domain.entities.Restaurante;
-import com.pedidos.domain.entities.Usuario;
-import com.pedidos.view.cliente.ClienteFrame;
-import com.pedidos.view.login.LoginFrame;
+import com.pedidos.model.service.*;
+import com.pedidos.model.entity.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 import com.pedidos.view.util.base.BaseFrame;

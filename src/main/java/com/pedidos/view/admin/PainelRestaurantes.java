@@ -1,8 +1,8 @@
 package com.pedidos.view.admin;
 
-import com.pedidos.application.service.AdminService;
-import com.pedidos.domain.entities.Restaurante;
-import com.pedidos.domain.enums.StatusRestaurante;
+import com.pedidos.model.service.AdminService;
+import com.pedidos.model.entity.Restaurante;
+import com.pedidos.model.enums.StatusRestaurante;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 
