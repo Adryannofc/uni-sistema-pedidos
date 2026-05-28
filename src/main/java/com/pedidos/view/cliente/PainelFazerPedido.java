@@ -160,7 +160,7 @@ public class PainelFazerPedido extends JPanel {
                 Restaurante r = restaurantes.get(row);
 
                 // Clique simples → seleciona restaurante e abre cardápio
-                if (e.getClickCount() >= 1) {
+                if (e.getClickCount() == 2) {
                     abrirRestaurante(r);
                 }
             }
