@@ -171,6 +171,36 @@ public class PainelPerfil extends JPanel {
 
         JButton btnSalvar = criarBotaoPrimario("Salvar Endereço", 150, 30);
         btnSalvar.addActionListener(e -> {
+
+            String rua = fields[0].getText().trim(); // rua
+            String numero = fields[1].getText().trim(); // numero
+            String bairro =fields[2].getText().trim(); // bairro
+            String cidade =fields[3].getText().trim(); // cidade
+            String estado =fields[4].getText().trim(); // estado
+            String cep =fields[5].getText().trim(); // cep
+
+            if (rua.isEmpty() || numero.isEmpty()  || bairro.isEmpty()  || cidade.isEmpty()  || estado.isEmpty()  || cep.isEmpty() ) {
+
+                JOptionPane.showMessageDialog(this, "Preencha todos os campos!",
+                        "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
+                return;
+            }
+
+            if (rua.equals(endAtual.map(Endereco::getRua).orElse("")) &&
+                numero.equals(endAtual.map(Endereco::getNumero).orElse("")) &&
+                bairro.equals(endAtual.map(Endereco::getBairro).orElse("")) &&
+                cidade.equals(endAtual.map(Endereco::getCidade).orElse("")) &&
+                estado.equals(endAtual.map(Endereco::getEstado).orElse("")) &&
+                cep.equals(endAtual.map(Endereco::getCep).orElse(""))) {
+
+
+                JOptionPane.showMessageDialog(this, "Nenhuma alteração detectada!",
+                        "Atenção", JOptionPane.INFORMATION_MESSAGE);
+
+                return;
+            }
+
             try {
                 clienteService.salvarEndereco(
                         cliente,
@@ -181,8 +211,10 @@ public class PainelPerfil extends JPanel {
                         fields[4].getText().trim(), // estado
                         fields[5].getText().trim()  // cep
                 );
+
                 JOptionPane.showMessageDialog(this, "Endereço salvo com sucesso!",
-                        "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                            "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
                 if (aoAtualizarEndereco != null) aoAtualizarEndereco.run();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
