@@ -315,10 +315,10 @@ public class PainelHorarios extends JPanel {
                         "Horário inválido", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            if (!fim.isAfter(inicio)) {
+            if (fim.equals(inicio)) {
                 JOptionPane.showMessageDialog(this,
                         NOMES_DIAS.get(linha.dia)
-                        + ": o horário de fechamento deve ser posterior ao de abertura.",
+                        + ": o horário de fechamento não pode ser igual ao de abertura.",
                         "Horário inválido", JOptionPane.WARNING_MESSAGE);
                 return;
             }
