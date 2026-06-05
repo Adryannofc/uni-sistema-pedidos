@@ -343,14 +343,13 @@ public class LoginFrame extends BaseFrame {
     }
 
     private void abrirTelaLogin() {
-        SessionManager.getInstance().encerrarSessao();
         LoginFrame novoLogin = new LoginFrame(
                 autenticacaoService, adminService, clienteService,
                 enderecoService, categoriaService, produtoService,
                 restauranteService, pedidoService, carrinho,
                 restauranteRepo, areaEntregaService, horarioService);
-        novoLogin.setVisible(true);
         SessionManager.getInstance().trocarFrame(novoLogin);
+        SessionManager.getInstance().encerrarSessao();
     }
 
     private void cancelar() {
