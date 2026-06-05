@@ -80,15 +80,7 @@ public class ClienteFrame extends BaseFrame {
             @Override
             public void menuSelected(MenuEvent e) {
                 menuLogout.setPopupMenuVisible(false);
-                Object[] opcoes = {"Sim", "Não"};
-                int r = JOptionPane.showOptionDialog(ClienteFrame.this,
-                        "Deseja sair do sistema?", "Confirmar Logout",
-                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
-                        null, opcoes, opcoes[0]);
-                if (r == JOptionPane.YES_OPTION) {
-                    carrinho.esvaziar();
-                    SwingUtilities.invokeLater(() -> acaoLogout.run());
-                }
+                executarLogout();
             }
         });
 
@@ -107,9 +99,35 @@ public class ClienteFrame extends BaseFrame {
         nomeLabel.setFont(AppFonts.STATUS);
         nomeLabel.setForeground(AppColors.TEXTO_BRANCO);
 
-        header.add(titulo,    BorderLayout.WEST);
-        header.add(nomeLabel, BorderLayout.EAST);
+        JButton btnSair = new JButton("Sair");
+        btnSair.setFont(AppFonts.BOTAO);
+        btnSair.setBackground(new Color(220, 53, 69));
+        btnSair.setForeground(AppColors.TEXTO_BRANCO);
+        btnSair.setOpaque(true);
+        btnSair.setBorderPainted(false);
+        btnSair.setFocusPainted(false);
+        btnSair.addActionListener(e -> executarLogout());
+
+        JPanel painelDireito = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        painelDireito.setOpaque(false);
+        painelDireito.add(nomeLabel);
+        painelDireito.add(btnSair);
+
+        header.add(titulo,        BorderLayout.WEST);
+        header.add(painelDireito, BorderLayout.EAST);
         return header;
+    }
+
+    private void executarLogout() {
+        Object[] opcoes = {"Sim", "Não"};
+        int r = JOptionPane.showOptionDialog(this,
+                "Deseja sair do sistema?", "Confirmar Logout",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+                null, opcoes, opcoes[0]);
+        if (r == JOptionPane.YES_OPTION) {
+            carrinho.esvaziar();
+            SwingUtilities.invokeLater(() -> acaoLogout.run());
+        }
     }
 
     private JPanel criarStatusBar() {
