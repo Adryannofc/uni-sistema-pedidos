@@ -136,7 +136,7 @@ public class PainelProdutos extends JPanel {
         listaCategorias.addListSelectionListener(e -> {
             if (e.getValueIsAdjusting()) return;
             categoriaSelecionada = listaCategorias.getSelectedValue();
-            if (categoriaSelecionada != null) carregarProdutos(categoriaSelecionada);
+            carregarProdutos(categoriaSelecionada);
         });
 
         painel.add(titulo,                      BorderLayout.NORTH);
