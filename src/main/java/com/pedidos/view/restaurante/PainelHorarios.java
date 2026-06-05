@@ -226,15 +226,21 @@ public class PainelHorarios extends JPanel {
         for (LinhaHorario linha : linhas) {
             HorarioFuncionamento h = porDia.get(linha.dia);
             if (h != null) {
-                linha.idExistente = h.getId();
+                linha.idExistente     = h.getId();
                 linha.campoAbre.setText(h.getHoraInicio().format(FMT));
                 linha.campoFecha.setText(h.getHoraFim().format(FMT));
                 linha.checkFechado.setSelected(false);
+                linha.fechadoOriginal = false;
+                linha.abreOriginal    = h.getHoraInicio().format(FMT);
+                linha.fechaOriginal   = h.getHoraFim().format(FMT);
             } else {
-                linha.idExistente = null;
+                linha.idExistente     = null;
                 linha.campoAbre.setText("00:00");
                 linha.campoFecha.setText("00:00");
                 linha.checkFechado.setSelected(true);
+                linha.fechadoOriginal = true;
+                linha.abreOriginal    = "00:00";
+                linha.fechaOriginal   = "00:00";
             }
             atualizarEstadoLinha(linha);
         }
@@ -272,6 +278,20 @@ public class PainelHorarios extends JPanel {
     // ─────────────────────────── save ────────────────────────────────────────
 
     private void salvarHorarios() {
+        // ── 0. Verificar se houve alguma alteração ─────────────────────────────
+        boolean algumaMudanca = linhas.stream().anyMatch(l ->
+                l.checkFechado.isSelected() != l.fechadoOriginal
+                || (!l.checkFechado.isSelected()
+                    && (!l.campoAbre.getText().trim().equals(l.abreOriginal)
+                        || !l.campoFecha.getText().trim().equals(l.fechaOriginal))));
+
+        if (!algumaMudanca) {
+            JOptionPane.showMessageDialog(this,
+                    "Nenhuma alteração detectada.",
+                    "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
         // ── 1. Validar todos os campos abertos antes de qualquer persistência ──
         for (LinhaHorario linha : linhas) {
             if (linha.checkFechado.isSelected()) continue;
@@ -325,6 +345,11 @@ public class PainelHorarios extends JPanel {
                     }
                 }
             }
+            for (LinhaHorario linha : linhas) {
+                linha.fechadoOriginal = linha.checkFechado.isSelected();
+                linha.abreOriginal    = linha.campoAbre.getText().trim();
+                linha.fechaOriginal   = linha.campoFecha.getText().trim();
+            }
             JOptionPane.showMessageDialog(this,
                     "Horários salvos com sucesso.",
                     "Sucesso", JOptionPane.INFORMATION_MESSAGE);
@@ -346,5 +371,8 @@ public class PainelHorarios extends JPanel {
         JPanel     painelDia;
         JPanel     painelCheck;
         String     idExistente;
+        boolean    fechadoOriginal;
+        String     abreOriginal;
+        String     fechaOriginal;
     }
 }
