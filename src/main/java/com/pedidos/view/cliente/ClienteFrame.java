@@ -22,6 +22,7 @@ public class ClienteFrame extends BaseFrame {
     private final ProdutoService produtoService;
     private final PedidoService pedidoService;
     private final CarrinhoManager carrinho;
+    private final AreaEntregaService areaEntregaService;
     private final Runnable acaoLogout;
 
     private JTabbedPane tabbedPane;
@@ -41,17 +42,19 @@ public class ClienteFrame extends BaseFrame {
                         ProdutoService produtoService,
                         PedidoService pedidoService,
                         CarrinhoManager carrinho,
+                        AreaEntregaService areaEntregaService,
                         Runnable acaoLogout) {
         super("Sistema Delivery — " + usuario.getNome() + " | Cliente");
-        this.usuario            = usuario;
-        this.cliente            = cliente;
-        this.clienteService     = clienteService;
-        this.enderecoService    = enderecoService;
-        this.restauranteService = restauranteService;
-        this.produtoService     = produtoService;
-        this.pedidoService      = pedidoService;
-        this.carrinho           = carrinho;
-        this.acaoLogout         = acaoLogout;
+        this.usuario             = usuario;
+        this.cliente             = cliente;
+        this.clienteService      = clienteService;
+        this.enderecoService     = enderecoService;
+        this.restauranteService  = restauranteService;
+        this.produtoService      = produtoService;
+        this.pedidoService       = pedidoService;
+        this.carrinho            = carrinho;
+        this.areaEntregaService  = areaEntregaService;
+        this.acaoLogout          = acaoLogout;
         construirInterface();
     }
 
@@ -154,6 +157,7 @@ public class ClienteFrame extends BaseFrame {
                 restauranteService,
                 produtoService,
                 carrinho,
+                areaEntregaService,
                 () -> {
                     painelCheckout.sincronizar();
                     tabbedPane.setSelectedIndex(1);

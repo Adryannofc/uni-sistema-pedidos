@@ -329,6 +329,7 @@ public class LoginFrame extends BaseFrame {
                         produtoService,
                         pedidoService,
                         carrinho,
+                        areaEntregaService,
                         this::abrirTelaLogin);
             }
             default -> {
