@@ -26,14 +26,6 @@ public class ClienteService {
         this.enderecoRepository = enderecoRepository;
     }
 
-    public void favoritar(Cliente cliente, Restaurante restaurante) {
-        if (cliente.getFavoritos().contains(restaurante)) {
-            cliente.removerFavorito(restaurante);
-        } else {
-            cliente.adicionarFavorito(restaurante);
-        }
-        clienteRepository.salvar(cliente);
-    }
 
     // Cadastro
     public void cadastrarCliente(String nome, String email, String senha, String cpf, String telefone) {
