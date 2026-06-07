@@ -39,6 +39,11 @@ public class PainelProdutos extends JPanel {
     private DefaultListModel<CategoriaCardapio> modelCategorias;
     private JList<CategoriaCardapio> listaCategorias;
 
+    // ── Rodapé de totalizadores ───────────────────────────────────────────────
+    private JLabel labelRodapeTotal;
+    private JLabel labelRodapeFiltrado;
+    private JLabel labelRodapeCategorias;
+
     public PainelProdutos(Usuario usuario, ProdutoService produtoService, CategoriaService categoriaService) {
         super(new BorderLayout());
         this.usuario = usuario;
@@ -55,6 +60,7 @@ public class PainelProdutos extends JPanel {
         split.setDividerLocation(200);
         split.setDividerSize(4);
         add(split, BorderLayout.CENTER);
+        add(criarRodape(), BorderLayout.SOUTH);
     }
 
     // ─────────────────────────── left: categorias ────────────────────────────
@@ -81,7 +87,7 @@ public class PainelProdutos extends JPanel {
         listaCategorias.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value,
-                    int index, boolean isSelected, boolean cellHasFocus) {
+                                                          int index, boolean isSelected, boolean cellHasFocus) {
                 JLabel lbl = (JLabel) super.getListCellRendererComponent(
                         list, value, index, isSelected, cellHasFocus);
                 if (value instanceof CategoriaCardapio c) lbl.setText(c.getNome());
@@ -112,6 +118,7 @@ public class PainelProdutos extends JPanel {
             try {
                 categoriaService.criarCategoriaCardapio(nome, descricao, usuario.getId());
                 recarregarListaCategorias();
+                atualizarRodape(); // atualiza contagem de categorias
             } catch (RuntimeException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
@@ -139,9 +146,9 @@ public class PainelProdutos extends JPanel {
             if (categoriaSelecionada != null) carregarProdutos(categoriaSelecionada);
         });
 
-        painel.add(titulo,                      BorderLayout.NORTH);
+        painel.add(titulo,                           BorderLayout.NORTH);
         painel.add(new JScrollPane(listaCategorias), BorderLayout.CENTER);
-        painel.add(painelBotoes,                BorderLayout.SOUTH);
+        painel.add(painelBotoes,                     BorderLayout.SOUTH);
         return painel;
     }
 
@@ -159,9 +166,9 @@ public class PainelProdutos extends JPanel {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 4));
         toolbar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, AppColors.CINZA_BORDA));
 
-        JButton btnNovo   = criarBotaoPrimario("+ Novo Produto");
-        JButton btnEditar = new JButton("Editar");
-        JButton btnAtivar = new JButton("Ativar");
+        JButton btnNovo    = criarBotaoPrimario("+ Novo Produto");
+        JButton btnEditar  = new JButton("Editar");
+        JButton btnAtivar  = new JButton("Ativar");
         JButton btnRemover = new JButton("Remover");
         btnEditar.setFont(AppFonts.BOTAO);
         btnAtivar.setFont(AppFonts.BOTAO);
@@ -202,7 +209,7 @@ public class PainelProdutos extends JPanel {
         topo.add(toolbar,        BorderLayout.NORTH);
         topo.add(labelSubtitulo, BorderLayout.SOUTH);
 
-        painel.add(topo,                           BorderLayout.NORTH);
+        painel.add(topo,                            BorderLayout.NORTH);
         painel.add(new JScrollPane(tabelaProdutos), BorderLayout.CENTER);
 
         carregarProdutos(null);
@@ -278,24 +285,84 @@ public class PainelProdutos extends JPanel {
         return painel;
     }
 
+    // ─────────────────────────── rodapé ──────────────────────────────────────
+
+    private JPanel criarRodape() {
+        JPanel rodape = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 4));
+        rodape.setBackground(AppColors.CINZA_STATUS);
+        rodape.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, AppColors.CINZA_BORDA));
+
+        labelRodapeTotal      = criarLabelRodape();
+        labelRodapeFiltrado   = criarLabelRodape();
+        labelRodapeCategorias = criarLabelRodape();
+
+        // separadores visuais entre os itens
+        rodape.add(labelRodapeTotal);
+        rodape.add(separador());
+        rodape.add(labelRodapeFiltrado);
+        rodape.add(separador());
+        rodape.add(labelRodapeCategorias);
+
+        return rodape;
+    }
+
+    private JLabel criarLabelRodape() {
+        JLabel lbl = new JLabel();
+        lbl.setFont(AppFonts.STATUS);
+        lbl.setForeground(AppColors.TEXTO_SECUNDARIO);
+        return lbl;
+    }
+
+    private JLabel separador() {
+        JLabel sep = new JLabel("|");
+        sep.setForeground(AppColors.CINZA_BORDA);
+        sep.setFont(AppFonts.STATUS);
+        return sep;
+    }
+
+    /**
+     * Atualiza os três totalizadores do rodapé.
+     * Chamado sempre que carregarProdutos() é executado.
+     */
+    private void atualizarRodape() {
+        // total geral de produtos do restaurante
+        int totalGeral = produtoService.listarPorRestaurante(usuario.getId()).size();
+        labelRodapeTotal.setText("Total: " + totalGeral + " produto(s)");
+
+        // total filtrado (visível na tabela)
+        int totalFiltrado = produtosCarregados.size();
+        if (categoriaSelecionada != null) {
+            labelRodapeFiltrado.setText("Filtrado: " + totalFiltrado + " produto(s) em \""
+                    + categoriaSelecionada.getNome() + "\"");
+            labelRodapeFiltrado.setVisible(true);
+        } else {
+            labelRodapeFiltrado.setText("");
+            labelRodapeFiltrado.setVisible(false);
+        }
+
+        // número de categorias cadastradas
+        int totalCategorias = categoriaService.listarCategoriasCardapio(usuario.getId()).size();
+        labelRodapeCategorias.setText("Categorias: " + totalCategorias);
+    }
+
     // ─────────────────────────── data ────────────────────────────────────────
 
     private void carregarProdutos(CategoriaCardapio categoria) {
         produtosCarregados = produtoService.listarPorRestaurante(usuario.getId()).stream()
                 .filter(p -> categoria == null
                         || (p.getCategoriaCardapioId() != null
-                            && p.getCategoriaCardapioId().equals(categoria.getId())))
+                        && p.getCategoriaCardapioId().equals(categoria.getId())))
                 .toList();
 
         modelProdutos.setRowCount(0);
         for (int i = 0; i < produtosCarregados.size(); i++) {
             Produto p = produtosCarregados.get(i);
             modelProdutos.addRow(new Object[]{
-                i + 1,
-                p.getNome(),
-                p.getDescricao(),
-                FMT_MOEDA.format(p.getPreco()),
-                p.isStatusAtivo() ? "ATIVO" : "INATIVO"
+                    i + 1,
+                    p.getNome(),
+                    p.getDescricao(),
+                    FMT_MOEDA.format(p.getPreco()),
+                    p.isStatusAtivo() ? "ATIVO" : "INATIVO"
             });
         }
 
@@ -304,6 +371,8 @@ public class PainelProdutos extends JPanel {
         } else {
             labelSubtitulo.setText(produtosCarregados.size() + " produto(s) no total");
         }
+
+        atualizarRodape(); // sempre atualiza o rodapé após qualquer carga
     }
 
     // ─────────────────────────── helpers ─────────────────────────────────────
@@ -355,7 +424,7 @@ public class PainelProdutos extends JPanel {
     }
 
     private void adicionarCampoForm(JPanel painel, GridBagConstraints gbc,
-                                     int row, String rotulo, JComponent campo) {
+                                    int row, String rotulo, JComponent campo) {
         gbc.gridx = 0; gbc.gridy = row; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
         JLabel lbl = new JLabel(rotulo);
         lbl.setFont(AppFonts.LABEL);
@@ -379,7 +448,7 @@ public class PainelProdutos extends JPanel {
     private static class StatusBadgeRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
+                                                       boolean isSelected, boolean hasFocus, int row, int column) {
             JLabel lbl = (JLabel) super.getTableCellRendererComponent(
                     table, value, isSelected, hasFocus, row, column);
             lbl.setHorizontalAlignment(SwingConstants.CENTER);
@@ -399,10 +468,10 @@ public class PainelProdutos extends JPanel {
     // ─────────────────────────── inner class ─────────────────────────────────
 
     private static class FormularioProduto {
-        JTextField campoNome        = new JTextField(20);
-        JTextField campoDescricao   = new JTextField(20);
-        JTextField campoPreco       = new JTextField(10);
+        JTextField campoNome              = new JTextField(20);
+        JTextField campoDescricao         = new JTextField(20);
+        JTextField campoPreco             = new JTextField(10);
         JComboBox<String> selecionadorCategoria = new JComboBox<>();
-        JPanel painel = new JPanel(new GridBagLayout());
+        JPanel painel                     = new JPanel(new GridBagLayout());
     }
 }
