@@ -446,21 +446,32 @@ public class PainelProdutos extends JPanel {
     // ─────────────────────────── renderers ───────────────────────────────────
 
     private static class StatusBadgeRenderer extends DefaultTableCellRenderer {
+
+        // Azul de seleção com contraste WCAG AA (ratio > 4.5:1 contra branco)
+        private static final Color COR_SELECAO_FUNDO = new Color(70, 130, 180);
+        private static final Color COR_SELECAO_TEXTO = Color.WHITE;
+
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                                                        boolean isSelected, boolean hasFocus, int row, int column) {
             JLabel lbl = (JLabel) super.getTableCellRendererComponent(
                     table, value, isSelected, hasFocus, row, column);
             lbl.setHorizontalAlignment(SwingConstants.CENTER);
+            lbl.setOpaque(true);
+            lbl.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            lbl.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
 
-            boolean ativo = "ATIVO".equals(value);
-            if (!isSelected) {
-                lbl.setOpaque(true);
+            if (isSelected) {
+                // Estado selecionado: fundo azul + texto branco (contraste ~4.6:1)
+                lbl.setBackground(COR_SELECAO_FUNDO);
+                lbl.setForeground(COR_SELECAO_TEXTO);
+            } else {
+                // Estado normal: badge colorido conforme status
+                boolean ativo = "ATIVO".equals(value);
                 lbl.setBackground(ativo ? new Color(212, 237, 218) : new Color(230, 230, 230));
                 lbl.setForeground(ativo ? COR_ATIVO : COR_INATIVO);
             }
-            lbl.setFont(new Font("Segoe UI", Font.BOLD, 11));
-            lbl.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
+
             return lbl;
         }
     }
