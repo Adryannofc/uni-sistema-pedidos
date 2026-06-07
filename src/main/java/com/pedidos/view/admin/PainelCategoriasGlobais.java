@@ -63,11 +63,11 @@ public class PainelCategoriasGlobais extends JPanel {
         btnEditar  = new JButton(" Editar");
         btnRemover = new JButton(" Remover");
         btnNova.setFont(AppFonts.BOTAO);
-        btnNova.setIcon(carregarIcone("/icones/criar.png"));
+        btnNova.setIcon(carregarIcone("/img/criar.png"));
         btnEditar.setFont(AppFonts.BOTAO);
-        btnEditar.setIcon(carregarIcone("/icones/editar.png"));
+        btnEditar.setIcon(carregarIcone("/img/editar.png"));
         btnRemover.setFont(AppFonts.BOTAO);
-        btnRemover.setIcon(carregarIcone("/icones/remover.png"));
+        btnRemover.setIcon(carregarIcone("/img/remover.png"));
         btnEditar.setEnabled(false);
         btnRemover.setEnabled(false);
 
