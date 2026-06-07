@@ -1,5 +1,6 @@
 package com.pedidos.view.restaurante;
 
+import com.pedidos.model.entity.Restaurante;
 import com.pedidos.model.service.CategoriaService;
 import com.pedidos.model.service.ProdutoService;
 import com.pedidos.model.entity.CategoriaCardapio;
@@ -89,6 +90,7 @@ public class PainelProdutos extends JPanel {
                 return lbl;
             }
         });
+
         recarregarListaCategorias();
 
         // buttons
@@ -147,7 +149,14 @@ public class PainelProdutos extends JPanel {
 
     private void recarregarListaCategorias() {
         modelCategorias.clear();
+
+        Restaurante restaurante = (Restaurante) usuario;
+
+        modelCategorias.addElement(new CategoriaCardapio("Todos", "", restaurante));
+
         categoriaService.listarCategoriasCardapio(usuario.getId()).forEach(modelCategorias::addElement);
+
+        modelCategorias.addElement(new CategoriaCardapio("Sem categoria", "", restaurante));
     }
 
     // ─────────────────────────── right: produtos ─────────────────────────────
@@ -282,9 +291,22 @@ public class PainelProdutos extends JPanel {
 
     private void carregarProdutos(CategoriaCardapio categoria) {
         produtosCarregados = produtoService.listarPorRestaurante(usuario.getId()).stream()
-                .filter(p -> categoria == null
-                        || (p.getCategoriaCardapioId() != null
-                            && p.getCategoriaCardapioId().equals(categoria.getId())))
+                .filter(p -> {
+                    if (categoria == null) {
+                        return true;
+                    }
+
+                    if ("Todos".equals(categoria.getNome())) {
+                        return true;
+                    }
+
+                    if ("Sem categoria".equals(categoria.getNome())) {
+                        return p.getCategoriaCardapioId() == null;
+                    }
+
+                    return p.getCategoriaCardapioId() != null
+                            && p.getCategoriaCardapioId().equals(categoria.getId());
+                })
                 .toList();
 
         modelProdutos.setRowCount(0);
