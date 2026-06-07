@@ -1,8 +1,10 @@
 package com.pedidos.view.cliente;
 
+import com.pedidos.model.service.AreaEntregaService;
 import com.pedidos.model.service.ProdutoService;
 import com.pedidos.model.service.RestauranteService;
 import com.pedidos.model.entity.Cliente;
+import com.pedidos.model.entity.Endereco;
 import com.pedidos.model.entity.HorarioFuncionamento;
 import com.pedidos.model.entity.Restaurante;
 import com.pedidos.view.util.AppColors;
@@ -38,6 +40,7 @@ public class PainelFazerPedido extends JPanel {
     private final RestauranteService restauranteService;
     private final ProdutoService produtoService;
     private final CarrinhoManager carrinho;
+    private final AreaEntregaService areaEntregaService;
 
     private final NumberFormat moedaBR = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
     private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -66,11 +69,13 @@ public class PainelFazerPedido extends JPanel {
                              RestauranteService restauranteService,
                              ProdutoService produtoService,
                              CarrinhoManager carrinho,
+                             AreaEntregaService areaEntregaService,
                              Runnable aoFinalizarPedido) {
         this.cliente = cliente;
         this.restauranteService = restauranteService;
         this.produtoService = produtoService;
         this.carrinho = carrinho;
+        this.areaEntregaService = areaEntregaService;
         this.aoFinalizarPedido = aoFinalizarPedido;
 
         construir();
@@ -234,8 +239,27 @@ public class PainelFazerPedido extends JPanel {
             carrinho.esvaziar();
         }
 
+        Optional<Endereco> enderecoPadrao = cliente.getEnderecoPadrao();
+        if (enderecoPadrao.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Cadastre um endereço de entrega antes de selecionar um restaurante.",
+                    "Endereço obrigatório", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        BigDecimal taxa;
+        try {
+            taxa = areaEntregaService.buscarTaxaPorBairro(r.getId(), enderecoPadrao.get().getBairro());
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Seu bairro (" + enderecoPadrao.get().getBairro() +
+                    ") não é atendido por este restaurante.",
+                    "Bairro não atendido", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         restauranteSelecionado = r;
-        carrinho.iniciar(cliente.getId(), r.getId(), new BigDecimal("5.00"));
+        carrinho.iniciar(cliente.getId(), r.getId(), taxa);
         painelCardapio.configurar(restauranteSelecionado);
         cardLayoutFazerPedido.show(centroPainelFazerPedido, "CARDAPIO");
     }

@@ -59,7 +59,11 @@ public class HorarioFuncionamento {
      * @return true se o horário está entre hora_inicio e hora_fim
      */
     public boolean contemHorario(LocalTime horario) {
-        return !horario.isBefore(horaInicio) && !horario.isAfter(horaFim);
+        if (horaFim.isAfter(horaInicio)) {
+            return !horario.isBefore(horaInicio) && !horario.isAfter(horaFim);
+        }
+        // Overnight: ex. 23:00–02:00
+        return !horario.isBefore(horaInicio) || !horario.isAfter(horaFim);
     }
 
     // Getters e Setters
