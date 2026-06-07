@@ -1,6 +1,6 @@
 package com.pedidos.view.cadastro;
 
-import com.pedidos.application.service.RestauranteService;
+import com.pedidos.model.service.RestauranteService;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 
@@ -27,7 +27,14 @@ public class PainelCadastroRestaurante extends JPanel {
         setBackground(AppColors.CINZA_FUNDO);
         setBorder(new EmptyBorder(20, 30, 20, 30));
 
-        add(criarFormulario(),   BorderLayout.CENTER);
+        JPanel centro = new JPanel();
+        centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
+        centro.setOpaque(false);
+        centro.add(criarFormulario());
+        centro.add(Box.createVerticalStrut(6));
+        centro.add(criarAvisoRestaurante());
+
+        add(centro,              BorderLayout.CENTER);
         add(criarPainelBotoes(), BorderLayout.SOUTH);
     }
 
@@ -36,11 +43,11 @@ public class PainelCadastroRestaurante extends JPanel {
         painel.setBackground(AppColors.CINZA_FUNDO);
         painel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(),
-                "Cadastro — Restaurante",
+                "Cadastro de Restaurante",
                 TitledBorder.DEFAULT_JUSTIFICATION,
                 TitledBorder.DEFAULT_POSITION,
-                AppFonts.LABEL,
-                AppColors.TEXTO_SECUNDARIO));
+                AppFonts.TITULO,
+                AppColors.CINZA_BORDA));
 
         campoNome     = new JTextField();
         campoEmail    = new JTextField();
@@ -165,6 +172,20 @@ public class PainelCadastroRestaurante extends JPanel {
                     "Erro ao cadastrar: " + ex.getMessage(),
                     "Erro no cadastro", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private JPanel criarAvisoRestaurante() {
+        JPanel aviso = new JPanel(new BorderLayout());
+        aviso.setBackground(new Color(255, 251, 204));
+        aviso.setBorder(new CompoundBorder(
+                new LineBorder(new Color(220, 200, 100), 1),
+                new EmptyBorder(6, 10, 6, 10)));
+        aviso.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+
+        JLabel label = new JLabel("* Sua conta ficará pendente de ativação pelo administrador.");
+        label.setFont(AppFonts.HINT);
+        aviso.add(label, BorderLayout.CENTER);
+        return aviso;
     }
 
     private JLabel rotulo(String texto) {

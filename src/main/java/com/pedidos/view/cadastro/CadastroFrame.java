@@ -1,7 +1,7 @@
 package com.pedidos.view.cadastro;
 
-import com.pedidos.application.service.ClienteService;
-import com.pedidos.application.service.RestauranteService;
+import com.pedidos.model.service.ClienteService;
+import com.pedidos.model.service.RestauranteService;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 import com.pedidos.view.util.base.BaseFrame;
@@ -56,6 +56,15 @@ public class CadastroFrame extends BaseFrame {
 
     public void mostrarCard(String nomeCard) {
         cardLayout.show(painelPrincipal, nomeCard);
+        if (CARD_RESTAURANTE.equals(nomeCard)) {
+            setTitle("Sistema de Delivery — Novo Cadastro | Restaurante");
+            setSize(500, 470);
+            setLocationRelativeTo(null);
+        } else if (CARD_CLIENTE.equals(nomeCard)) {
+            setTitle("Sistema de Delivery — Novo Cadastro | Cliente");
+            setSize(500, 420);
+            setLocationRelativeTo(null);
+        }
     }
 
     // ── status bar ────────────────────────────────────────────────────────────

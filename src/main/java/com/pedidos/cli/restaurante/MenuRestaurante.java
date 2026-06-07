@@ -1,0 +1,561 @@
+package com.pedidos.cli.restaurante;
+
+import com.pedidos.model.service.*;
+import com.pedidos.model.enums.StatusPedido;
+import com.pedidos.model.entity.CategoriaGlobal;
+import com.pedidos.model.entity.Pedido;
+import com.pedidos.model.entity.Restaurante;
+import com.pedidos.cli.util.EntradaSegura;
+import com.pedidos.cli.util.TerminalUtils;
+
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class MenuRestaurante {
+    private final MenuProdutos menuProdutos;
+    private final MenuCategoriasCardapio menuCategorias;
+    private final MenuAreaEntrega menuAreaEntrega;
+    private final MenuHorarios menuHorarios;
+    private final RestauranteService restauranteService;
+    private final CategoriaService categoriaService;
+    private final PedidoService pedidoService;
+    private final AreaEntregaService areaEntregaService;
+    private final HorarioService horarioService;
+    private final Scanner scanner;
+
+    public MenuRestaurante(MenuProdutos menuProdutos, MenuCategoriasCardapio menuCategorias, MenuAreaEntrega menuAreaEntrega, MenuHorarios menuHorarios,
+                           RestauranteService restauranteService,
+                           CategoriaService categoriaService,
+                           PedidoService pedidoService, AreaEntregaService areaEntregaService,HorarioService horarioService, Scanner scanner) {
+        this.menuProdutos = menuProdutos;
+        this.menuCategorias = menuCategorias;
+        this.menuAreaEntrega = menuAreaEntrega;
+        this.menuHorarios = menuHorarios;
+        this.restauranteService = restauranteService;
+        this.categoriaService = categoriaService;
+        this.pedidoService = pedidoService;
+        this.areaEntregaService = areaEntregaService;
+        this.horarioService = horarioService;
+        this.scanner = scanner;
+    }
+
+    // ─── Helpers locais ───────────────────────────────────────────────────────
+
+    private boolean confirmar(String pergunta) {
+        System.out.println();
+        System.out.print(TerminalUtils.AVISO + pergunta + " (s/N): ");
+        return scanner.nextLine().trim().equalsIgnoreCase("s");
+    }
+
+    private String lerCampoEditavel(String label, String valorAtual) {
+        System.out.printf("  %s%n", label);
+        System.out.printf("  Atual: [ %s ]%n", valorAtual);
+        System.out.print("  Novo  (Enter para manter): ");
+        String entrada = scanner.nextLine().trim();
+        return entrada.isEmpty() ? valorAtual : entrada;
+    }
+
+    // ─── Menu principal ───────────────────────────────────────────────────────
+
+    public void exibir(Restaurante restauranteLogado) {
+        while (true) {
+            TerminalUtils.limparTela();
+            TerminalUtils.cabecalho("PAINEL DO RESTAURANTE", "Restaurante: " + restauranteLogado.getNome());
+
+            System.out.println(TerminalUtils.TOPO);
+            System.out.println(TerminalUtils.linha("  GERENCIAMENTO"));
+            System.out.println(TerminalUtils.SEPARADOR);
+            System.out.println(TerminalUtils.linha("    1  \u00bb  Produtos"));
+            System.out.println(TerminalUtils.linha("    2  \u00bb  Categorias do Cardapio"));
+            System.out.println(TerminalUtils.linha("    3  \u00bb  Pedidos"));
+            System.out.println(TerminalUtils.linha("    4  \u00bb  Area Entrega"));
+            System.out.println(TerminalUtils.linha("    5  \u00bb  Horario de Funcionamento"));
+            System.out.println(TerminalUtils.SEPARADOR);
+            System.out.println(TerminalUtils.linha("  CONTA"));
+            System.out.println(TerminalUtils.SEPARADOR);
+            System.out.println(TerminalUtils.linha("    6  \u00bb  Perfil e Configuracoes"));
+            System.out.println(TerminalUtils.SEPARADOR);
+            System.out.println(TerminalUtils.linha("    0  \u00bb  Sair (Logout)"));
+            System.out.println(TerminalUtils.BASE);
+            System.out.println();
+            System.out.print("  Escolha uma opcao: ");
+
+            int opcao = EntradaSegura.lerOpcao(scanner, 0, 6);
+
+            switch (opcao) {
+                case 1 -> menuProdutos.exibir(restauranteLogado);
+                case 2 -> menuCategorias.exibir(restauranteLogado);
+                case 3 -> menuPedidos(restauranteLogado);
+                case 4 -> menuAreaEntrega.exibir(restauranteLogado);
+                case 5 -> menuHorarios.exibir(restauranteLogado);
+                case 6 -> exibirMenuPerfil(restauranteLogado);
+                case 0 -> {
+                    if (confirmar("Deseja realmente sair da sua conta?")) {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    // ─── Menu de pedidos ──────────────────────────────────────────────────────
+
+    private void menuPedidos(Restaurante restauranteLogado) {
+        TerminalUtils.limparTela();
+        System.out.println("╔══════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                            MENU DE PEDIDOS                                   ║");
+        System.out.println("╠══════════════════════════════════════════════════════════════════════════════╣");
+        System.out.println("║                                                                              ║");
+        System.out.println("║  [1] VER PEDIDOS ATIVOS                                                      ║");
+        System.out.println("║  [2] HISTÓRICO COMPLETO                                                      ║");
+        System.out.println("║  [3] FILTRAR POR STATUS                                                      ║");
+        System.out.println("║  [0] VOLTAR                                                                  ║");
+        System.out.println("║                                                                              ║");
+        System.out.println("╚══════════════════════════════════════════════════════════════════════════════╝");
+        System.out.print("ESCOLHA UMA OPÇÃO: ");
+
+        int opcao = EntradaSegura.lerOpcao(scanner, 0, 3);
+
+        switch (opcao) {
+            case 1 -> exibirPedidos(restauranteLogado);
+            case 2 -> {
+                List<Pedido> listaParaExibir = pedidoService.obterHistoricoFinalizado(restauranteLogado.getId());
+
+                historicoPedidos(listaParaExibir);
+
+            }
+            case 3 -> {
+                TerminalUtils.limparTela();
+                TerminalUtils.cabecalho("=== FILTRAR POR STATUS ===");
+                System.out.println("[1] AGUARDANDO CONFIRMAÇÃO");
+                System.out.println("[2] CONFIRMADO");
+                System.out.println("[3] EM PREPARO");
+                System.out.println("[4] SAIU_PARA_ENTREGA");
+                System.out.println("[5] ENTREGUE");
+                System.out.println("[6] CANCELADO");
+                System.out.println("[0] VOLTAR");
+
+                int escolha = EntradaSegura.lerOpcao(scanner,0, 6);
+
+                if (escolha != 0)
+                {
+                    StatusPedido status = converterParaStatus(escolha);
+
+                    List<Pedido> filtrando = pedidoService.filtrarPorStatus(restauranteLogado.getId(), status);
+
+                    exibirTodosOsPedidos(filtrando);
+
+                };
+            }
+            case 0 -> { return; }
+        }
+
+
+
+    }
+    private void historicoPedidos(List<Pedido> historico){
+        TerminalUtils.limparTela();
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        if (historico.isEmpty())
+        {
+            System.out.println("╔════════════════════════════════════════════════════════════════════════════════╗");
+            System.out.println("║                        HISTÓRICO COMPLETO DE PEDIDOS                           ║");
+            System.out.println("╠════════════════════════════════════════════════════════════════════════════════╣");
+            System.out.println("║       ID      |    CLIENTE    |      DATA      |   TOTAL (R$)  |   STATUS      ║");
+            TerminalUtils.aviso("╟─SEM HISTÓRICO─┼─SEM HISTÓRICO─┼─SEM HISTÓRICO──┼─SEM HISTÓRICO─┼─SEM HISTÓRICO─╢");
+            return;
+        };
+
+
+        System.out.println("╔══════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                        HISTÓRICO COMPLETO DE PEDIDOS                         ║");
+        System.out.println("╠══════════════════════════════════════════════════════════════════════════════╣");
+        System.out.println("║ ID    | CLIENTE             | DATA       | TOTAL (R$)  | STATUS              ║");
+        System.out.println("╟───────┼─────────────────────┼────────────┼─────────────┼─────────────────────║ ");
+
+
+
+        for (Pedido p : historico)
+        {
+            String idTratado = p.getId();
+
+            if(idTratado.length() > 5){
+                idTratado = idTratado.substring(0,5) + "...";
+            }
+            String dataFormatada = p.getDataPedido().format(fmt);
+            System.out.printf("║%-5s | %-19s | %-10s | %-11.2f | %-19s\n",
+                    idTratado,
+                    p.getCliente().getNome(),
+                    dataFormatada,
+                    p.getTotal(),
+                    p.getStatus());
+
+
+        };
+        System.out.println("╚══════════════════════════════════════════════════════════════════════════════");
+        System.out.println("  ESCOLHA UMA OPÇÃO (0 para voltar): ");
+
+        int num = EntradaSegura.lerOpcao(scanner, 0, historico.size());
+        if (num == 0) return;
+
+        Pedido pedido = historico.get(num - 1);
+
+        exibirDetalhes(pedido);
+
+        TerminalUtils.pausar();
+    };
+
+
+
+
+    private void exibirTodosOsPedidos(List<Pedido> pedidos){
+        TerminalUtils.limparTela();
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        if (pedidos.isEmpty())
+            {
+                System.out.println("╔════════════════════════════════════════════════════════════════════════════════╗");
+                System.out.println("║                        HISTÓRICO COMPLETO DE PEDIDOS                           ║");
+                System.out.println("╠════════════════════════════════════════════════════════════════════════════════╣");
+                System.out.println("║       ID      |    CLIENTE    |      DATA      |   TOTAL (R$)  |   STATUS      ║");
+                System.out.println("╟─SEM HISTÓRICO─┼─SEM HISTÓRICO─┼─SEM HISTÓRICO──┼─SEM HISTÓRICO─┼─SEM HISTÓRICO─╢");
+                return;
+            };
+
+
+        System.out.println("╔══════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                        HISTÓRICO COMPLETO DE PEDIDOS                         ║");
+        System.out.println("╠══════════════════════════════════════════════════════════════════════════════╣");
+        System.out.println("║ ID    | CLIENTE             | DATA       | TOTAL (R$)  | STATUS              ║");
+        System.out.println("╟───────┼─────────────────────┼────────────┼─────────────┼─────────────────────║ ");
+
+        for (Pedido p : pedidos)
+        {
+            String idTratado = p.getId();
+
+            if(idTratado.length() > 5){
+                idTratado = idTratado.substring(0,5) + "...";
+            }
+            String dataFormatada = p.getDataPedido().format(fmt);
+                    System.out.printf("║%-5s | %-19s | %-10s | %-11.2f | %-19s\n",
+                    idTratado,
+                    p.getCliente().getNome(),
+                    dataFormatada,
+                    p.getTotal(),
+                    p.getStatus());
+
+
+        };
+        System.out.println("╚══════════════════════════════════════════════════════════════════════════════");
+        TerminalUtils.pausar();
+    };
+
+    private void exibirPedidos(Restaurante restauranteLogado){
+        TerminalUtils.limparTela();
+        TerminalUtils.cabecalho("PEDIDOS", restauranteLogado.getNome());
+        List<Pedido> todos = pedidoService.listarPorRestaurante(restauranteLogado.getId());
+        List<Pedido> ativos = new ArrayList<>();
+        for (Pedido p : todos) {
+            if (p.getStatus() != StatusPedido.ENTREGUE && p.getStatus() != StatusPedido.CANCELADO) {
+                ativos.add(p);
+            }
+        }
+
+        if (ativos.isEmpty()) {
+            TerminalUtils.aviso("Nenhum pedido ativo no momento.");
+            TerminalUtils.pausar();
+            return;
+        }
+
+        System.out.println(TerminalUtils.TOPO);
+        System.out.println(TerminalUtils.linha("  #   ID        Status"));
+        System.out.println(TerminalUtils.SEPARADOR);
+        for (int i = 0; i < ativos.size(); i++) {
+            Pedido p = ativos.get(i);
+            System.out.println(TerminalUtils.linha(String.format(
+                    "  %-3d %-8s  %s", (i + 1), p.getId().substring(0, Math.min(8, p.getId().length())), p.getStatus())));
+        }
+        System.out.println(TerminalUtils.SEPARADOR);
+        System.out.println(TerminalUtils.linha("  0  \u00bb  Voltar"));
+        System.out.println(TerminalUtils.BASE);
+        System.out.print("\n  Selecione um pedido (0 para voltar): ");
+
+        int num = EntradaSegura.lerOpcao(scanner, 0, ativos.size());
+        if (num == 0) return;
+
+        Pedido pedido = ativos.get(num - 1);
+        avancarStatus(pedido);
+    };
+
+    private StatusPedido converterParaStatus(int opcao)
+    {
+        return switch (opcao)
+        {
+            case 1 -> StatusPedido.AGUARDANDO_CONFIRMACAO;
+            case 2 -> StatusPedido.CONFIRMADO;
+            case 3 -> StatusPedido.EM_PREPARO;
+            case 4 -> StatusPedido.SAIU_PARA_ENTREGA;
+            case 5 -> StatusPedido.ENTREGUE;
+            case 6 -> StatusPedido.CANCELADO;
+            default -> throw new IllegalArgumentException("Status Inválido");
+
+        };
+    };
+
+
+
+    private void avancarStatus(Pedido pedido) {
+        TerminalUtils.limparTela();
+        TerminalUtils.cabecalho("PEDIDO " + pedido.getId().substring(0, Math.min(8, pedido.getId().length())));
+        System.out.println("  Endereco : " + pedido.getEnderecoEntrega());
+        System.out.println("  Status   : " + pedido.getStatus());
+        System.out.println();
+
+        StatusPedido proximo;
+        String acao;
+
+        switch (pedido.getStatus()) {
+            case AGUARDANDO_CONFIRMACAO -> { proximo = StatusPedido.CONFIRMADO;         acao = "Confirmar pedido"; }
+            case CONFIRMADO             -> { proximo = StatusPedido.EM_PREPARO;         acao = "Iniciar preparo"; }
+            case EM_PREPARO             -> { proximo = StatusPedido.SAIU_PARA_ENTREGA;  acao = "Marcar saiu para entrega"; }
+            default -> {
+                TerminalUtils.aviso("Aguardando confirmacao do cliente para concluir.");
+                TerminalUtils.pausar();
+                return;
+            }
+        }
+
+        if (confirmar(acao + "?")) {
+            try {
+                pedidoService.atualizarStatus(pedido.getId(), proximo);
+                TerminalUtils.sucesso("Status atualizado para: " + proximo);
+            } catch (Exception e) {
+                TerminalUtils.erro(e.getMessage());
+            }
+        } else {
+            TerminalUtils.aviso("Nenhuma alteracao realizada.");
+        }
+        TerminalUtils.pausar();
+    }
+
+    // ─── Menu de perfil ───────────────────────────────────────────────────────
+
+    private void exibirMenuPerfil(Restaurante restauranteLogado) {
+        while (true) {
+            TerminalUtils.limparTela();
+            TerminalUtils.cabecalho("PERFIL E CONFIGURACOES", "Restaurante: " + restauranteLogado.getNome());
+
+            System.out.println(TerminalUtils.SEPARADOR);
+            System.out.println(TerminalUtils.linha("  INFORMACOES"));
+            System.out.println(TerminalUtils.SEPARADOR);
+            System.out.println(TerminalUtils.linha("    1  »  Visualizar Perfil"));
+            System.out.println(TerminalUtils.linha("    2  \u00bb  Editar Dados  (nome, CNPJ, telefone)"));
+            System.out.println(TerminalUtils.linha("    3  \u00bb  Editar E-mail"));
+            System.out.println(TerminalUtils.linha("    4  \u00bb  Alterar Categoria Global"));
+            System.out.println(TerminalUtils.SEPARADOR);
+            System.out.println(TerminalUtils.linha("  SEGURANCA"));
+            System.out.println(TerminalUtils.SEPARADOR);
+            System.out.println(TerminalUtils.linha("    5  \u00bb  Alterar Senha"));
+            System.out.println(TerminalUtils.SEPARADOR);
+            System.out.println(TerminalUtils.linha("    0  \u00bb  Voltar"));
+            System.out.println(TerminalUtils.BASE);
+            System.out.println();
+            System.out.print("  Escolha uma opcao: ");
+
+            int opcao = EntradaSegura.lerOpcao(scanner, 0, 5);
+
+            switch (opcao) {
+                case 1 -> acaoVisualizarPerfil(restauranteLogado);
+                case 2 -> acaoEditarDados(restauranteLogado);
+                case 3 -> acaoEditarEmail(restauranteLogado);
+                case 4 -> acaoAlterarCategoria(restauranteLogado);
+                case 5 -> acaoAlterarSenha(restauranteLogado);
+                case 0 -> { return; }
+            }
+        }
+    }
+
+    private void exibirDetalhes(Pedido detalhePedido)
+    {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        TerminalUtils.limparTela();
+
+        if (detalhePedido == null)
+        {
+            TerminalUtils.aviso("[!] Nenhum detalhe encontrado para o pedido selecionado");
+            return;
+        }
+
+            System.out.println("╔══════════════════════════════════════════════════════════════════════════════╗");
+            System.out.printf(" ║ DETALHES DO PEDIDO: %-56s ║\n", detalhePedido.getId());
+            System.out.println("╠══════════════════════════════════════════════════════════════════════════════╣");
+
+            System.out.printf("║ CLIENTE: %-67s ║\n", detalhePedido.getCliente().getNome());
+            System.out.printf("║ EMAIL:   %-67s ║\n", detalhePedido.getCliente().getEmail());
+            System.out.printf("║ DATA:    %-67s ║\n", detalhePedido.getDataPedido().format(fmt));
+            System.out.printf("║ STATUS:  %-67s ║\n", detalhePedido.getStatus());
+
+
+            System.out.println("╟──────────────────────────────────────────────────────────────────────────────╢");
+            System.out.println("║ ITENS DO PEDIDO:                                                             ║");
+            System.out.printf(" ║- Total do Pedido: R$ %-54.2f ║\n", detalhePedido.getTotal());
+            System.out.println("║                                                                              ║");
+            System.out.println("╚══════════════════════════════════════════════════════════════════════════════╝");
+
+            TerminalUtils.pausar();
+
+    };
+
+    // ─── Acoes do perfil ──────────────────────────────────────────────────────
+
+    private void acaoVisualizarPerfil(Restaurante restauranteLogado) {
+        TerminalUtils.limparTela();
+        TerminalUtils.cabecalho("VISUALIZAR PERFIL", "Restaurante: " + restauranteLogado.getNome());
+        System.out.println("  ID       : " + restauranteLogado.getId());
+        System.out.println("  Nome     : " + restauranteLogado.getNome());
+        System.out.println("  CNPJ     : " + restauranteLogado.getCnpj());
+        System.out.println("  Telefone : " + restauranteLogado.getTelefone());
+        System.out.println("  Categoria: " + restauranteLogado.getCategoriaGlobalId());
+        System.out.println("  Status   : " + (restauranteLogado.isStatusAtivo() ? "ATIVO" : "BLOQUEADO"));
+        TerminalUtils.pausar();
+    }
+
+    private void acaoEditarDados(Restaurante restauranteLogado) {
+        TerminalUtils.limparTela();
+        TerminalUtils.cabecalho("EDITAR DADOS", "Restaurante: " + restauranteLogado.getNome());
+
+        System.out.println("  Preencha os campos abaixo.");
+        System.out.println("  Pressione Enter para manter o valor atual.");
+        System.out.println();
+
+        try {
+            String novoNome     = lerCampoEditavel("Nome",     restauranteLogado.getNome());
+            String novoCnpj     = lerCampoEditavel("CNPJ",     restauranteLogado.getCnpj());
+            String novoTelefone = lerCampoEditavel("Telefone", restauranteLogado.getTelefone());
+
+            System.out.println();
+            System.out.println(TerminalUtils.TOPO);
+            System.out.println(TerminalUtils.linha("  Resumo das alteracoes"));
+            System.out.println(TerminalUtils.SEPARADOR);
+            System.out.println(TerminalUtils.linha(String.format("  Nome      : %s -> %s", restauranteLogado.getNome(), novoNome)));
+            System.out.println(TerminalUtils.linha(String.format("  CNPJ      : %s -> %s", restauranteLogado.getCnpj(), novoCnpj)));
+            System.out.println(TerminalUtils.linha(String.format("  Telefone  : %s -> %s", restauranteLogado.getTelefone(), novoTelefone)));
+            System.out.println(TerminalUtils.BASE);
+
+            if (confirmar("Confirmar essas alteracoes?")) {
+                restauranteService.editarPerfil(restauranteLogado, novoNome, novoCnpj, novoTelefone);
+                TerminalUtils.sucesso("Dados atualizados com sucesso!");
+            } else {
+                TerminalUtils.aviso("Alteracoes canceladas.");
+            }
+        } catch (Exception e) {
+            TerminalUtils.erro(e.getMessage());
+        }
+        TerminalUtils.pausar();
+    }
+
+    private void acaoEditarEmail(Restaurante restauranteLogado) {
+        TerminalUtils.limparTela();
+        TerminalUtils.cabecalho("EDITAR E-MAIL", "Restaurante: " + restauranteLogado.getNome());
+
+        try {
+            String novoEmail = lerCampoEditavel("E-mail", restauranteLogado.getEmail());
+
+            if (novoEmail.equals(restauranteLogado.getEmail())) {
+                TerminalUtils.aviso("Nenhuma alteracao detectada.");
+                TerminalUtils.pausar();
+                return;
+            }
+
+            if (confirmar("Alterar e-mail para \"" + novoEmail + "\"?")) {
+                restauranteService.editarEmail(restauranteLogado, novoEmail);
+                TerminalUtils.sucesso("E-mail atualizado com sucesso!");
+            } else {
+                TerminalUtils.aviso("Alteracao cancelada.");
+            }
+        } catch (Exception e) {
+            TerminalUtils.erro(e.getMessage());
+        }
+        TerminalUtils.pausar();
+    }
+
+    private void acaoAlterarCategoria(Restaurante restauranteLogado) {
+        TerminalUtils.limparTela();
+        TerminalUtils.cabecalho("ALTERAR CATEGORIA GLOBAL", "Restaurante: " + restauranteLogado.getNome());
+
+        try {
+            List<CategoriaGlobal> categorias = categoriaService.listarCategoriasGlobais();
+
+            if (categorias.isEmpty()) {
+                TerminalUtils.aviso("Nenhuma categoria global disponivel no momento.");
+                TerminalUtils.pausar();
+                return;
+            }
+
+            System.out.println(TerminalUtils.TOPO);
+            System.out.println(TerminalUtils.linha("  Categorias disponiveis"));
+            System.out.println(TerminalUtils.SEPARADOR);
+            for (int i = 0; i < categorias.size(); i++) {
+                System.out.println(TerminalUtils.linha(
+                        String.format("    %2d  \u00bb  %s", (i + 1), categorias.get(i).getNome())));
+            }
+            System.out.println(TerminalUtils.BASE);
+            System.out.println();
+            System.out.print("  Escolha o numero da categoria: ");
+
+            int num = EntradaSegura.lerOpcao(scanner, 1, categorias.size());
+            CategoriaGlobal escolhida = categorias.get(num - 1);
+
+            if (confirmar("Definir categoria como \"" + escolhida.getNome() + "\"?")) {
+                restauranteService.alterarCategoria(restauranteLogado, escolhida.getId());
+                TerminalUtils.sucesso("Categoria atualizada para: " + escolhida.getNome());
+            } else {
+                TerminalUtils.aviso("Alteracao cancelada.");
+            }
+        } catch (Exception e) {
+            TerminalUtils.erro(e.getMessage());
+        }
+        TerminalUtils.pausar();
+    }
+
+    private void acaoAlterarSenha(Restaurante restauranteLogado) {
+        TerminalUtils.limparTela();
+        TerminalUtils.cabecalho("ALTERAR SENHA", "Restaurante: " + restauranteLogado.getNome());
+
+        System.out.println("  Por seguranca, confirme sua senha atual antes de definir a nova.");
+        System.out.println();
+
+        try {
+            System.out.print("  Senha atual          : ");
+            String senhaAtual = scanner.nextLine();
+
+            System.out.print("  Nova senha           : ");
+            String novaSenha = scanner.nextLine();
+
+            System.out.print("  Confirmar nova senha : ");
+            String confirmacao = scanner.nextLine();
+
+            if (!novaSenha.equals(confirmacao)) {
+                TerminalUtils.erro("As senhas nao coincidem. Nenhuma alteracao foi feita.");
+                TerminalUtils.pausar();
+                return;
+            }
+
+            if (novaSenha.equals(senhaAtual)) {
+                TerminalUtils.aviso("A nova senha nao pode ser igual a senha atual.");
+                TerminalUtils.pausar();
+                return;
+            }
+
+            restauranteService.alterarSenha(restauranteLogado, senhaAtual, novaSenha);
+            TerminalUtils.sucesso("Senha alterada com sucesso!");
+        } catch (Exception e) {
+            TerminalUtils.erro(e.getMessage());
+        }
+        TerminalUtils.pausar();
+    }
+}

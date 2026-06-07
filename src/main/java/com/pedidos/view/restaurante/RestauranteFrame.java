@@ -1,13 +1,15 @@
 package com.pedidos.view.restaurante;
 
-import com.pedidos.application.service.*;
-import com.pedidos.domain.entities.Usuario;
+import com.pedidos.model.service.*;
+import com.pedidos.model.entity.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 import com.pedidos.view.util.base.BaseFrame;
 import com.pedidos.view.util.session.SessionManager;
 
 import javax.swing.*;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import java.awt.*;
 
 public class RestauranteFrame extends BaseFrame {
@@ -19,6 +21,8 @@ public class RestauranteFrame extends BaseFrame {
     private final AreaEntregaService areaEntregaService;
     private final HorarioService horarioService;
     private final PedidoService pedidoService;
+    private final AutenticacaoService autenticacaoService;
+    private final Runnable acaoLogout;
 
     public RestauranteFrame(Usuario usuario,
                             CategoriaService categoriaService,
@@ -26,7 +30,9 @@ public class RestauranteFrame extends BaseFrame {
                             RestauranteService restauranteService,
                             AreaEntregaService areaEntregaService,
                             HorarioService horarioService,
-                            PedidoService pedidoService) {
+                            PedidoService pedidoService,
+                            AutenticacaoService autenticacaoService,
+                            Runnable acaoLogout) {
         super("Sistema de Delivery — Painel do Restaurante");
         this.usuario = usuario;
         this.categoriaService = categoriaService;
@@ -35,9 +41,13 @@ public class RestauranteFrame extends BaseFrame {
         this.areaEntregaService = areaEntregaService;
         this.horarioService = horarioService;
         this.pedidoService = pedidoService;
+        this.autenticacaoService = autenticacaoService;
+        this.acaoLogout = acaoLogout;
         construirInterface();
         criarAbas();
+        criarMenu();
     }
+
 
     private void construirInterface() {
         setLayout(new BorderLayout());
@@ -77,6 +87,39 @@ public class RestauranteFrame extends BaseFrame {
         add(rodape, BorderLayout.SOUTH);
     }
 
+    private JMenuBar criarMenu() {
+
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.setBackground(Color.WHITE);
+        menuBar.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
+
+        JMenu menuLogout = new JMenu("Logout");
+        menuLogout.setBackground(Color.WHITE);
+        menuLogout.setForeground(Color.BLACK);
+        menuLogout.setFont(AppFonts.MENU);
+        menuLogout.addMenuListener(new MenuListener() {
+            @Override public void menuDeselected(MenuEvent e) {}
+            @Override public void menuCanceled(MenuEvent e) {}
+            @Override
+            public void menuSelected(MenuEvent e) {
+                menuLogout.setPopupMenuVisible(false);
+                Object[] opcoes = {"Sim", "Não"};
+                int r = JOptionPane.showOptionDialog(RestauranteFrame.this,
+                        "Deseja sair do sistema?", "Confirmar Logout",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+                        null, opcoes, opcoes[0]);
+                if (r == JOptionPane.YES_OPTION) {
+                    SwingUtilities.invokeLater(() -> acaoLogout.run());
+                }
+            }
+        });
+
+        menuBar.add(menuLogout);
+        setJMenuBar(menuBar);
+
+        return menuBar;
+    }
+
     private void criarAbas() {
         JTabbedPane abas = new JTabbedPane();
         abas.setFont(AppFonts.MENU);
@@ -85,7 +128,7 @@ public class RestauranteFrame extends BaseFrame {
         abas.addTab("Pedidos",                   new PainelPedidos(usuario, pedidoService));
         abas.addTab("Áreas de Entrega",          new PainelAreaEntrega(usuario, areaEntregaService));
         abas.addTab("Horários de funcionamento", new PainelHorarios(usuario, horarioService));
-        abas.addTab("Perfil",                    new JPanel());
+        abas.addTab("Perfil",                    new PainelPerfil(usuario, autenticacaoService, restauranteService));
 
         add(abas, BorderLayout.CENTER);
     }
