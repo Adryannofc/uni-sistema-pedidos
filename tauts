@@ -1,0 +1,17 @@
+* [33m7d1ea4e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/thiago[m[33m)[m feat: implement dirty-tracking for schedule changes and enhance save button behavior
+[31m|[m *   [33me45c6ae[m[33m ([m[1;31morigin/feature/thiago[m[33m)[m feat: add StatusRestaurante enum and update related entity packages
+[31m|[m [32m|[m[31m\[m  
+[31m|[m [32m|[m[31m/[m  
+[31m|[m[31m/[m[32m|[m   
+* [32m|[m   [33ma788cab[m[33m ([m[1;31morigin/feature/adryann[m[33m, [m[1;31morigin/develop[m[33m, [m[1;32mdevelop[m[33m)[m Merge pull request #151 from Adryannofc/feature/guilherme
+[34m|[m[35m\[m [32m\[m  
+[34m|[m * [32m|[m [33m610a16a[m[33m ([m[1;31morigin/feature/guilherme[m[33m)[m feat: atualize a funcionalidade de salvamento de endereço com verificações de validação e seleção de clique duplo para restaurante
+[34m|[m[34m/[m [32m/[m  
+* [32m|[m   [33m34b1b88[m Merge pull request #150 from Adryannofc/feature/adryann
+[36m|[m[1;31m\[m [32m\[m  
+[36m|[m * [32m|[m [33mc510c01[m refactor: reorganize package structure to use 'model' prefix for entities and services
+[36m|[m * [32m|[m [33m4ab7800[m feat: implement order tracking and address update in client interface
+* [1;31m|[m [32m|[m [33ma6fab54[m Merge pull request #149 from Adryannofc/feature/adryann
+[1;32m|[m[1;31m\[m[1;31m|[m [32m|[m 
+[1;32m|[m * [32m|[m [33m7c351a5[m feat: implement order tracking and address update in client interface
+[1;32m|[m * [32m|[m [33m0238fec[m fix: order Pedido results by dataPedido in buscarPorCliente method
