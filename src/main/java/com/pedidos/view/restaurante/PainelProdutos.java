@@ -62,6 +62,7 @@ public class PainelProdutos extends JPanel {
         split.setDividerSize(4);
         add(split, BorderLayout.CENTER);
         add(criarRodape(), BorderLayout.SOUTH);
+        carregarProdutos(null);
     }
 
     // ─────────────────────────── left: categorias ────────────────────────────
@@ -220,8 +221,6 @@ public class PainelProdutos extends JPanel {
 
         painel.add(topo,                            BorderLayout.NORTH);
         painel.add(new JScrollPane(tabelaProdutos), BorderLayout.CENTER);
-
-        carregarProdutos(null);
 
         // actions
         btnNovo.addActionListener(e -> {
