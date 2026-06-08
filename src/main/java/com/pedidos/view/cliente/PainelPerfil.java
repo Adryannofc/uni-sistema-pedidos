@@ -21,7 +21,7 @@ import java.util.Optional;
 
 /**
  * Painel responsável pela aba "Perfil".
- * Contém sub-abas: Dados, Endereço, Favoritos, Senha.
+ * Contém sub-abas: Dados, Endereço, Senha.
  */
 public class PainelPerfil extends JPanel {
 
@@ -50,7 +50,6 @@ public class PainelPerfil extends JPanel {
 
         subAbas.addTab("Dados", criarSubAbaDados());
         subAbas.addTab("Endereço", criarSubAbaEndereco());
-        subAbas.addTab("Favoritos", criarSubAbaFavoritos());
         subAbas.addTab("Senha", criarSubAbaSenha());
 
         subAbas.setSelectedIndex(0);
@@ -228,114 +227,6 @@ public class PainelPerfil extends JPanel {
         return painel;
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // SUB-ABA — FAVORITOS
-    // ─────────────────────────────────────────────────────────────
-    private JPanel criarSubAbaFavoritos() {
-        JPanel painel = new JPanel(new BorderLayout(0, 8));
-        painel.setBackground(Color.WHITE);
-        painel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-
-        JLabel titulo = new JLabel("Restaurantes favoritos");
-        titulo.setFont(AppFonts.TITULO);
-        titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 6, 0));
-
-        String[] colunas = {"Restaurante", "Categoria", "Status", "★ Remover"};
-        DefaultTableModel model = new DefaultTableModel(colunas, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
-
-        // Carrega favoritos
-        List<Restaurante> favs = cliente.getFavoritos();
-        for (Restaurante r : favs) {
-            String categoria = r.getCategoriaGlobal() != null
-                    ? r.getCategoriaGlobal().getNome() : "N/A";
-            model.addRow(new Object[]{r.getNome(), categoria,
-                    r.isStatusAtivo() ? "Ativo" : "Inativo", "★"});
-        }
-
-        JTable tabela = new JTable(model);
-        tabela.setFont(AppFonts.LABEL);
-        tabela.setRowHeight(30);
-        tabela.setGridColor(new Color(220, 220, 220));
-        tabela.setShowGrid(true);
-        tabela.setSelectionBackground(new Color(220, 235, 255));
-
-        configurarHeader(tabela);
-        tabela.getColumnModel().getColumn(0).setPreferredWidth(220);
-        tabela.getColumnModel().getColumn(1).setPreferredWidth(160);
-        tabela.getColumnModel().getColumn(2).setPreferredWidth(80);
-        tabela.getColumnModel().getColumn(3).setPreferredWidth(70);
-
-        // Badge de status ativo/inativo
-        tabela.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable t, Object value,
-                                                           boolean sel, boolean foc, int row, int col) {
-                JPanel cell = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 3));
-                cell.setBackground(sel ? t.getSelectionBackground() : Color.WHITE);
-                JLabel badge = new JLabel(String.valueOf(value));
-                badge.setFont(AppFonts.STATUS.deriveFont(Font.BOLD, 11f));
-                badge.setOpaque(true);
-                badge.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
-                if ("Ativo".equals(value)) {
-                    badge.setBackground(new Color(180, 240, 190));
-                    badge.setForeground(new Color(0, 100, 30));
-                } else {
-                    badge.setBackground(new Color(255, 190, 190));
-                    badge.setForeground(new Color(150, 0, 0));
-                }
-                cell.add(badge);
-                return cell;
-            }
-        });
-
-        // Estrela laranja para remover
-        tabela.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable t, Object value,
-                                                           boolean sel, boolean foc, int row, int col) {
-                JLabel lbl = (JLabel) super.getTableCellRendererComponent(t, value, sel, foc, row, col);
-                lbl.setHorizontalAlignment(SwingConstants.CENTER);
-                lbl.setForeground(new Color(255, 160, 0));
-                lbl.setFont(lbl.getFont().deriveFont(14f));
-                return lbl;
-            }
-        });
-
-        // Clique na ★ remove favorito
-        tabela.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int col = tabela.columnAtPoint(e.getPoint());
-                int row = tabela.rowAtPoint(e.getPoint());
-                if (col == 3 && row >= 0 && row < favs.size()) {
-                    Restaurante r = favs.get(row);
-                    int confirm = JOptionPane.showConfirmDialog(PainelPerfil.this,
-                            "Remover \"" + r.getNome() + "\" dos favoritos?",
-                            "Confirmar", JOptionPane.YES_NO_OPTION);
-                    if (confirm == JOptionPane.YES_OPTION) {
-                        clienteService.favoritar(cliente, r); // toggle → remove
-                        favs.remove(r);
-                        model.removeRow(row);
-                    }
-                }
-            }
-        });
-
-        JScrollPane scroll = new JScrollPane(tabela);
-        scroll.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
-
-        JLabel info = new JLabel("💡 Clique em ★ para remover um restaurante dos favoritos.");
-        info.setFont(AppFonts.HINT);
-        info.setForeground(Color.GRAY);
-        info.setBorder(BorderFactory.createEmptyBorder(6, 2, 0, 0));
-
-        painel.add(titulo, BorderLayout.NORTH);
-        painel.add(scroll, BorderLayout.CENTER);
-        painel.add(info, BorderLayout.SOUTH);
-        return painel;
-    }
 
     // ─────────────────────────────────────────────────────────────
     // SUB-ABA — SENHA

@@ -3,6 +3,8 @@ package com.pedidos.model.entity;
 import com.pedidos.model.enums.StatusRestaurante;
 import com.pedidos.model.enums.TipoUsuario;
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -35,7 +37,6 @@ public class Restaurante extends Usuario {
 
     @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<HorarioFuncionamento> horarios;
-
 
 
     protected Restaurante() {}

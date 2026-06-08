@@ -1,11 +1,13 @@
 package com.pedidos.model.service;
 
 import com.pedidos.model.entity.Admin;
+import com.pedidos.model.entity.Cliente;
 import com.pedidos.model.entity.Restaurante;
 import com.pedidos.model.entity.Usuario;
 import com.pedidos.model.enums.StatusRestaurante;
 import com.pedidos.model.repository.AdminRepository;
 import com.pedidos.model.repository.CategoriaCardapioRepository;
+import com.pedidos.model.repository.ClienteRepository;
 import com.pedidos.model.repository.RestauranteRepository;
 
 import java.util.List;
@@ -14,6 +16,7 @@ public class AdminService {
     private final AdminRepository adminRepository;
     private final AutenticacaoService autenticacaoService;
     private final RestauranteRepository restauranteRepository;
+    private final ClienteRepository clienteRepository;
     private CategoriaCardapioRepository categoriaCardapioRepository;
 
     /**
@@ -23,11 +26,12 @@ public class AdminService {
      * @param autenticacaoService   verifica se as credenciais estao corretas
      * @param restauranteRepository gerencia os dados dos restaurantes
      */
-    public AdminService(AdminRepository adminRepository, AutenticacaoService autenticacaoService, RestauranteRepository restauranteRepository, CategoriaCardapioRepository categoriaCardapioRepository) {
+    public AdminService(AdminRepository adminRepository, AutenticacaoService autenticacaoService, RestauranteRepository restauranteRepository, CategoriaCardapioRepository categoriaCardapioRepository, ClienteRepository clienteRepository) {
         this.adminRepository = adminRepository;
         this.autenticacaoService = autenticacaoService;
         this.restauranteRepository = restauranteRepository;
         this.categoriaCardapioRepository = categoriaCardapioRepository;
+        this.clienteRepository = clienteRepository;
     }
 
     /**
