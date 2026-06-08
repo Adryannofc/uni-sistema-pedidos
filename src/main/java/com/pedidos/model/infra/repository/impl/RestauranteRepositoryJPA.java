@@ -1,5 +1,6 @@
 package com.pedidos.model.infra.repository.impl;
 
+import com.pedidos.model.entity.Cliente;
 import com.pedidos.model.entity.Restaurante;
 import com.pedidos.model.entity.Usuario;
 import com.pedidos.model.repository.RestauranteRepository;

@@ -2,6 +2,8 @@ package com.pedidos.model.entity;
 
 import com.pedidos.model.enums.TipoUsuario;
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,22 +23,6 @@ public class Cliente extends Usuario {
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Endereco> enderecos = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "cliente_restaurantes_favoritos",
-            joinColumns = @JoinColumn(name = "cliente_id"),
-            inverseJoinColumns = @JoinColumn(name = "restaurante_id")
-    )
-    private List<Restaurante> favoritos = new ArrayList<>();
-
-    public void adicionarFavorito(Restaurante restaurante) {
-        this.favoritos.add(restaurante);
-    }
-
-    public void removerFavorito(Restaurante restaurante) {
-        this.favoritos.remove(restaurante);
-    }
-
     protected Cliente() {
     }
 
@@ -46,9 +32,6 @@ public class Cliente extends Usuario {
         this.telefone = telefone;
     }
 
-    public List<Restaurante> getFavoritos() {
-        return favoritos;
-    }
 
     public String getCpf() {
         return cpf;
@@ -92,11 +75,7 @@ public class Cliente extends Usuario {
         endereco.setCliente(this);
     }
 
-
-    public List<Restaurante> listarFavoritos(Cliente cliente) {
-        return cliente.getFavoritos();
-    }
-
+    
     @Override
     public String toString() {
         return "Cliente{nome=" + getNome() + ", email=" + getEmail() + "}";
