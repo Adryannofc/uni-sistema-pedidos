@@ -1,6 +1,6 @@
 package com.pedidos.view.util.session;
 
-import com.pedidos.domain.entities.Produto;
+import com.pedidos.model.entity.Produto;
 import java.math.BigDecimal;
 import java.util.*;
 

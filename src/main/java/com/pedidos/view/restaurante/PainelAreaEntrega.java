@@ -1,9 +1,9 @@
 package com.pedidos.view.restaurante;
 
-import com.pedidos.application.service.AreaEntregaService;
-import com.pedidos.domain.entities.AreaEntrega;
-import com.pedidos.domain.entities.Restaurante;
-import com.pedidos.domain.entities.Usuario;
+import com.pedidos.model.service.AreaEntregaService;
+import com.pedidos.model.entity.AreaEntrega;
+import com.pedidos.model.entity.Restaurante;
+import com.pedidos.model.entity.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 

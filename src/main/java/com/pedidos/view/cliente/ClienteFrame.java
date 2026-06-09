@@ -1,7 +1,7 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.application.service.*;
-import com.pedidos.domain.entities.*;
+import com.pedidos.model.service.*;
+import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 import com.pedidos.view.util.base.BaseFrame;
@@ -22,6 +22,7 @@ public class ClienteFrame extends BaseFrame {
     private final ProdutoService produtoService;
     private final PedidoService pedidoService;
     private final CarrinhoManager carrinho;
+    private final AreaEntregaService areaEntregaService;
     private final Runnable acaoLogout;
 
     private JTabbedPane tabbedPane;
@@ -41,17 +42,19 @@ public class ClienteFrame extends BaseFrame {
                         ProdutoService produtoService,
                         PedidoService pedidoService,
                         CarrinhoManager carrinho,
+                        AreaEntregaService areaEntregaService,
                         Runnable acaoLogout) {
         super("Sistema Delivery — " + usuario.getNome() + " | Cliente");
-        this.usuario            = usuario;
-        this.cliente            = cliente;
-        this.clienteService     = clienteService;
-        this.enderecoService    = enderecoService;
-        this.restauranteService = restauranteService;
-        this.produtoService     = produtoService;
-        this.pedidoService      = pedidoService;
-        this.carrinho           = carrinho;
-        this.acaoLogout         = acaoLogout;
+        this.usuario             = usuario;
+        this.cliente             = cliente;
+        this.clienteService      = clienteService;
+        this.enderecoService     = enderecoService;
+        this.restauranteService  = restauranteService;
+        this.produtoService      = produtoService;
+        this.pedidoService       = pedidoService;
+        this.carrinho            = carrinho;
+        this.areaEntregaService  = areaEntregaService;
+        this.acaoLogout          = acaoLogout;
         construirInterface();
     }
 
@@ -77,15 +80,7 @@ public class ClienteFrame extends BaseFrame {
             @Override
             public void menuSelected(MenuEvent e) {
                 menuLogout.setPopupMenuVisible(false);
-                Object[] opcoes = {"Sim", "Não"};
-                int r = JOptionPane.showOptionDialog(ClienteFrame.this,
-                        "Deseja sair do sistema?", "Confirmar Logout",
-                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
-                        null, opcoes, opcoes[0]);
-                if (r == JOptionPane.YES_OPTION) {
-                    carrinho.esvaziar();
-                    SwingUtilities.invokeLater(() -> acaoLogout.run());
-                }
+                executarLogout();
             }
         });
 
@@ -104,9 +99,35 @@ public class ClienteFrame extends BaseFrame {
         nomeLabel.setFont(AppFonts.STATUS);
         nomeLabel.setForeground(AppColors.TEXTO_BRANCO);
 
-        header.add(titulo,    BorderLayout.WEST);
-        header.add(nomeLabel, BorderLayout.EAST);
+        JButton btnSair = new JButton("Sair");
+        btnSair.setFont(AppFonts.BOTAO);
+        btnSair.setBackground(new Color(220, 53, 69));
+        btnSair.setForeground(AppColors.TEXTO_BRANCO);
+        btnSair.setOpaque(true);
+        btnSair.setBorderPainted(false);
+        btnSair.setFocusPainted(false);
+        btnSair.addActionListener(e -> executarLogout());
+
+        JPanel painelDireito = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        painelDireito.setOpaque(false);
+        painelDireito.add(nomeLabel);
+        painelDireito.add(btnSair);
+
+        header.add(titulo,        BorderLayout.WEST);
+        header.add(painelDireito, BorderLayout.EAST);
         return header;
+    }
+
+    private void executarLogout() {
+        Object[] opcoes = {"Sim", "Não"};
+        int r = JOptionPane.showOptionDialog(this,
+                "Deseja sair do sistema?", "Confirmar Logout",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+                null, opcoes, opcoes[0]);
+        if (r == JOptionPane.YES_OPTION) {
+            carrinho.esvaziar();
+            SwingUtilities.invokeLater(() -> acaoLogout.run());
+        }
     }
 
     private JPanel criarStatusBar() {
@@ -154,6 +175,7 @@ public class ClienteFrame extends BaseFrame {
                 restauranteService,
                 produtoService,
                 carrinho,
+                areaEntregaService,
                 () -> {
                     painelCheckout.sincronizar();
                     tabbedPane.setSelectedIndex(1);
@@ -178,7 +200,10 @@ public class ClienteFrame extends BaseFrame {
 
         painelMeusPedidos = new PainelMeusPedidos(cliente, pedidoService);
 
-        painelPerfil = new PainelPerfil(usuario, cliente, clienteService);
+        painelPerfil = new PainelPerfil(usuario, cliente, clienteService, () -> {
+            painelCheckout.atualizarEndereco();
+            atualizarStatusBar();
+        });
 
         tabbedPane.addTab("Fazer Pedido", painelFazerPedido);
         tabbedPane.addTab("Checkout",     painelCheckout);

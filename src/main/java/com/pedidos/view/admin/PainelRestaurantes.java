@@ -1,8 +1,8 @@
 package com.pedidos.view.admin;
 
-import com.pedidos.application.service.AdminService;
-import com.pedidos.domain.entities.Restaurante;
-import com.pedidos.domain.enums.StatusRestaurante;
+import com.pedidos.model.service.AdminService;
+import com.pedidos.model.entity.Restaurante;
+import com.pedidos.model.enums.StatusRestaurante;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 
@@ -69,9 +69,9 @@ public class PainelRestaurantes extends JPanel {
         btnBloquear = botaoAcao(" Bloquear", new Color(248, 215, 218), new Color(114, 28, 36));
         btnRemover  = botaoAcao(" Remover",  new Color(255, 243, 205), new Color(133, 100, 4));
 
-        btnAprovar.setIcon(new ImageIcon(getClass().getResource("/icones/aprovar.png")));
-        btnBloquear.setIcon(new ImageIcon(getClass().getResource("/icones/bloquear.png")));
-        btnRemover.setIcon(new ImageIcon(getClass().getResource("/icones/remover.png")));
+        btnAprovar.setIcon(new ImageIcon(getClass().getResource("/img/aprovar.png")));
+        btnBloquear.setIcon(new ImageIcon(getClass().getResource("/img/bloquear.png")));
+        btnRemover.setIcon(new ImageIcon(getClass().getResource("/img/remover.png")));
 
         btnAprovar.setEnabled(false);
         btnBloquear.setEnabled(false);

@@ -1,9 +1,9 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.application.service.ProdutoService;
-import com.pedidos.domain.entities.CategoriaCardapio;
-import com.pedidos.domain.entities.Produto;
-import com.pedidos.domain.entities.Restaurante;
+import com.pedidos.model.service.ProdutoService;
+import com.pedidos.model.entity.CategoriaCardapio;
+import com.pedidos.model.entity.Produto;
+import com.pedidos.model.entity.Restaurante;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 import com.pedidos.view.util.session.CarrinhoManager;
