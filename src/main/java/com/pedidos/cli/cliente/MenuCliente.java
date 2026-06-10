@@ -99,49 +99,10 @@ public class MenuCliente {
                 case 5 -> acaoEditarTelefone();
                 case 6 -> acaoAlterarSenha();
                 case 7 -> menuGerenciarEnderecos();
-                case 8 -> menuFavoritos();
                 case 0 -> {
                     return;
                 }
             }
-        }
-    }
-
-    private void menuFavoritos() {
-            TerminalUtils.limparTela();
-            TerminalUtils.cabecalho("MEUS FAVORITOS", clienteLogado.getNome());
-
-            List<Restaurante> favs = clienteLogado.getFavoritos();
-
-            if (favs.isEmpty()) {
-                TerminalUtils.aviso("Sua lista de favoritos esta vazia.");
-                TerminalUtils.pausar();
-                return;
-            }
-
-            System.out.println(TerminalUtils.TOPO);
-            System.out.println(TerminalUtils.linha("  #   Nome do Restaurante"));
-            System.out.println(TerminalUtils.SEPARADOR);
-            for (int i = 0; i < favs.size(); i++) {
-                System.out.println(TerminalUtils.linha(String.format("  %-3d %s", (i + 1), favs.get(i).getNome())));
-            }
-            System.out.println(TerminalUtils.SEPARADOR);
-            System.out.println(TerminalUtils.linha("  0  \u00bb  Voltar"));
-            System.out.println(TerminalUtils.BASE);
-
-            System.out.print("\n  Escolha um numero para REMOVER (ou 0 para voltar): ");
-            int escolha = EntradaSegura.lerOpcao(scanner, 0, favs.size());
-
-            if (escolha == 0) return;
-
-            try {
-                Restaurante selecionado = favs.get(escolha - 1);
-                clienteService.favoritar(clienteLogado, selecionado);
-                TerminalUtils.sucesso("Restaurante removido dos favoritos!");
-                TerminalUtils.pausar();
-            } catch (Exception e) {
-                TerminalUtils.erro("Erro ao remover: " + e.getMessage());
-                TerminalUtils.pausar();
         }
     }
 
@@ -515,17 +476,15 @@ public class MenuCliente {
             Restaurante escolhido = ativos.get(escolha - 1);
 
             System.out.println("\n  1 \u00bb Ver Cardápio");
-            System.out.println("  2 \u00bb Favoritar / Desfavoritar");
             System.out.print("  Opção: ");
-            int acao = EntradaSegura.lerOpcao(scanner, 1, 2);
+            int acao = EntradaSegura.lerOpcao(scanner, 1, 1);
 
-            if(acao == 2) {
-                clienteService.favoritar(clienteLogado, escolhido);
-                TerminalUtils.sucesso("Lista de favoritos atualizada!");
-            } else {
+            if(acao == 1) {
                 carrinhoService.iniciarCarrinho(clienteLogado.getId(), escolhido.getId());
                 TerminalUtils.sucesso("Restaurante \"" + escolhido.getNome() + "\" selecionado.");
                 acaoNavegarCardapio(escolhido);
+            } else {
+                System.out.println("Opção inválida. Retornando ao menu de restaurantes.");
             }
 
         } catch (Exception e) {

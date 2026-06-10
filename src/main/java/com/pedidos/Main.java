@@ -35,8 +35,8 @@ public class Main {
         EnderecoRepositoryJPA enderecoRepo = new EnderecoRepositoryJPA(em);
 
         AutenticacaoService authService = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
-        AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo, categoriaCardapioRepo);
         ClienteService clienteService = new ClienteService(clienteRepo, authService, adminRepo, restauranteRepo, enderecoRepo);
+        AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo, categoriaCardapioRepo, clienteRepo);
         EnderecoService enderecoService = new EnderecoService(enderecoRepo);
         CategoriaService categoriaService = new CategoriaService(categoriaGlobalRepo, categoriaCardapioRepo, restauranteRepo, produtoRepo);
         ProdutoService produtoService = new ProdutoService(produtoRepo, restauranteRepo);

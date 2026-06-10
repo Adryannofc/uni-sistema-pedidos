@@ -9,7 +9,11 @@ import com.pedidos.view.util.AppFonts;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -38,16 +42,27 @@ public class PainelHorarios extends JPanel {
     private static final Color COR_ABERTO_FUNDO  = Color.WHITE;
     private static final Color COR_BADGE         = new Color(220, 0, 0);
 
+    // ── Cor de destaque do botão Salvar ──────────────────────────────────────
+    private static final Color COR_SALVAR_ATIVO   = new Color(25, 135, 84);   // verde
+    private static final Color COR_SALVAR_TEXTO   = Color.WHITE;
+    private static final Color COR_SALVAR_INATIVO = new Color(180, 180, 180);
+
     private final Restaurante restaurante;
     private final HorarioService horarioService;
     private final List<LinhaHorario> linhas = new ArrayList<>();
 
+    // ── Dirty-tracking ───────────────────────────────────────────────────────
+    private boolean dadosAlterados = false;
+    private JButton btnSalvar;
+
     public PainelHorarios(Usuario usuario, HorarioService horarioService) {
         super(new BorderLayout());
-        this.restaurante = (Restaurante) usuario;
+        this.restaurante    = (Restaurante) usuario;
         this.horarioService = horarioService;
         construir();
         carregarHorarios();
+        // Após carregar, registra listener na janela pai (se houver)
+        SwingUtilities.invokeLater(this::registrarListenerJanela);
     }
 
     // ─────────────────────────── build UI ────────────────────────────────────
@@ -75,9 +90,9 @@ public class PainelHorarios extends JPanel {
         adicionarCabecalho(grid);
 
         DayOfWeek[] ordem = {
-            DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
-            DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY,
-            DayOfWeek.SUNDAY
+                DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+                DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY,
+                DayOfWeek.SUNDAY
         };
         for (int i = 0; i < ordem.length; i++) {
             LinhaHorario linha = criarLinha(ordem[i], i + 1, grid);
@@ -87,8 +102,18 @@ public class PainelHorarios extends JPanel {
         JScrollPane scroll = new JScrollPane(grid);
         scroll.setBorder(null);
 
-        JButton btnSalvar = new JButton("Salvar Horários");
-        btnSalvar.setFont(AppFonts.BOTAO);
+        // ── Botão Salvar: tamanho mínimo 120×35px, cor de destaque ────────────
+        btnSalvar = new JButton("Salvar Horários");
+        btnSalvar.setFont(AppFonts.BOTAO.deriveFont(Font.BOLD, 13f));
+        btnSalvar.setPreferredSize(new Dimension(150, 35));
+        btnSalvar.setMinimumSize(new Dimension(120, 35));
+        btnSalvar.setBackground(COR_SALVAR_INATIVO);
+        btnSalvar.setForeground(COR_SALVAR_TEXTO);
+        btnSalvar.setOpaque(true);
+        btnSalvar.setBorderPainted(false);
+        btnSalvar.setFocusPainted(false);
+        btnSalvar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnSalvar.setEnabled(false); // só habilita com alterações
         btnSalvar.addActionListener(e -> salvarHorarios());
 
         JPanel rodape = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -97,6 +122,36 @@ public class PainelHorarios extends JPanel {
         add(topo,   BorderLayout.NORTH);
         add(scroll, BorderLayout.CENTER);
         add(rodape, BorderLayout.SOUTH);
+    }
+
+    // ── Registra listener na Window pai para confirmar fechamento ─────────────
+    private void registrarListenerJanela() {
+        Window janela = SwingUtilities.getWindowAncestor(this);
+        if (janela == null) return;
+
+        janela.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (!dadosAlterados) return;
+
+                int resposta = JOptionPane.showConfirmDialog(
+                        PainelHorarios.this,
+                        "Você tem alterações não salvas nos horários.\nDeseja realmente sair sem salvar?",
+                        "Alterações pendentes",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE);
+
+                if (resposta != JOptionPane.YES_OPTION) {
+                    // Cancela o fechamento
+                    if (janela instanceof JDialog d) d.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+                    if (janela instanceof JFrame  f) f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+                } else {
+                    if (janela instanceof JDialog d) d.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+                    if (janela instanceof JFrame  f) f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    janela.dispose();
+                }
+            }
+        });
     }
 
     private void adicionarCabecalho(JPanel grid) {
@@ -178,7 +233,10 @@ public class PainelHorarios extends JPanel {
         linha.checkFechado.setOpaque(true);
         linha.checkFechado.setBackground(COR_ABERTO_FUNDO);
         linha.checkFechado.setHorizontalAlignment(SwingConstants.CENTER);
-        linha.checkFechado.addActionListener(e -> atualizarEstadoLinha(linha));
+        linha.checkFechado.addActionListener(e -> {
+            atualizarEstadoLinha(linha);
+            marcarAlterado();  // dirty-tracking no checkbox
+        });
 
         JPanel painelCheck = new JPanel(new GridBagLayout());
         painelCheck.setOpaque(true);
@@ -199,6 +257,12 @@ public class PainelHorarios extends JPanel {
         JTextField f = new JTextField("00:00", 6);
         f.setFont(AppFonts.CAMPO);
         f.setHorizontalAlignment(SwingConstants.CENTER);
+        // dirty-tracking nos campos de texto
+        f.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e)  { marcarAlterado(); }
+            @Override public void removeUpdate(DocumentEvent e)  { marcarAlterado(); }
+            @Override public void changedUpdate(DocumentEvent e) { marcarAlterado(); }
+        });
         return f;
     }
 
@@ -210,6 +274,29 @@ public class PainelHorarios extends JPanel {
                 0, 0, 1, 0, new Color(220, 220, 220)));
         p.add(campo);
         return p;
+    }
+
+    // ─────────────────────────── dirty-tracking ───────────────────────────────
+
+    /**
+     * Chamado sempre que qualquer campo ou checkbox é alterado pelo usuário.
+     * Habilita o botão Salvar e acende a cor de destaque.
+     */
+    private void marcarAlterado() {
+        if (dadosAlterados) return; // já marcado, evita repintura desnecessária
+        dadosAlterados = true;
+        btnSalvar.setEnabled(true);
+        btnSalvar.setBackground(COR_SALVAR_ATIVO);
+    }
+
+    /**
+     * Chamado após salvar com sucesso ou ao recarregar os dados.
+     * Desabilita o botão Salvar e volta à cor inativa.
+     */
+    private void limparAlterado() {
+        dadosAlterados = false;
+        btnSalvar.setEnabled(false);
+        btnSalvar.setBackground(COR_SALVAR_INATIVO);
     }
 
     // ─────────────────────────── data loading ────────────────────────────────
@@ -244,6 +331,9 @@ public class PainelHorarios extends JPanel {
             }
             atualizarEstadoLinha(linha);
         }
+
+        // Após carregar dados iniciais, reseta o dirty-tracking
+        limparAlterado();
     }
 
     // ─────────────────────────── state update ────────────────────────────────
@@ -302,7 +392,7 @@ public class PainelHorarios extends JPanel {
             } catch (DateTimeParseException ex) {
                 JOptionPane.showMessageDialog(this,
                         "Horário de abertura inválido para " + NOMES_DIAS.get(linha.dia)
-                        + ".\nUse o formato HH:mm (ex: 09:00).",
+                                + ".\nUse o formato HH:mm (ex: 09:00).",
                         "Horário inválido", JOptionPane.WARNING_MESSAGE);
                 return;
             }
@@ -311,14 +401,14 @@ public class PainelHorarios extends JPanel {
             } catch (DateTimeParseException ex) {
                 JOptionPane.showMessageDialog(this,
                         "Horário de fechamento inválido para " + NOMES_DIAS.get(linha.dia)
-                        + ".\nUse o formato HH:mm (ex: 22:00).",
+                                + ".\nUse o formato HH:mm (ex: 22:00).",
                         "Horário inválido", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             if (fim.equals(inicio)) {
                 JOptionPane.showMessageDialog(this,
                         NOMES_DIAS.get(linha.dia)
-                        + ": o horário de fechamento não pode ser igual ao de abertura.",
+                                + ": o horário de fechamento não pode ser igual ao de abertura.",
                         "Horário inválido", JOptionPane.WARNING_MESSAGE);
                 return;
             }
@@ -353,6 +443,10 @@ public class PainelHorarios extends JPanel {
             JOptionPane.showMessageDialog(this,
                     "Horários salvos com sucesso.",
                     "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
+            // Após salvar com sucesso, limpa o dirty-tracking
+            limparAlterado();
+
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this,
                     "Erro ao salvar horários:\n" + ex.getMessage(),

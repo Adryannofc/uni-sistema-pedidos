@@ -111,13 +111,3 @@ CREATE TABLE horarios_funcionamento (
 );
 
 CREATE INDEX idx_horarios_restaurante ON horarios_funcionamento (restaurante_id);
-
-CREATE TABLE cliente_restaurantes_favoritos (
-   cliente_id VARCHAR(36) NOT NULL,
-   restaurante_id VARCHAR(36) NOT NULL,
-   PRIMARY KEY (cliente_id, restaurante_id),
-   CONSTRAINT fk_cliente FOREIGN KEY (cliente_id)
-   REFERENCES clientes(usuario_id) ON DELETE CASCADE,
-   CONSTRAINT fk_restaurante FOREIGN KEY (restaurante_id)
-   REFERENCES restaurantes(usuario_id) ON DELETE CASCADE
-);
