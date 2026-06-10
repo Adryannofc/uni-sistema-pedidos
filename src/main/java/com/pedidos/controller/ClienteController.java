@@ -2,7 +2,6 @@ package com.pedidos.controller;
 
 import com.pedidos.model.entity.Cliente;
 import com.pedidos.model.entity.Endereco;
-import com.pedidos.model.entity.Restaurante;
 import com.pedidos.model.entity.Usuario;
 import com.pedidos.model.service.ClienteService;
 
@@ -16,10 +15,6 @@ public class ClienteController {
 
     public void cadastrarCliente(String nome, String email, String senha, String cpf, String telefone) {
         clienteService.cadastrarCliente(nome, email, senha, cpf, telefone);
-    }
-
-    public void favoritar(Cliente cliente, Restaurante restaurante) {
-        clienteService.favoritar(cliente, restaurante);
     }
 
     public void editarNome(Cliente cliente, String novoNome) {
