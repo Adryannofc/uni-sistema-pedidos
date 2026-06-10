@@ -1,5 +1,6 @@
 package com.pedidos.view.restaurante;
 
+import com.pedidos.controller.AutenticacaoController;
 import com.pedidos.model.service.*;
 import com.pedidos.model.entity.Usuario;
 import com.pedidos.view.util.AppColors;
@@ -21,7 +22,7 @@ public class RestauranteFrame extends BaseFrame {
     private final AreaEntregaService areaEntregaService;
     private final HorarioService horarioService;
     private final PedidoService pedidoService;
-    private final AutenticacaoService autenticacaoService;
+    private final AutenticacaoController autenticacaoController;
     private final Runnable acaoLogout;
 
     public RestauranteFrame(Usuario usuario,
@@ -31,7 +32,7 @@ public class RestauranteFrame extends BaseFrame {
                             AreaEntregaService areaEntregaService,
                             HorarioService horarioService,
                             PedidoService pedidoService,
-                            AutenticacaoService autenticacaoService,
+                            AutenticacaoController autenticacaoController,
                             Runnable acaoLogout) {
         super("Sistema de Delivery — Painel do Restaurante");
         this.usuario = usuario;
@@ -41,7 +42,7 @@ public class RestauranteFrame extends BaseFrame {
         this.areaEntregaService = areaEntregaService;
         this.horarioService = horarioService;
         this.pedidoService = pedidoService;
-        this.autenticacaoService = autenticacaoService;
+        this.autenticacaoController = autenticacaoController;
         this.acaoLogout = acaoLogout;
         construirInterface();
         criarAbas();
@@ -128,7 +129,7 @@ public class RestauranteFrame extends BaseFrame {
         abas.addTab("Pedidos",                   new PainelPedidos(usuario, pedidoService));
         abas.addTab("Áreas de Entrega",          new PainelAreaEntrega(usuario, areaEntregaService));
         abas.addTab("Horários de funcionamento", new PainelHorarios(usuario, horarioService));
-        abas.addTab("Perfil",                    new PainelPerfil(usuario, autenticacaoService, restauranteService));
+        abas.addTab("Perfil",                    new PainelPerfil(usuario, autenticacaoController, restauranteService));
 
         add(abas, BorderLayout.CENTER);
     }

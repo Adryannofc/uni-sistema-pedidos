@@ -116,10 +116,14 @@ public class CategoriaService {
         try {
             categoriaCardapioRepository.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada."));
 
-            boolean temProdutoVinculado = produtoRepository.listarTodos().stream()
-                    .anyMatch(p -> id.equals(p.getCategoriaCardapioId()));
-            if (temProdutoVinculado) {
-                throw new IllegalArgumentException("Categoria em uso por um produto — remoção bloqueada.");
+            long qtdProdutos = produtoRepository.listarTodos().stream()
+                    .filter(p -> id.equals(p.getCategoriaCardapioId()))
+                    .count();
+            if (qtdProdutos > 0) {
+                throw new IllegalArgumentException(
+                    "Categoria possui " + qtdProdutos + " produto(s) vinculado(s). " +
+                    "Remova ou reatribua os produtos antes de excluir a categoria."
+                );
             }
 
             categoriaCardapioRepository.remover(id);
