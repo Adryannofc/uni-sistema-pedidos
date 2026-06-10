@@ -1,6 +1,6 @@
 package com.pedidos.view.cadastro;
 
-import com.pedidos.model.service.ClienteService;
+import com.pedidos.controller.ClienteController;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 
@@ -14,8 +14,8 @@ import java.awt.*;
  */
 public class PainelCadastroCliente extends JPanel {
 
-    private final CadastroFrame  frame;
-    private final ClienteService clienteService;
+    private final CadastroFrame    frame;
+    private final ClienteController clienteController;
 
     private JTextField     campoNome;
     private JTextField     campoEmail;
@@ -23,9 +23,9 @@ public class PainelCadastroCliente extends JPanel {
     private JTextField     campoTelefone;
     private JPasswordField campoSenha;
 
-    public PainelCadastroCliente(CadastroFrame frame, ClienteService clienteService) {
-        this.frame          = frame;
-        this.clienteService = clienteService;
+    public PainelCadastroCliente(CadastroFrame frame, ClienteController clienteController) {
+        this.frame             = frame;
+        this.clienteController = clienteController;
 
         setLayout(new BorderLayout(0, 10));
         setBackground(AppColors.CINZA_FUNDO);
@@ -41,7 +41,7 @@ public class PainelCadastroCliente extends JPanel {
         JPanel painel = new JPanel();
         painel.setBackground(AppColors.CINZA_FUNDO);
         painel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(),
+                 BorderFactory.createEtchedBorder(),
                 "Cadastro de Cliente",
                 TitledBorder.DEFAULT_JUSTIFICATION,
                 TitledBorder.DEFAULT_POSITION,
@@ -166,7 +166,7 @@ public class PainelCadastroCliente extends JPanel {
         }
 
         try {
-            clienteService.cadastrarCliente(nome, email, senha, cpfNumeros, telefone);
+            clienteController.cadastrarCliente(nome, email, senha, cpfNumeros, telefone);
             JOptionPane.showMessageDialog(frame,
                     "Cadastro realizado com sucesso!\nBem-vindo(a), " + nome + "!",
                     "Cadastro realizado", JOptionPane.INFORMATION_MESSAGE);

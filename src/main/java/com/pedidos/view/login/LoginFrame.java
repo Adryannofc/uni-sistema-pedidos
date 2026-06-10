@@ -1,5 +1,8 @@
 package com.pedidos.view.login;
 
+import com.pedidos.controller.AutenticacaoController;
+import com.pedidos.controller.ClienteController;
+import com.pedidos.controller.RestauranteController;
 import com.pedidos.model.service.*;
 import com.pedidos.model.entity.*;
 import com.pedidos.model.enums.TipoUsuario;
@@ -20,8 +23,10 @@ import java.awt.*;
 
 public class LoginFrame extends BaseFrame {
 
-    private final AutenticacaoService autenticacaoService;
-    private final AdminService        adminService;
+    private final AutenticacaoController autenticacaoController;
+    private final ClienteController      clienteController;
+    private final RestauranteController  restauranteController;
+    private final AdminService           adminService;
     private final ClienteService      clienteService;
     private final EnderecoService     enderecoService;
     private final CategoriaService    categoriaService;
@@ -40,7 +45,9 @@ public class LoginFrame extends BaseFrame {
     private JLabel         labelConexao;
     private JPanel         painelNovoCadastro;
 
-    public LoginFrame(AutenticacaoService autenticacaoService,
+    public LoginFrame(AutenticacaoController autenticacaoController,
+                      ClienteController clienteController,
+                      RestauranteController restauranteController,
                       AdminService adminService,
                       ClienteService clienteService,
                       EnderecoService enderecoService,
@@ -53,8 +60,10 @@ public class LoginFrame extends BaseFrame {
                       AreaEntregaService areaEntregaService,
                       HorarioService horarioService) {
         super("Sistema de Delivery - Login", 500, 310);
-        this.autenticacaoService = autenticacaoService;
-        this.adminService        = adminService;
+        this.autenticacaoController = autenticacaoController;
+        this.clienteController      = clienteController;
+        this.restauranteController  = restauranteController;
+        this.adminService           = adminService;
         this.clienteService      = clienteService;
         this.enderecoService     = enderecoService;
         this.categoriaService    = categoriaService;
@@ -233,13 +242,13 @@ public class LoginFrame extends BaseFrame {
     }
 
     private void abrirCadastroCliente() {
-        CadastroFrame f = new CadastroFrame(clienteService, restauranteService);
+        CadastroFrame f = new CadastroFrame(clienteController, restauranteController);
         f.mostrarCard(CadastroFrame.CARD_CLIENTE);
         f.setVisible(true);
     }
 
     private void abrirCadastroRestaurante() {
-        CadastroFrame f = new CadastroFrame(clienteService, restauranteService);
+        CadastroFrame f = new CadastroFrame(clienteController, restauranteController);
         f.mostrarCard(CadastroFrame.CARD_RESTAURANTE);
         f.setVisible(true);
     }
@@ -251,7 +260,7 @@ public class LoginFrame extends BaseFrame {
         if (!validarCampos(email, senha)) return;
 
         try {
-            Usuario usuario = autenticacaoService.autenticar(email, senha);
+            Usuario usuario = autenticacaoController.autenticar(email, senha);
             SessionManager.getInstance().iniciarSessao(usuario, this);
             labelConexao.setText("Conectado: " + usuario.getNome());
             redirecionarConformalPapel(usuario);
@@ -311,7 +320,7 @@ public class LoginFrame extends BaseFrame {
                     areaEntregaService,
                     horarioService,
                     pedidoService,
-                    autenticacaoService,
+                    autenticacaoController,
                     this::abrirTelaLogin);
             case CLIENTE -> {
                 if (!(usuario instanceof Cliente)) {
@@ -345,10 +354,11 @@ public class LoginFrame extends BaseFrame {
 
     private void abrirTelaLogin() {
         LoginFrame novoLogin = new LoginFrame(
-                autenticacaoService, adminService, clienteService,
-                enderecoService, categoriaService, produtoService,
-                restauranteService, pedidoService, carrinho,
-                restauranteRepo, areaEntregaService, horarioService);
+                autenticacaoController, clienteController, restauranteController,
+                adminService, clienteService, enderecoService,
+                categoriaService, produtoService, restauranteService,
+                pedidoService, carrinho, restauranteRepo,
+                areaEntregaService, horarioService);
         SessionManager.getInstance().trocarFrame(novoLogin);
         SessionManager.getInstance().encerrarSessao();
     }

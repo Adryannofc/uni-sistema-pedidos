@@ -1,6 +1,6 @@
 package com.pedidos.view.restaurante;
 
-import com.pedidos.model.service.AutenticacaoService;
+import com.pedidos.controller.AutenticacaoController;
 import com.pedidos.model.service.RestauranteService;
 import com.pedidos.model.entity.Restaurante;
 import com.pedidos.model.entity.Usuario;
@@ -13,13 +13,13 @@ import java.awt.*;
 
 public class PainelPerfil extends JPanel {
     private final Usuario usuario;
-    private final AutenticacaoService autenticacaoService;
+    private final AutenticacaoController autenticacaoController;
     private final RestauranteService restauranteService;
     private Restaurante restaurante;
 
-    public PainelPerfil(Usuario usuario, AutenticacaoService autenticacaoService, RestauranteService restauranteService) {
+    public PainelPerfil(Usuario usuario, AutenticacaoController autenticacaoController, RestauranteService restauranteService) {
         this.usuario = usuario;
-        this.autenticacaoService = autenticacaoService;
+        this.autenticacaoController = autenticacaoController;
         this.restauranteService = restauranteService;
         criarAbas();
     }
@@ -254,7 +254,7 @@ public class PainelPerfil extends JPanel {
 
     private String pegarSenhaHash (String senhaAtual) {
 
-        String senhaAtualHash = autenticacaoService.hashSenha(senhaAtual);
+        String senhaAtualHash = autenticacaoController.hashSenha(senhaAtual);
 
         return senhaAtualHash;
     }
