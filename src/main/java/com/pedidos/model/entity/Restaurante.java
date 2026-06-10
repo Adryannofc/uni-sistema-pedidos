@@ -55,11 +55,14 @@ public class Restaurante extends Usuario {
         this.statusAtivo = (status == StatusRestaurante.ATIVO);
     }
 
+
     public boolean isStatusAtivo() { return status == StatusRestaurante.ATIVO; }
     public void setStatusAtivo(boolean statusAtivo) {
         this.statusAtivo = statusAtivo;
         this.status = statusAtivo ? StatusRestaurante.ATIVO : StatusRestaurante.PENDENTE;
     }
+
+
 
     public String getCnpj() { return cnpj; }
 

@@ -9,6 +9,7 @@ import com.pedidos.model.repository.AdminRepository;
 import com.pedidos.model.repository.CategoriaCardapioRepository;
 import com.pedidos.model.repository.ClienteRepository;
 import com.pedidos.model.repository.RestauranteRepository;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 

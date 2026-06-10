@@ -4,12 +4,14 @@ import com.pedidos.model.enums.StatusPedido;
 import com.pedidos.model.entity.*;
 import com.pedidos.model.repository.PedidoRepository;
 import com.pedidos.model.repository.HorarioFuncionamentoRepository;
+import com.pedidos.model.repository.RestauranteRepository;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 public class PedidoService {
 
@@ -18,6 +20,7 @@ public class PedidoService {
 
     public PedidoService(PedidoRepository pedidoRepository, HorarioFuncionamentoRepository horarioRepository) {
         this.pedidoRepository = pedidoRepository;
+
         this.horarioRepository = horarioRepository;
     }
 
@@ -38,6 +41,7 @@ public class PedidoService {
             }
 
             isRestauranteAberto(restaurante.getId());
+
 
             Pedido pedido = new Pedido();
             pedido.setCliente(cliente);
