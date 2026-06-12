@@ -1,6 +1,7 @@
 package com.pedidos.view.restaurante;
 
 import com.pedidos.controller.AutenticacaoController;
+import com.pedidos.controller.RestauranteController;
 import com.pedidos.model.service.RestauranteService;
 import com.pedidos.model.entity.Restaurante;
 import com.pedidos.model.entity.Usuario;
@@ -14,13 +15,13 @@ import java.awt.*;
 public class PainelPerfil extends JPanel {
     private final Usuario usuario;
     private final AutenticacaoController autenticacaoController;
-    private final RestauranteService restauranteService;
+    private final RestauranteController restauranteController;
     private Restaurante restaurante;
 
-    public PainelPerfil(Usuario usuario, AutenticacaoController autenticacaoController, RestauranteService restauranteService) {
+    public PainelPerfil(Usuario usuario, AutenticacaoController autenticacaoController, RestauranteController restauranteController) {
         this.usuario = usuario;
         this.autenticacaoController = autenticacaoController;
-        this.restauranteService = restauranteService;
+        this.restauranteController = restauranteController;
         criarAbas();
     }
 
@@ -28,7 +29,7 @@ public class PainelPerfil extends JPanel {
         JTabbedPane abasDados = new JTabbedPane();
         abasDados.setFont(AppFonts.LABEL);
 
-        restaurante = restauranteService.buscarRestaurantePorId(usuario.getId());
+        restaurante = restauranteController.buscarPorId(usuario.getId());
 
         abasDados.addTab("Dados", criarFormularioDados());
         abasDados.addTab("E-mail", criarFormularioEmail());
@@ -91,7 +92,7 @@ public class PainelPerfil extends JPanel {
                 return;
             }
 
-            restauranteService.editarPerfil(restaurante, novoNome, novoCnpj, novoTelefone);
+            restauranteController.editarPerfil(restaurante, novoNome, novoCnpj, novoTelefone);
 
             JOptionPane.showMessageDialog(painel, "Dados atualizados com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
 
@@ -156,7 +157,7 @@ public class PainelPerfil extends JPanel {
                 return;
             }
 
-            restauranteService.editarEmail(restaurante, emailNovo); // Exemplo
+            restauranteController.editarEmail(restaurante, emailNovo); // Exemplo
 
             JOptionPane.showMessageDialog(painel, "E-mail atualizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
 
@@ -240,7 +241,7 @@ public class PainelPerfil extends JPanel {
             if (op != JOptionPane.OK_OPTION) {
                 return;
             }
-            restauranteService.alterarSenha(restaurante,senhaAtual, novaSenha);
+            restauranteController.alterarSenha(restaurante,senhaAtual, novaSenha);
 
             JOptionPane.showMessageDialog(painel, "Senha atualizada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
 

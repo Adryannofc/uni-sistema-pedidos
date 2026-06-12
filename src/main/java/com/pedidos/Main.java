@@ -66,17 +66,14 @@ public class Main {
                     autenticacaoController,
                     clienteController,
                     restauranteController,
-                    adminService,
-                    clienteService,
-                    enderecoService,
-                    categoriaService,
-                    produtoService,
-                    restauranteService,
-                    pedidoService,
+                    adminController,
+                    enderecoController,
+                    categoriaController,
+                    produtoController,
+                    pedidoController,
                     carrinhoManager,
-                    restauranteRepo,
                     areaEntregaService,
-                    horarioService);
+                    horarioController);
             frame.setVisible(true);
         });
     }
