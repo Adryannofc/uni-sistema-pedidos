@@ -1,6 +1,6 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.model.service.PedidoService;
+import com.pedidos.controller.PedidoController;
 import com.pedidos.model.entity.Cliente;
 import com.pedidos.model.entity.ItemPedido;
 import com.pedidos.model.entity.Pedido;
@@ -24,7 +24,7 @@ import java.util.Locale;
 public class PainelMeusPedidos extends JPanel {
 
     private final Cliente cliente;
-    private final PedidoService pedidoService;
+    private final PedidoController pedidoController;
 
     private final NumberFormat moedaBR = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
     private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -52,9 +52,9 @@ public class PainelMeusPedidos extends JPanel {
     // Acompanhamento
     private PainelAcompanharPedido painelAcompanhar;
 
-    public PainelMeusPedidos(Cliente cliente, PedidoService pedidoService) {
+    public PainelMeusPedidos(Cliente cliente, PedidoController pedidoController) {
         this.cliente = cliente;
-        this.pedidoService = pedidoService;
+        this.pedidoController = pedidoController;
         construir();
     }
 
@@ -216,7 +216,7 @@ public class PainelMeusPedidos extends JPanel {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(Color.WHITE);
 
-        painelAcompanhar = new PainelAcompanharPedido(pedidoService, () -> {
+        painelAcompanhar = new PainelAcompanharPedido(pedidoController, () -> {
             carregarMeusPedidos();
             cardLayout.show(this, CARD_LISTA);
         });
@@ -228,7 +228,7 @@ public class PainelMeusPedidos extends JPanel {
     // ── Lógica ─────────────────────────────────────────────────────
 
     public void carregarMeusPedidos() {
-        pedidosCarregados = pedidoService.listarPorCliente(cliente.getId());
+        pedidosCarregados = pedidoController.listarPorCliente(cliente.getId());
         modelPedidos.setRowCount(0);
         painelDetalhes.setVisible(false);
 

@@ -1,7 +1,6 @@
 package com.pedidos.view.restaurante;
 
 import com.pedidos.controller.PedidoController;
-import com.pedidos.model.service.PedidoService;
 import com.pedidos.model.entity.Pedido;
 import com.pedidos.model.entity.Usuario;
 import com.pedidos.model.enums.StatusPedido;

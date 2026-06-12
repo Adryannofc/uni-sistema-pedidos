@@ -1,6 +1,6 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.model.service.ClienteService;
+import com.pedidos.controller.ClienteController;
 import com.pedidos.model.entity.Cliente;
 import com.pedidos.model.entity.Endereco;
 import com.pedidos.model.entity.Restaurante;
@@ -27,13 +27,13 @@ public class PainelPerfil extends JPanel {
 
     private final Usuario usuario;
     private final Cliente cliente;
-    private final ClienteService clienteService;
+    private final ClienteController clienteController;
     private final Runnable aoAtualizarEndereco;
 
-    public PainelPerfil(Usuario usuario, Cliente cliente, ClienteService clienteService, Runnable aoAtualizarEndereco) {
+    public PainelPerfil(Usuario usuario, Cliente cliente, ClienteController clienteController, Runnable aoAtualizarEndereco) {
         this.usuario = usuario;
         this.cliente = cliente;
-        this.clienteService = clienteService;
+        this.clienteController = clienteController;
         this.aoAtualizarEndereco = aoAtualizarEndereco;
 
         construir();
@@ -102,10 +102,10 @@ public class PainelPerfil extends JPanel {
         JButton btnSalvar = criarBotaoPrimario("Salvar", 80, 30);
         btnSalvar.addActionListener(e -> {
             try {
-                clienteService.editarNome(cliente, fields[0].getText().trim());
-                clienteService.editarEmail(cliente, fields[1].getText().trim());
-                clienteService.editarCpf(cliente, fields[2].getText().trim());
-                clienteService.editarTelefone(cliente, fields[3].getText().trim());
+                clienteController.editarNome(cliente, fields[0].getText().trim());
+                clienteController.editarEmail(cliente, fields[1].getText().trim());
+                clienteController.editarCpf(cliente, fields[2].getText().trim());
+                clienteController.editarTelefone(cliente, fields[3].getText().trim());
                 JOptionPane.showMessageDialog(this, "Dados salvos com sucesso!",
                         "Sucesso", JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {
@@ -201,7 +201,7 @@ public class PainelPerfil extends JPanel {
             }
 
             try {
-                clienteService.salvarEndereco(
+                clienteController.salvarEndereco(
                         cliente,
                         fields[0].getText().trim(), // rua
                         fields[1].getText().trim(), // numero
@@ -296,7 +296,7 @@ public class PainelPerfil extends JPanel {
             String nova = new String(fields[1].getPassword());
             String confirma = new String(fields[2].getPassword());
             try {
-                clienteService.alterarSenha(usuario, atual, nova, confirma);
+                clienteController.alterarSenha(usuario, atual, nova, confirma);
                 for (JPasswordField f : fields) f.setText("");
                 JOptionPane.showMessageDialog(this, "Senha alterada com sucesso!",
                         "Sucesso", JOptionPane.INFORMATION_MESSAGE);

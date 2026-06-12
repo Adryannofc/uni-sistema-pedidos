@@ -1,7 +1,6 @@
 package com.pedidos.view.restaurante;
 
 import com.pedidos.controller.HorarioController;
-import com.pedidos.model.service.HorarioService;
 import com.pedidos.model.entity.HorarioFuncionamento;
 import com.pedidos.model.entity.Restaurante;
 import com.pedidos.model.entity.Usuario;

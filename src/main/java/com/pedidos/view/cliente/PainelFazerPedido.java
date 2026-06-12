@@ -1,8 +1,8 @@
 package com.pedidos.view.cliente;
 
+import com.pedidos.controller.ProdutoController;
+import com.pedidos.controller.RestauranteController;
 import com.pedidos.model.service.AreaEntregaService;
-import com.pedidos.model.service.ProdutoService;
-import com.pedidos.model.service.RestauranteService;
 import com.pedidos.model.entity.Cliente;
 import com.pedidos.model.entity.Endereco;
 import com.pedidos.model.entity.HorarioFuncionamento;
@@ -37,8 +37,8 @@ import java.util.Optional;
 public class PainelFazerPedido extends JPanel {
 
     private final Cliente cliente;
-    private final RestauranteService restauranteService;
-    private final ProdutoService produtoService;
+    private final RestauranteController restauranteController;
+    private final ProdutoController produtoController;
     private final CarrinhoManager carrinho;
     private final AreaEntregaService areaEntregaService;
 
@@ -66,14 +66,14 @@ public class PainelFazerPedido extends JPanel {
     private Runnable aoFinalizarPedido;
 
     public PainelFazerPedido(Cliente cliente,
-                             RestauranteService restauranteService,
-                             ProdutoService produtoService,
+                             RestauranteController restauranteController,
+                             ProdutoController produtoController,
                              CarrinhoManager carrinho,
                              AreaEntregaService areaEntregaService,
                              Runnable aoFinalizarPedido) {
         this.cliente = cliente;
-        this.restauranteService = restauranteService;
-        this.produtoService = produtoService;
+        this.restauranteController = restauranteController;
+        this.produtoController = produtoController;
         this.carrinho = carrinho;
         this.areaEntregaService = areaEntregaService;
         this.aoFinalizarPedido = aoFinalizarPedido;
@@ -91,7 +91,7 @@ public class PainelFazerPedido extends JPanel {
         centroPainelFazerPedido.setBackground(Color.WHITE);
 
         painelCardapio = new PainelCardapio(
-                produtoService,
+                produtoController,
                 carrinho,
                 () -> cardLayoutFazerPedido.show(centroPainelFazerPedido, "RESTAURANTES"),
                 () -> { sincronizarCarrinho(); }
@@ -160,7 +160,7 @@ public class PainelFazerPedido extends JPanel {
                 int col = tabela.columnAtPoint(e.getPoint());
                 if (row < 0) return;
 
-                List<Restaurante> restaurantes = restauranteService.buscarRestaurantesAtivos();
+                List<Restaurante> restaurantes = restauranteController.buscarAtivos();
                 if (row >= restaurantes.size()) return;
                 Restaurante r = restaurantes.get(row);
 
@@ -187,7 +187,7 @@ public class PainelFazerPedido extends JPanel {
                         "Selecione um restaurante para ver o cardápio.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            List<Restaurante> restaurantes = restauranteService.buscarRestaurantesAtivos();
+            List<Restaurante> restaurantes = restauranteController.buscarAtivos();
             if (row >= restaurantes.size()) return;
             Restaurante r = restaurantes.get(row);
             abrirRestaurante(r);
@@ -200,7 +200,7 @@ public class PainelFazerPedido extends JPanel {
                         "Selecione um restaurante para ver os horários.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            List<Restaurante> restaurantes = restauranteService.buscarRestaurantesAtivos();
+            List<Restaurante> restaurantes = restauranteController.buscarAtivos();
             if (row >= restaurantes.size()) return;
             Restaurante r = restaurantes.get(row);
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm");
@@ -271,7 +271,7 @@ public class PainelFazerPedido extends JPanel {
         LocalTime agora = LocalTime.now();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm");
 
-        for (Restaurante r : restauranteService.buscarRestaurantesAtivos()) {
+        for (Restaurante r : restauranteController.buscarAtivos()) {
             String categoria = r.getCategoriaGlobal() != null
                     ? r.getCategoriaGlobal().getNome() : "N/A";
 

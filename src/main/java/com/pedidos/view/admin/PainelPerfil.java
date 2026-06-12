@@ -1,6 +1,6 @@
 package com.pedidos.view.admin;
 
-import com.pedidos.model.service.AdminService;
+import com.pedidos.controller.AdminController;
 import com.pedidos.model.entity.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -12,12 +12,12 @@ import java.awt.*;
 public class PainelPerfil extends JPanel {
 
     private final Usuario usuario;
-    private final AdminService adminService;
+    private final AdminController adminController;
 
-    public PainelPerfil(Usuario usuario, AdminService adminService) {
+    public PainelPerfil(Usuario usuario, AdminController adminController) {
         super(new BorderLayout());
         this.usuario = usuario;
-        this.adminService = adminService;
+        this.adminController = adminController;
         construir();
     }
 
@@ -88,7 +88,7 @@ public class PainelPerfil extends JPanel {
                 return;
             }
             try {
-                adminService.alterarSenha(usuario, atual, nova, confirma);
+                adminController.alterarSenha(usuario, atual, nova, confirma);
                 JOptionPane.showMessageDialog(this,
                         "Senha alterada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 campoAtual.setText("");

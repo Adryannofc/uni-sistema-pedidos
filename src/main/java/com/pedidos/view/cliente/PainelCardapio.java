@@ -1,6 +1,6 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.model.service.ProdutoService;
+import com.pedidos.controller.ProdutoController;
 import com.pedidos.model.entity.CategoriaCardapio;
 import com.pedidos.model.entity.Produto;
 import com.pedidos.model.entity.Restaurante;
@@ -26,7 +26,7 @@ public class PainelCardapio extends JPanel {
     private static final NumberFormat FMT_MOEDA =
             NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 
-    private final ProdutoService   produtoService;
+    private final ProdutoController   produtoController;
     private final CarrinhoManager  carrinho;
     private final Runnable         onVoltar;
     private final Runnable         onAdicionado;
@@ -41,10 +41,10 @@ public class PainelCardapio extends JPanel {
     private List<Produto> todosOsProdutos  = new ArrayList<>();
     private List<Produto> produtosVisiveis = new ArrayList<>();
 
-    public PainelCardapio(ProdutoService produtoService, CarrinhoManager carrinho,
+    public PainelCardapio(ProdutoController produtoController, CarrinhoManager carrinho,
                           Runnable onVoltar, Runnable onAdicionado) {
         super(new BorderLayout(0, 0));
-        this.produtoService = produtoService;
+        this.produtoController = produtoController;
         this.carrinho       = carrinho;
         this.onVoltar       = onVoltar;
         this.onAdicionado   = onAdicionado;
@@ -209,7 +209,7 @@ public class PainelCardapio extends JPanel {
         labelTitulo.setText("Cardapio - " + restaurante.getNome());
         campoQtd.setText("1");
 
-        todosOsProdutos = produtoService.listarAtivosPorRestaurante(restaurante.getId());
+        todosOsProdutos = produtoController.listarAtivosPorRestaurante(restaurante.getId());
 
         categoriaModel.clear();
         List<CategoriaCardapio> cats = restaurante.getCategorias();

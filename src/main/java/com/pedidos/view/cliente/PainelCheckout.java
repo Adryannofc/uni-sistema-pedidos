@@ -1,7 +1,7 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.model.service.ClienteService;
-import com.pedidos.model.service.PedidoService;
+import com.pedidos.controller.ClienteController;
+import com.pedidos.controller.PedidoController;
 import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -26,8 +26,8 @@ public class PainelCheckout extends JPanel {
 
     private final Usuario usuario;
     private final Cliente cliente;
-    private final ClienteService clienteService;
-    private final PedidoService pedidoService;
+    private final ClienteController clienteController;
+    private final PedidoController pedidoController;
     private final CarrinhoManager carrinho;
     private PainelFazerPedido painelFazerPedido;
 
@@ -47,15 +47,15 @@ public class PainelCheckout extends JPanel {
 
     public PainelCheckout(Usuario usuario,
                           Cliente cliente,
-                          ClienteService clienteService,
-                          PedidoService pedidoService,
+                          ClienteController clienteController,
+                          PedidoController pedidoController,
                           CarrinhoManager carrinho,
                           PainelFazerPedido painelFazerPedido,
                           Runnable aoConfirmarPedido) {
         this.usuario = usuario;
         this.cliente = cliente;
-        this.clienteService = clienteService;
-        this.pedidoService = pedidoService;
+        this.clienteController = clienteController;
+        this.pedidoController = pedidoController;
         this.carrinho = carrinho;
         this.painelFazerPedido = painelFazerPedido;
         this.aoConfirmarPedido = aoConfirmarPedido;
@@ -249,7 +249,7 @@ public class PainelCheckout extends JPanel {
             String cpfDigitos = cliente.getCpf().replaceAll("[^0-9]", "");
             String codigoConfirmacao = cpfDigitos.substring(cpfDigitos.length() - 4);
 
-            Pedido pedido = pedidoService.criarPedido(
+            Pedido pedido = pedidoController.criarPedido(
                     cliente,
                     restauranteSelecionado,
                     carrinhoDominio,

@@ -3,8 +3,6 @@ package com.pedidos.view.restaurante;
 import com.pedidos.controller.CategoriaController;
 import com.pedidos.controller.ProdutoController;
 import com.pedidos.model.entity.Restaurante;
-import com.pedidos.model.service.CategoriaService;
-import com.pedidos.model.service.ProdutoService;
 import com.pedidos.model.entity.CategoriaCardapio;
 import com.pedidos.model.entity.Produto;
 import com.pedidos.model.entity.Usuario;

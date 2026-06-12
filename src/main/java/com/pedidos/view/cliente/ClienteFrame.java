@@ -1,6 +1,7 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.model.service.*;
+import com.pedidos.controller.*;
+import com.pedidos.model.service.AreaEntregaService;
 import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -16,11 +17,11 @@ public class ClienteFrame extends BaseFrame {
 
     private final Usuario usuario;
     private final Cliente cliente;
-    private final ClienteService clienteService;
-    private final EnderecoService enderecoService;
-    private final RestauranteService restauranteService;
-    private final ProdutoService produtoService;
-    private final PedidoService pedidoService;
+    private final ClienteController clienteController;
+    private final EnderecoController enderecoController;
+    private final RestauranteController restauranteController;
+    private final ProdutoController produtoController;
+    private final PedidoController pedidoController;
     private final CarrinhoManager carrinho;
     private final AreaEntregaService areaEntregaService;
     private final Runnable acaoLogout;
@@ -36,22 +37,22 @@ public class ClienteFrame extends BaseFrame {
 
     public ClienteFrame(Usuario usuario,
                         Cliente cliente,
-                        ClienteService clienteService,
-                        EnderecoService enderecoService,
-                        RestauranteService restauranteService,
-                        ProdutoService produtoService,
-                        PedidoService pedidoService,
+                        ClienteController clienteController,
+                        EnderecoController enderecoController,
+                        RestauranteController restauranteController,
+                        ProdutoController produtoController,
+                        PedidoController pedidoController,
                         CarrinhoManager carrinho,
                         AreaEntregaService areaEntregaService,
                         Runnable acaoLogout) {
         super("Sistema Delivery — " + usuario.getNome() + " | Cliente");
         this.usuario             = usuario;
         this.cliente             = cliente;
-        this.clienteService      = clienteService;
-        this.enderecoService     = enderecoService;
-        this.restauranteService  = restauranteService;
-        this.produtoService      = produtoService;
-        this.pedidoService       = pedidoService;
+        this.clienteController      = clienteController;
+        this.enderecoController     = enderecoController;
+        this.restauranteController  = restauranteController;
+        this.produtoController      = produtoController;
+        this.pedidoController       = pedidoController;
         this.carrinho            = carrinho;
         this.areaEntregaService  = areaEntregaService;
         this.acaoLogout          = acaoLogout;
@@ -135,7 +136,7 @@ public class ClienteFrame extends BaseFrame {
         bar.setBackground(new Color(240, 240, 240));
         bar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(200, 200, 200)));
 
-        int pedidosAtivos = pedidoService.listarPorCliente(cliente.getId()).size();
+        int pedidosAtivos = pedidoController.listarPorCliente(cliente.getId()).size();
         String infoEndereco = cliente.getEnderecoPadrao()
                 .map(e -> e.getRua() + ", " + e.getNumero() + " - " + e.getCidade())
                 .orElse("Nenhum endereço cadastrado");
@@ -158,7 +159,7 @@ public class ClienteFrame extends BaseFrame {
     }
 
     public void atualizarStatusBar() {
-        int total = pedidoService.listarPorCliente(cliente.getId()).size();
+        int total = pedidoController.listarPorCliente(cliente.getId()).size();
         lblStatusPedidos.setText(total + " pedido(s) ativo(s)");
         lblStatusEndereco.setText(cliente.getEnderecoPadrao()
                 .map(e -> e.getRua() + ", " + e.getNumero() + " - " + e.getCidade())
@@ -172,8 +173,8 @@ public class ClienteFrame extends BaseFrame {
 
         painelFazerPedido = new PainelFazerPedido(
                 cliente,
-                restauranteService,
-                produtoService,
+                restauranteController,
+                produtoController,
                 carrinho,
                 areaEntregaService,
                 () -> {
@@ -185,8 +186,8 @@ public class ClienteFrame extends BaseFrame {
         painelCheckout = new PainelCheckout(
                 usuario,
                 cliente,
-                clienteService,
-                pedidoService,
+                clienteController,
+                pedidoController,
                 carrinho,
                 painelFazerPedido,
                 () -> {
@@ -198,9 +199,9 @@ public class ClienteFrame extends BaseFrame {
                 }
         );
 
-        painelMeusPedidos = new PainelMeusPedidos(cliente, pedidoService);
+        painelMeusPedidos = new PainelMeusPedidos(cliente, pedidoController);
 
-        painelPerfil = new PainelPerfil(usuario, cliente, clienteService, () -> {
+        painelPerfil = new PainelPerfil(usuario, cliente, clienteController, () -> {
             painelCheckout.atualizarEndereco();
             atualizarStatusBar();
         });
