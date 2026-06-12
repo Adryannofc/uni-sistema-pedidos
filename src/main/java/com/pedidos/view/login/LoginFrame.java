@@ -6,7 +6,7 @@ import com.pedidos.controller.RestauranteController;
 import com.pedidos.model.service.*;
 import com.pedidos.model.entity.*;
 import com.pedidos.model.enums.TipoUsuario;
-import com.pedidos.model.repository.RestauranteRepository;
+import com.pedidos.controller.*;
 import com.pedidos.view.admin.AdminFrame;
 import com.pedidos.view.cadastro.CadastroFrame;
 import com.pedidos.view.cliente.ClienteFrame;
@@ -26,17 +26,14 @@ public class LoginFrame extends BaseFrame {
     private final AutenticacaoController autenticacaoController;
     private final ClienteController      clienteController;
     private final RestauranteController  restauranteController;
-    private final AdminService           adminService;
-    private final ClienteService      clienteService;
-    private final EnderecoService     enderecoService;
-    private final CategoriaService    categoriaService;
-    private final ProdutoService      produtoService;
-    private final RestauranteService  restauranteService;
-    private final PedidoService       pedidoService;
+    private final AdminController          adminController;
+    private final EnderecoController    enderecoController;
+    private final CategoriaController   categoriaController;
+    private final ProdutoController   produtoController;
+    private final PedidoController    pedidoController;
     private final CarrinhoManager     carrinho;
-    private final RestauranteRepository restauranteRepo;
     private final AreaEntregaService  areaEntregaService;
-    private final HorarioService      horarioService;
+    private final HorarioController     horarioController;
 
     private JTextField     campoEmail;
     private JPasswordField campoSenha;
@@ -48,32 +45,26 @@ public class LoginFrame extends BaseFrame {
     public LoginFrame(AutenticacaoController autenticacaoController,
                       ClienteController clienteController,
                       RestauranteController restauranteController,
-                      AdminService adminService,
-                      ClienteService clienteService,
-                      EnderecoService enderecoService,
-                      CategoriaService categoriaService,
-                      ProdutoService produtoService,
-                      RestauranteService restauranteService,
-                      PedidoService pedidoService,
+                      AdminController adminController,
+                      EnderecoController enderecoController,
+                      CategoriaController categoriaController,
+                      ProdutoController produtoController,
+                      PedidoController pedidoController,
                       CarrinhoManager carrinho,
-                      RestauranteRepository restauranteRepo,
                       AreaEntregaService areaEntregaService,
-                      HorarioService horarioService) {
+                      HorarioController horarioController) {
         super("Sistema de Delivery - Login", 500, 310);
         this.autenticacaoController = autenticacaoController;
         this.clienteController      = clienteController;
         this.restauranteController  = restauranteController;
-        this.adminService           = adminService;
-        this.clienteService      = clienteService;
-        this.enderecoService     = enderecoService;
-        this.categoriaService    = categoriaService;
-        this.produtoService      = produtoService;
-        this.restauranteService  = restauranteService;
-        this.pedidoService       = pedidoService;
+        this.adminController          = adminController;
+        this.enderecoController    = enderecoController;
+        this.categoriaController   = categoriaController;
+        this.produtoController     = produtoController;
+        this.pedidoController      = pedidoController;
         this.carrinho            = carrinho;
-        this.restauranteRepo     = restauranteRepo;
         this.areaEntregaService  = areaEntregaService;
-        this.horarioService      = horarioService;
+        this.horarioController      = horarioController;
         construirInterface();
     }
 
@@ -311,15 +302,15 @@ public class LoginFrame extends BaseFrame {
         JFrame proximo;
 
         switch (tipo) {
-            case ADMIN -> proximo = new AdminFrame(usuario, adminService, categoriaService);
+            case ADMIN -> proximo = new AdminFrame(usuario, adminController, categoriaController);
             case RESTAURANTE -> proximo = new RestauranteFrame(
                     usuario,
-                    categoriaService,
-                    produtoService,
-                    restauranteService,
+                    categoriaController,
+                    produtoController,
+                    restauranteController,
                     areaEntregaService,
-                    horarioService,
-                    pedidoService,
+                    horarioController,
+                    pedidoController,
                     autenticacaoController,
                     this::abrirTelaLogin);
             case CLIENTE -> {
@@ -332,11 +323,11 @@ public class LoginFrame extends BaseFrame {
                 proximo = new ClienteFrame(
                         usuario,
                         (Cliente) usuario,
-                        clienteService,
-                        enderecoService,
-                        restauranteService,
-                        produtoService,
-                        pedidoService,
+                        clienteController,
+                        enderecoController,
+                        restauranteController,
+                        produtoController,
+                        pedidoController,
                         carrinho,
                         areaEntregaService,
                         this::abrirTelaLogin);
@@ -355,10 +346,10 @@ public class LoginFrame extends BaseFrame {
     private void abrirTelaLogin() {
         LoginFrame novoLogin = new LoginFrame(
                 autenticacaoController, clienteController, restauranteController,
-                adminService, clienteService, enderecoService,
-                categoriaService, produtoService, restauranteService,
-                pedidoService, carrinho, restauranteRepo,
-                areaEntregaService, horarioService);
+                adminController, enderecoController,
+                categoriaController, produtoController,
+                pedidoController, carrinho,
+                areaEntregaService, horarioController);
         SessionManager.getInstance().trocarFrame(novoLogin);
         SessionManager.getInstance().encerrarSessao();
     }
