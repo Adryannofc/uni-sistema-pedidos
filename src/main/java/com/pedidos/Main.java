@@ -55,6 +55,7 @@ public class Main {
         CategoriaController categoriaController = new CategoriaController(categoriaService);
         EnderecoController enderecoController = new EnderecoController(enderecoService);
         HorarioController horarioController = new HorarioController(horarioService);
+        AreaEntregaController areaEntregaController = new AreaEntregaController(areaEntregaService);
 
         SwingUtilities.invokeLater(() -> {
             try {
@@ -72,7 +73,7 @@ public class Main {
                     produtoController,
                     pedidoController,
                     carrinhoManager,
-                    areaEntregaService,
+                    areaEntregaController,
                     horarioController);
             frame.setVisible(true);
         });

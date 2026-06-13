@@ -2,7 +2,6 @@ package com.pedidos.view.cliente;
 
 import com.pedidos.controller.ProdutoController;
 import com.pedidos.controller.RestauranteController;
-import com.pedidos.model.service.AreaEntregaService;
 import com.pedidos.model.entity.Cliente;
 import com.pedidos.model.entity.Endereco;
 import com.pedidos.model.entity.HorarioFuncionamento;
@@ -40,7 +39,7 @@ public class PainelFazerPedido extends JPanel {
     private final RestauranteController restauranteController;
     private final ProdutoController produtoController;
     private final CarrinhoManager carrinho;
-    private final AreaEntregaService areaEntregaService;
+    private final AreaEntregaController areaEntregaController;
 
     private final NumberFormat moedaBR = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
     private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -69,13 +68,13 @@ public class PainelFazerPedido extends JPanel {
                              RestauranteController restauranteController,
                              ProdutoController produtoController,
                              CarrinhoManager carrinho,
-                             AreaEntregaService areaEntregaService,
+                             AreaEntregaController areaEntregaController,
                              Runnable aoFinalizarPedido) {
         this.cliente = cliente;
         this.restauranteController = restauranteController;
         this.produtoController = produtoController;
         this.carrinho = carrinho;
-        this.areaEntregaService = areaEntregaService;
+        this.areaEntregaController = areaEntregaController;
         this.aoFinalizarPedido = aoFinalizarPedido;
 
         construir();
@@ -249,11 +248,11 @@ public class PainelFazerPedido extends JPanel {
 
         BigDecimal taxa;
         try {
-            taxa = areaEntregaService.buscarTaxaPorBairro(r.getId(), enderecoPadrao.get().getBairro());
+            taxa = areaEntregaController.buscarTaxaPorBairro(r.getId(), enderecoPadrao.get().getBairro());
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this,
                     "Seu bairro (" + enderecoPadrao.get().getBairro() +
-                    ") não é atendido por este restaurante.",
+                            ") não é atendido por este restaurante.",
                     "Bairro não atendido", JOptionPane.WARNING_MESSAGE);
             return;
         }

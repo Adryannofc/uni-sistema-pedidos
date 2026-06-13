@@ -3,7 +3,6 @@ package com.pedidos.view.login;
 import com.pedidos.controller.AutenticacaoController;
 import com.pedidos.controller.ClienteController;
 import com.pedidos.controller.RestauranteController;
-import com.pedidos.model.service.*;
 import com.pedidos.model.entity.*;
 import com.pedidos.model.enums.TipoUsuario;
 import com.pedidos.controller.*;
@@ -32,7 +31,7 @@ public class LoginFrame extends BaseFrame {
     private final ProdutoController   produtoController;
     private final PedidoController    pedidoController;
     private final CarrinhoManager     carrinho;
-    private final AreaEntregaService  areaEntregaService;
+    private final AreaEntregaController  areaEntregaController;
     private final HorarioController     horarioController;
 
     private JTextField     campoEmail;
@@ -51,7 +50,7 @@ public class LoginFrame extends BaseFrame {
                       ProdutoController produtoController,
                       PedidoController pedidoController,
                       CarrinhoManager carrinho,
-                      AreaEntregaService areaEntregaService,
+                      AreaEntregaController areaEntregaController,
                       HorarioController horarioController) {
         super("Sistema de Delivery - Login", 500, 310);
         this.autenticacaoController = autenticacaoController;
@@ -63,7 +62,7 @@ public class LoginFrame extends BaseFrame {
         this.produtoController     = produtoController;
         this.pedidoController      = pedidoController;
         this.carrinho            = carrinho;
-        this.areaEntregaService  = areaEntregaService;
+        this.areaEntregaController  = areaEntregaController;
         this.horarioController      = horarioController;
         construirInterface();
     }
@@ -308,7 +307,7 @@ public class LoginFrame extends BaseFrame {
                     categoriaController,
                     produtoController,
                     restauranteController,
-                    areaEntregaService,
+                    areaEntregaController,
                     horarioController,
                     pedidoController,
                     autenticacaoController,
@@ -329,7 +328,7 @@ public class LoginFrame extends BaseFrame {
                         produtoController,
                         pedidoController,
                         carrinho,
-                        areaEntregaService,
+                        areaEntregaController,
                         this::abrirTelaLogin);
             }
             default -> {
@@ -349,7 +348,7 @@ public class LoginFrame extends BaseFrame {
                 adminController, enderecoController,
                 categoriaController, produtoController,
                 pedidoController, carrinho,
-                areaEntregaService, horarioController);
+                areaEntregaController, horarioController);
         SessionManager.getInstance().trocarFrame(novoLogin);
         SessionManager.getInstance().encerrarSessao();
     }
