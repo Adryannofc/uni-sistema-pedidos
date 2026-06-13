@@ -11,5 +11,7 @@ public interface RestauranteRepository extends UsuarioRepository {
 
     void salvarCadastro(Usuario usuario);
 
+
+
     List<Restaurante> listarRestaurantes();
 }
