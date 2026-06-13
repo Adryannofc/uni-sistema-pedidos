@@ -1,6 +1,6 @@
 package com.pedidos.view.restaurante;
 
-import com.pedidos.model.service.AreaEntregaService;
+import com.pedidos.controller.AreaEntregaController;
 import com.pedidos.model.entity.AreaEntrega;
 import com.pedidos.model.entity.Restaurante;
 import com.pedidos.model.entity.Usuario;
@@ -21,17 +21,17 @@ public class PainelAreaEntrega extends JPanel {
             NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 
     private final Restaurante restaurante;
-    private final AreaEntregaService areaEntregaService;
+    private final AreaEntregaController areaEntregaController;
 
     private DefaultTableModel modelo;
     private JTable tabela;
     private JLabel labelStatus;
     private List<AreaEntrega> areas;
 
-    public PainelAreaEntrega(Usuario usuario, AreaEntregaService areaEntregaService) {
+    public PainelAreaEntrega(Usuario usuario, AreaEntregaController areaEntregaController) {
         super(new BorderLayout());
         this.restaurante = (Restaurante) usuario;
-        this.areaEntregaService = areaEntregaService;
+        this.areaEntregaController = areaEntregaController;
         construir();
         carregarAreas();
     }
@@ -101,7 +101,7 @@ public class PainelAreaEntrega extends JPanel {
     // ─────────────────────────── data ────────────────────────────────────────
 
     private void carregarAreas() {
-        areas = areaEntregaService.listarAreasPorRestaurante(restaurante.getId());
+        areas = areaEntregaController.listarAreasPorRestaurante(restaurante.getId());
         modelo.setRowCount(0);
         for (int i = 0; i < areas.size(); i++) {
             AreaEntrega a = areas.get(i);
@@ -141,7 +141,7 @@ public class PainelAreaEntrega extends JPanel {
         if (opcao != JOptionPane.OK_OPTION) return;
 
         try {
-            areaEntregaService.deletarAreaEntrega(area.getId());
+            areaEntregaController.deletarAreaEntrega(area.getId());
             carregarAreas();
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this,
@@ -215,9 +215,9 @@ public class PainelAreaEntrega extends JPanel {
 
         try {
             if (editando) {
-                areaEntregaService.editarAreaEntrega(existente.getId(), bairro, distancia, taxa, previsao);
+                areaEntregaController.editarAreaEntrega(existente.getId(), bairro, distancia, taxa, previsao);
             } else {
-                areaEntregaService.criarAreaEntrega(restaurante, bairro, distancia, taxa, previsao);
+                areaEntregaController.criarAreaEntrega(restaurante, bairro, distancia, taxa, previsao);
             }
             carregarAreas();
         } catch (RuntimeException ex) {

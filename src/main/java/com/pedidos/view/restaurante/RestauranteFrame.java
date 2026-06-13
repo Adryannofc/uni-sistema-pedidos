@@ -1,7 +1,6 @@
 package com.pedidos.view.restaurante;
 
 import com.pedidos.controller.*;
-import com.pedidos.model.service.*;
 import com.pedidos.model.entity.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -19,7 +18,7 @@ public class RestauranteFrame extends BaseFrame {
     private final CategoriaController categoriaController;
     private final ProdutoController produtoController;
     private final RestauranteController restauranteController;
-    private final AreaEntregaService areaEntregaService;
+    private final AreaEntregaController areaEntregaController;
     private final HorarioController horarioController;
     private final PedidoController pedidoController;
     private final AutenticacaoController autenticacaoController;
@@ -29,7 +28,7 @@ public class RestauranteFrame extends BaseFrame {
                             CategoriaController categoriaController,
                             ProdutoController produtoController,
                             RestauranteController restauranteController,
-                            AreaEntregaService areaEntregaService,
+                            AreaEntregaController areaEntregaController,
                             HorarioController horarioController,
                             PedidoController pedidoController,
                             AutenticacaoController autenticacaoController,
@@ -39,7 +38,7 @@ public class RestauranteFrame extends BaseFrame {
         this.categoriaController = categoriaController;
         this.produtoController = produtoController;
         this.restauranteController = restauranteController;
-        this.areaEntregaService = areaEntregaService;
+        this.areaEntregaController = areaEntregaController;
         this.horarioController = horarioController;
         this.pedidoController = pedidoController;
         this.autenticacaoController = autenticacaoController;
@@ -127,7 +126,7 @@ public class RestauranteFrame extends BaseFrame {
 
         abas.addTab("Produtos",                  new PainelProdutos(usuario, produtoController, categoriaController));
         abas.addTab("Pedidos",                   new PainelPedidos(usuario, pedidoController));
-        abas.addTab("Áreas de Entrega",          new PainelAreaEntrega(usuario, areaEntregaService));
+        abas.addTab("Áreas de Entrega",          new PainelAreaEntrega(usuario, areaEntregaController));
         abas.addTab("Horários de funcionamento", new PainelHorarios(usuario, horarioController));
         abas.addTab("Perfil",                    new PainelPerfil(usuario, autenticacaoController, restauranteController));
 

@@ -1,5 +1,6 @@
 package com.pedidos.view.cliente;
 
+import com.pedidos.controller.AreaEntregaController;
 import com.pedidos.controller.ProdutoController;
 import com.pedidos.controller.RestauranteController;
 import com.pedidos.model.entity.Cliente;
