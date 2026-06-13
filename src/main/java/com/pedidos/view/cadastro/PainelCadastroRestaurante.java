@@ -1,6 +1,6 @@
 package com.pedidos.view.cadastro;
 
-import com.pedidos.model.service.RestauranteService;
+import com.pedidos.controller.RestauranteController;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 
@@ -10,8 +10,8 @@ import java.awt.*;
 
 public class PainelCadastroRestaurante extends JPanel {
 
-    private final CadastroFrame      frame;
-    private final RestauranteService restauranteService;
+    private final CadastroFrame         frame;
+    private final RestauranteController restauranteController;
 
     private JTextField     campoNome;
     private JTextField     campoEmail;
@@ -19,9 +19,9 @@ public class PainelCadastroRestaurante extends JPanel {
     private JTextField     campoTelefone;
     private JPasswordField campoSenha;
 
-    public PainelCadastroRestaurante(CadastroFrame frame, RestauranteService restauranteService) {
-        this.frame              = frame;
-        this.restauranteService = restauranteService;
+    public PainelCadastroRestaurante(CadastroFrame frame, RestauranteController restauranteController) {
+        this.frame                 = frame;
+        this.restauranteController = restauranteController;
 
         setLayout(new BorderLayout(0, 10));
         setBackground(AppColors.CINZA_FUNDO);
@@ -159,7 +159,7 @@ public class PainelCadastroRestaurante extends JPanel {
         }
 
         try {
-            restauranteService.cadastrarRestaurante(nome, email, senha, cnpj, telefone);
+            restauranteController.cadastrarRestaurante(nome, email, senha, cnpj, telefone);
 
             JOptionPane.showMessageDialog(frame,
                     "Cadastro enviado com sucesso!\n\n" +

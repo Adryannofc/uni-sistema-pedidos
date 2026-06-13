@@ -1,8 +1,8 @@
 package com.pedidos.view.restaurante;
 
+import com.pedidos.controller.CategoriaController;
+import com.pedidos.controller.ProdutoController;
 import com.pedidos.model.entity.Restaurante;
-import com.pedidos.model.service.CategoriaService;
-import com.pedidos.model.service.ProdutoService;
 import com.pedidos.model.entity.CategoriaCardapio;
 import com.pedidos.model.entity.Produto;
 import com.pedidos.model.entity.Usuario;
@@ -27,8 +27,8 @@ public class PainelProdutos extends JPanel {
     private static final Color COR_INATIVO = new Color(108, 117, 125);
 
     private final Usuario usuario;
-    private final ProdutoService produtoService;
-    private final CategoriaService categoriaService;
+    private final ProdutoController produtoController;
+    private final CategoriaController categoriaController;
 
     private DefaultTableModel modelProdutos;
     private JTable tabelaProdutos;
@@ -45,11 +45,11 @@ public class PainelProdutos extends JPanel {
     private JLabel labelRodapeFiltrado;
     private JLabel labelRodapeCategorias;
 
-    public PainelProdutos(Usuario usuario, ProdutoService produtoService, CategoriaService categoriaService) {
+    public PainelProdutos(Usuario usuario, ProdutoController produtoController, CategoriaController categoriaController) {
         super(new BorderLayout());
         this.usuario = usuario;
-        this.produtoService = produtoService;
-        this.categoriaService = categoriaService;
+        this.produtoController = produtoController;
+        this.categoriaController = categoriaController;
         construir();
     }
 
@@ -119,7 +119,7 @@ public class PainelProdutos extends JPanel {
             if (nome == null || nome.isBlank()) return;
             String descricao = JOptionPane.showInputDialog(this, "Descrição:");
             try {
-                categoriaService.criarCategoriaCardapio(nome, descricao, usuario.getId());
+                categoriaController.criarCategoriaCardapio(nome, descricao, usuario.getId());
                 recarregarListaCategorias();
                 atualizarRodape(); // atualiza contagem de categorias
             } catch (RuntimeException ex) {
@@ -137,7 +137,7 @@ public class PainelProdutos extends JPanel {
                     "Remover categoria \"" + cat.getNome() + "\"?",
                     "Confirmar", JOptionPane.OK_CANCEL_OPTION);
             if (ok != JOptionPane.OK_OPTION) return;
-            categoriaService.removerCategoriaCardapio(cat.getId());
+            categoriaController.removerCategoriaCardapio(cat.getId());
             recarregarListaCategorias();
             categoriaSelecionada = null;
             carregarProdutos(null);
@@ -161,10 +161,12 @@ public class PainelProdutos extends JPanel {
         Restaurante restaurante = (Restaurante) usuario;
 
         modelCategorias.addElement(new CategoriaCardapio("Todos", "", restaurante));
-
-        categoriaService.listarCategoriasCardapio(usuario.getId()).forEach(modelCategorias::addElement);
-
+        categoriaController.listarCategoriasCardapio(usuario.getId()).forEach(modelCategorias::addElement);
         modelCategorias.addElement(new CategoriaCardapio("Sem categoria", "", restaurante));
+
+        if (!modelCategorias.isEmpty()) {
+            listaCategorias.setSelectedIndex(0);
+        }
     }
 
     // ─────────────────────────── right: produtos ─────────────────────────────
@@ -235,7 +237,7 @@ public class PainelProdutos extends JPanel {
             try {
                 BigDecimal preco = new BigDecimal(form.campoPreco.getText().trim().replace(",", "."));
                 String catId = resolverCategoriaId(form);
-                produtoService.criarProduto(form.campoNome.getText().trim(),
+                produtoController.criarProduto(form.campoNome.getText().trim(),
                         form.campoDescricao.getText().trim(), preco, catId, usuario.getId());
                 carregarProdutos(categoriaSelecionada);
             } catch (NumberFormatException ex) {
@@ -256,7 +258,7 @@ public class PainelProdutos extends JPanel {
             try {
                 BigDecimal preco = new BigDecimal(form.campoPreco.getText().trim().replace(",", "."));
                 String catId = resolverCategoriaId(form);
-                produtoService.editarProduto(p.getId(), usuario.getId(),
+                produtoController.editarProduto(p.getId(), usuario.getId(),
                         form.campoNome.getText().trim(), form.campoDescricao.getText().trim(),
                         preco, catId);
                 carregarProdutos(categoriaSelecionada);
@@ -270,7 +272,7 @@ public class PainelProdutos extends JPanel {
         btnAtivar.addActionListener(e -> {
             int row = selecionado();
             if (row < 0) return;
-            produtoService.ativarInativar(produtosCarregados.get(row).getId(), usuario.getId());
+            produtoController.ativarInativar(produtosCarregados.get(row).getId(), usuario.getId());
             carregarProdutos(categoriaSelecionada);
         });
 
@@ -283,7 +285,7 @@ public class PainelProdutos extends JPanel {
                     "Confirmar", JOptionPane.OK_CANCEL_OPTION);
             if (ok != JOptionPane.OK_OPTION) return;
             try {
-                produtoService.removerProduto(p.getId(), usuario.getId());
+                produtoController.removerProduto(p.getId(), usuario.getId());
                 carregarProdutos(categoriaSelecionada);
             } catch (RuntimeException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -334,7 +336,7 @@ public class PainelProdutos extends JPanel {
      */
     private void atualizarRodape() {
         // total geral de produtos do restaurante
-        int totalGeral = produtoService.listarPorRestaurante(usuario.getId()).size();
+        int totalGeral = produtoController.listarPorRestaurante(usuario.getId()).size();
         labelRodapeTotal.setText("Total: " + totalGeral + " produto(s)");
 
         // total filtrado (visível na tabela)
@@ -349,23 +351,16 @@ public class PainelProdutos extends JPanel {
         }
 
         // número de categorias cadastradas
-        int totalCategorias = categoriaService.listarCategoriasCardapio(usuario.getId()).size();
+        int totalCategorias = categoriaController.listarCategoriasCardapio(usuario.getId()).size();
         labelRodapeCategorias.setText("Categorias: " + totalCategorias);
     }
 
     // ─────────────────────────── data ────────────────────────────────────────
 
     private void carregarProdutos(CategoriaCardapio categoria) {
-        produtosCarregados = produtoService.listarPorRestaurante(usuario.getId()).stream()
-                .filter(p -> categoria == null
-                        || (p.getCategoriaCardapioId() != null
-                        && p.getCategoriaCardapioId().equals(categoria.getId())))
+        produtosCarregados = produtoController.listarPorRestaurante(usuario.getId()).stream()
                 .filter(p -> {
-                    if (categoria == null) {
-                        return true;
-                    }
-
-                    if ("Todos".equals(categoria.getNome())) {
+                    if (categoria == null || "Todos".equals(categoria.getNome())) {
                         return true;
                     }
 
@@ -421,7 +416,7 @@ public class PainelProdutos extends JPanel {
     private FormularioProduto criarFormulario(Produto existente, CategoriaCardapio filtroAtivo) {
         FormularioProduto form = new FormularioProduto();
 
-        List<CategoriaCardapio> cats = categoriaService.listarCategoriasCardapio(usuario.getId());
+        List<CategoriaCardapio> cats = categoriaController.listarCategoriasCardapio(usuario.getId());
         form.selecionadorCategoria.addItem("Sem categoria");
         cats.forEach(c -> form.selecionadorCategoria.addItem(c.getNome()));
 
@@ -467,7 +462,7 @@ public class PainelProdutos extends JPanel {
     private String resolverCategoriaId(FormularioProduto form) {
         String escolhida = (String) form.selecionadorCategoria.getSelectedItem();
         if (escolhida == null || escolhida.equals("Sem categoria")) return null;
-        return categoriaService.listarCategoriasCardapio(usuario.getId()).stream()
+        return categoriaController.listarCategoriasCardapio(usuario.getId()).stream()
                 .filter(c -> c.getNome().equals(escolhida))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Categoria não encontrada"))

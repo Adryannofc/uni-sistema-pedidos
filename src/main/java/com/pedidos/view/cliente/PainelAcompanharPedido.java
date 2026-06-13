@@ -1,6 +1,6 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.model.service.PedidoService;
+import com.pedidos.controller.PedidoController;
 import com.pedidos.model.entity.Endereco;
 import com.pedidos.model.entity.ItemPedido;
 import com.pedidos.model.entity.Pedido;
@@ -20,7 +20,7 @@ import java.util.Locale;
 
 public class PainelAcompanharPedido extends JPanel {
 
-    private final PedidoService pedidoService;
+    private final PedidoController pedidoController;
     private final Runnable aoVoltar;
     private Pedido pedido;
 
@@ -51,8 +51,8 @@ public class PainelAcompanharPedido extends JPanel {
     // Botões
     private JButton btnCancelar;
 
-    public PainelAcompanharPedido(PedidoService pedidoService, Runnable aoVoltar) {
-        this.pedidoService = pedidoService;
+    public PainelAcompanharPedido(PedidoController pedidoController, Runnable aoVoltar) {
+        this.pedidoController = pedidoController;
         this.aoVoltar = aoVoltar;
         construir();
     }
@@ -297,7 +297,7 @@ public class PainelAcompanharPedido extends JPanel {
 
     private void atualizarDoBanco() {
         try {
-            pedido = pedidoService.buscarPorId(pedido.getId());
+            pedido = pedidoController.buscarPorId(pedido.getId());
             atualizar();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erro ao atualizar: " + ex.getMessage(),
@@ -311,8 +311,8 @@ public class PainelAcompanharPedido extends JPanel {
                 "Deseja cancelar este pedido?", "Cancelar Pedido", JOptionPane.YES_NO_OPTION);
         if (r != JOptionPane.YES_OPTION) return;
         try {
-            pedidoService.atualizarStatus(pedido.getId(), StatusPedido.CANCELADO);
-            pedido = pedidoService.buscarPorId(pedido.getId());
+            pedidoController.atualizarStatus(pedido.getId(), StatusPedido.CANCELADO);
+            pedido = pedidoController.buscarPorId(pedido.getId());
             atualizar();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);

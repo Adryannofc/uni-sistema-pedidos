@@ -1,6 +1,7 @@
 package com.pedidos;
 
 
+import com.pedidos.controller.*;
 import com.pedidos.model.service.*;
 import com.pedidos.model.infra.config.FlyWayconfig;
 import com.pedidos.model.infra.config.JPAUtil;
@@ -45,6 +46,17 @@ public class Main {
         AreaEntregaService areaEntregaService = new AreaEntregaService(areaRepo);
         CarrinhoManager carrinhoManager = new CarrinhoManager();
 
+        AutenticacaoController autenticacaoController = new AutenticacaoController(authService);
+        AdminController adminController = new AdminController(adminService);
+        ClienteController clienteController = new ClienteController(clienteService);
+        RestauranteController restauranteController = new RestauranteController(restauranteService);
+        PedidoController pedidoController = new PedidoController(pedidoService);
+        ProdutoController produtoController = new ProdutoController(produtoService);
+        CategoriaController categoriaController = new CategoriaController(categoriaService);
+        EnderecoController enderecoController = new EnderecoController(enderecoService);
+        HorarioController horarioController = new HorarioController(horarioService);
+        AreaEntregaController areaEntregaController = new AreaEntregaController(areaEntregaService);
+
         SwingUtilities.invokeLater(() -> {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -52,18 +64,17 @@ public class Main {
             }
 
             LoginFrame frame = new LoginFrame(
-                    authService,
-                    adminService,
-                    clienteService,
-                    enderecoService,
-                    categoriaService,
-                    produtoService,
-                    restauranteService,
-                    pedidoService,
+                    autenticacaoController,
+                    clienteController,
+                    restauranteController,
+                    adminController,
+                    enderecoController,
+                    categoriaController,
+                    produtoController,
+                    pedidoController,
                     carrinhoManager,
-                    restauranteRepo,
-                    areaEntregaService,
-                    horarioService);
+                    areaEntregaController,
+                    horarioController);
             frame.setVisible(true);
         });
     }

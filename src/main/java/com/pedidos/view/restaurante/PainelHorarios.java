@@ -1,6 +1,6 @@
 package com.pedidos.view.restaurante;
 
-import com.pedidos.model.service.HorarioService;
+import com.pedidos.controller.HorarioController;
 import com.pedidos.model.entity.HorarioFuncionamento;
 import com.pedidos.model.entity.Restaurante;
 import com.pedidos.model.entity.Usuario;
@@ -48,17 +48,17 @@ public class PainelHorarios extends JPanel {
     private static final Color COR_SALVAR_INATIVO = new Color(180, 180, 180);
 
     private final Restaurante restaurante;
-    private final HorarioService horarioService;
+    private final HorarioController horarioController;
     private final List<LinhaHorario> linhas = new ArrayList<>();
 
     // ── Dirty-tracking ───────────────────────────────────────────────────────
     private boolean dadosAlterados = false;
     private JButton btnSalvar;
 
-    public PainelHorarios(Usuario usuario, HorarioService horarioService) {
+    public PainelHorarios(Usuario usuario, HorarioController horarioController) {
         super(new BorderLayout());
         this.restaurante    = (Restaurante) usuario;
-        this.horarioService = horarioService;
+        this.horarioController = horarioController;
         construir();
         carregarHorarios();
         // Após carregar, registra listener na janela pai (se houver)
@@ -303,7 +303,7 @@ public class PainelHorarios extends JPanel {
 
     private void carregarHorarios() {
         List<HorarioFuncionamento> lista =
-                horarioService.listarHorarioPorRestaurante(restaurante.getId());
+                horarioController.listarPorRestaurante(restaurante.getId());
 
         Map<DayOfWeek, HorarioFuncionamento> porDia = new EnumMap<>(DayOfWeek.class);
         for (HorarioFuncionamento h : lista) {
@@ -419,7 +419,7 @@ public class PainelHorarios extends JPanel {
             for (LinhaHorario linha : linhas) {
                 if (linha.checkFechado.isSelected()) {
                     if (linha.idExistente != null) {
-                        horarioService.removerHorario(linha.idExistente);
+                        horarioController.removerHorario(linha.idExistente);
                         linha.idExistente = null;
                     }
                 } else {
@@ -427,10 +427,10 @@ public class PainelHorarios extends JPanel {
                     LocalTime fim    = LocalTime.parse(linha.campoFecha.getText().trim(), FMT);
 
                     if (linha.idExistente != null) {
-                        horarioService.editarHorario(linha.idExistente, inicio, fim);
+                        horarioController.editarHorario(linha.idExistente, inicio, fim);
                     } else {
                         HorarioFuncionamento novo =
-                                horarioService.criarHorario(restaurante, linha.dia, inicio, fim);
+                                horarioController.criarHorario(restaurante, linha.dia, inicio, fim);
                         linha.idExistente = novo.getId();
                     }
                 }

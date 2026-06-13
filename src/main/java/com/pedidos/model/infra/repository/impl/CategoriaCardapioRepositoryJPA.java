@@ -67,10 +67,16 @@ public class    CategoriaCardapioRepositoryJPA implements CategoriaCardapioRepos
             System.out.println("DEBUG: Restaurante e todas as dependências apagados com sucesso via SQL Nativo!");
         }
         catch (Exception e) {
+            CategoriaCardapio categoria = em.find(CategoriaCardapio.class, id);
+            if (categoria != null) {
+                em.remove(categoria);
+            }
+            em.getTransaction().commit();
+        } catch (Exception e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            throw new RuntimeException("Erro ao limpar dependências do restaurante: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao remover categoria do cardápio", e);
         }
     }
 

@@ -2,6 +2,7 @@ package com.pedidos.view.restaurante;
 
 import com.pedidos.model.entity.Restaurante;
 import com.pedidos.model.service.*;
+import com.pedidos.controller.*;
 import com.pedidos.model.entity.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -16,33 +17,33 @@ import java.awt.*;
 public class RestauranteFrame extends BaseFrame {
 
     private final Usuario usuario;
-    private final CategoriaService categoriaService;
-    private final ProdutoService produtoService;
-    private final RestauranteService restauranteService;
-    private final AreaEntregaService areaEntregaService;
-    private final HorarioService horarioService;
-    private final PedidoService pedidoService;
-    private final AutenticacaoService autenticacaoService;
+    private final CategoriaController categoriaController;
+    private final ProdutoController produtoController;
+    private final RestauranteController restauranteController;
+    private final AreaEntregaController areaEntregaController;
+    private final HorarioController horarioController;
+    private final PedidoController pedidoController;
+    private final AutenticacaoController autenticacaoController;
     private final Runnable acaoLogout;
 
     public RestauranteFrame(Usuario usuario,
-                            CategoriaService categoriaService,
-                            ProdutoService produtoService,
-                            RestauranteService restauranteService,
-                            AreaEntregaService areaEntregaService,
-                            HorarioService horarioService,
-                            PedidoService pedidoService,
-                            AutenticacaoService autenticacaoService,
+                            CategoriaController categoriaController,
+                            ProdutoController produtoController,
+                            RestauranteController restauranteController,
+                            AreaEntregaController areaEntregaController,
+                            HorarioController horarioController,
+                            PedidoController pedidoController,
+                            AutenticacaoController autenticacaoController,
                             Runnable acaoLogout) {
         super("Sistema de Delivery — Painel do Restaurante");
         this.usuario = usuario;
-        this.categoriaService = categoriaService;
-        this.produtoService = produtoService;
-        this.restauranteService = restauranteService;
-        this.areaEntregaService = areaEntregaService;
-        this.horarioService = horarioService;
-        this.pedidoService = pedidoService;
-        this.autenticacaoService = autenticacaoService;
+        this.categoriaController = categoriaController;
+        this.produtoController = produtoController;
+        this.restauranteController = restauranteController;
+        this.areaEntregaController = areaEntregaController;
+        this.horarioController = horarioController;
+        this.pedidoController = pedidoController;
+        this.autenticacaoController = autenticacaoController;
         this.acaoLogout = acaoLogout;
 
         //Busca do restaurante Atualizado (devido a busca direto no BD pelo ID)
@@ -200,11 +201,11 @@ public class RestauranteFrame extends BaseFrame {
         JTabbedPane abas = new JTabbedPane();
         abas.setFont(AppFonts.MENU);
 
-        abas.addTab("Produtos",                  new PainelProdutos(usuario, produtoService, categoriaService));
-        abas.addTab("Pedidos",                   new PainelPedidos(usuario, pedidoService));
-        abas.addTab("Áreas de Entrega",          new PainelAreaEntrega(usuario, areaEntregaService));
-        abas.addTab("Horários de funcionamento", new PainelHorarios(usuario, horarioService));
-        abas.addTab("Perfil",                    new PainelPerfil(usuario, autenticacaoService, restauranteService));
+        abas.addTab("Produtos",                  new PainelProdutos(usuario, produtoController, categoriaController));
+        abas.addTab("Pedidos",                   new PainelPedidos(usuario, pedidoController));
+        abas.addTab("Áreas de Entrega",          new PainelAreaEntrega(usuario, areaEntregaController));
+        abas.addTab("Horários de funcionamento", new PainelHorarios(usuario, horarioController));
+        abas.addTab("Perfil",                    new PainelPerfil(usuario, autenticacaoController, restauranteController));
 
         add(abas, BorderLayout.CENTER);
     }

@@ -1,7 +1,7 @@
 package com.pedidos.view.admin;
 
-import com.pedidos.model.service.AdminService;
-import com.pedidos.model.service.CategoriaService;
+import com.pedidos.controller.AdminController;
+import com.pedidos.controller.CategoriaController;
 import com.pedidos.model.entity.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -24,9 +24,9 @@ public class AdminFrame extends BaseFrame {
     private static final String CARD_CATEGORIAS    = "categorias";
     private static final String CARD_PERFIL        = "perfil";
 
-    private final Usuario         usuario;
-    private final AdminService adminService;
-    private final CategoriaService categoriaService;
+    private final Usuario           usuario;
+    private final AdminController   adminController;
+    private final CategoriaController categoriaController;
 
     private CardLayout cardLayout;
     private JPanel     painelConteudo;
@@ -34,11 +34,11 @@ public class AdminFrame extends BaseFrame {
     private final List<NavItem> navItems = new ArrayList<>();
     private NavItem itemSelecionado;
 
-    public AdminFrame(Usuario usuario, AdminService adminService, CategoriaService categoriaService) {
+    public AdminFrame(Usuario usuario, AdminController adminController, CategoriaController categoriaController) {
         super("Sistema Delivery — Painel Administrativo | " + usuario.getEmail(), 1100, 700);
-        this.usuario          = usuario;
-        this.adminService     = adminService;
-        this.categoriaService = categoriaService;
+        this.usuario              = usuario;
+        this.adminController      = adminController;
+        this.categoriaController  = categoriaController;
         construirInterface();
     }
 
@@ -175,9 +175,9 @@ public class AdminFrame extends BaseFrame {
         painelConteudo = new JPanel(cardLayout);
         painelConteudo.setBackground(AppColors.CINZA_FUNDO);
 
-        painelConteudo.add(new PainelRestaurantes(adminService),           CARD_RESTAURANTES);
-        painelConteudo.add(new PainelCategoriasGlobais(categoriaService),  CARD_CATEGORIAS);
-        painelConteudo.add(new PainelPerfil(usuario, adminService),        CARD_PERFIL);
+        painelConteudo.add(new PainelRestaurantes(adminController),          CARD_RESTAURANTES);
+        painelConteudo.add(new PainelCategoriasGlobais(categoriaController), CARD_CATEGORIAS);
+        painelConteudo.add(new PainelPerfil(usuario, adminController),       CARD_PERFIL);
 
         return painelConteudo;
     }
@@ -196,7 +196,7 @@ public class AdminFrame extends BaseFrame {
         logado.setForeground(AppColors.TEXTO_SECUNDARIO);
 
         long total = 0;
-        try { total = adminService.listarRestaurantes().size(); } catch (Exception ignored) {}
+        try { total = adminController.listarRestaurantes().size(); } catch (Exception ignored) {}
         JLabel contagem = new JLabel(total + " restaurante(s) cadastrado(s)");
         contagem.setFont(AppFonts.STATUS);
         contagem.setForeground(AppColors.TEXTO_SECUNDARIO);
