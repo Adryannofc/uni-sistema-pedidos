@@ -1,6 +1,5 @@
 package com.pedidos;
 
-
 import com.pedidos.controller.*;
 import com.pedidos.model.service.*;
 import com.pedidos.model.infra.config.FlyWayconfig;
@@ -55,6 +54,7 @@ public class Main {
         CategoriaController categoriaController = new CategoriaController(categoriaService);
         EnderecoController enderecoController = new EnderecoController(enderecoService);
         HorarioController horarioController = new HorarioController(horarioService);
+        AreaEntregaController areaEntregaController = new AreaEntregaController(areaEntregaService); // NOVO
 
         SwingUtilities.invokeLater(() -> {
             try {
@@ -72,7 +72,7 @@ public class Main {
                     produtoController,
                     pedidoController,
                     carrinhoManager,
-                    areaEntregaService,
+                    areaEntregaController, // era areaEntregaService
                     horarioController);
             frame.setVisible(true);
         });

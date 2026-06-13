@@ -1,7 +1,6 @@
 package com.pedidos.view.cliente;
 
 import com.pedidos.controller.*;
-import com.pedidos.model.service.AreaEntregaService;
 import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -23,7 +22,7 @@ public class ClienteFrame extends BaseFrame {
     private final ProdutoController produtoController;
     private final PedidoController pedidoController;
     private final CarrinhoManager carrinho;
-    private final AreaEntregaService areaEntregaService;
+    private final AreaEntregaController areaEntregaController; // era AreaEntregaService
     private final Runnable acaoLogout;
 
     private JTabbedPane tabbedPane;
@@ -43,19 +42,19 @@ public class ClienteFrame extends BaseFrame {
                         ProdutoController produtoController,
                         PedidoController pedidoController,
                         CarrinhoManager carrinho,
-                        AreaEntregaService areaEntregaService,
+                        AreaEntregaController areaEntregaController, // era AreaEntregaService
                         Runnable acaoLogout) {
         super("Sistema Delivery — " + usuario.getNome() + " | Cliente");
-        this.usuario             = usuario;
-        this.cliente             = cliente;
+        this.usuario                = usuario;
+        this.cliente                = cliente;
         this.clienteController      = clienteController;
         this.enderecoController     = enderecoController;
         this.restauranteController  = restauranteController;
         this.produtoController      = produtoController;
         this.pedidoController       = pedidoController;
-        this.carrinho            = carrinho;
-        this.areaEntregaService  = areaEntregaService;
-        this.acaoLogout          = acaoLogout;
+        this.carrinho               = carrinho;
+        this.areaEntregaController  = areaEntregaController; // era areaEntregaService
+        this.acaoLogout             = acaoLogout;
         construirInterface();
     }
 
@@ -176,7 +175,7 @@ public class ClienteFrame extends BaseFrame {
                 restauranteController,
                 produtoController,
                 carrinho,
-                areaEntregaService,
+                areaEntregaController, // era areaEntregaService
                 () -> {
                     painelCheckout.sincronizar();
                     tabbedPane.setSelectedIndex(1);
