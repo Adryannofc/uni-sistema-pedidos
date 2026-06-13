@@ -10,6 +10,8 @@ import com.pedidos.view.util.AppFonts;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -29,6 +31,9 @@ public class PainelPerfil extends JPanel {
     private final Cliente cliente;
     private final ClienteController clienteController;
     private final Runnable aoAtualizarEndereco;
+
+    // Flag de dirty-tracking
+    private boolean dadosAlterados = false;
 
     public PainelPerfil(Usuario usuario, Cliente cliente, ClienteController clienteController, Runnable aoAtualizarEndereco) {
         this.usuario = usuario;
@@ -54,6 +59,30 @@ public class PainelPerfil extends JPanel {
 
         subAbas.setSelectedIndex(0);
         add(subAbas, BorderLayout.CENTER);
+    }
+
+    // Método para marcar alteração
+    private void marcarAlterado() {
+        this.dadosAlterados = true;
+    }
+
+    // Método público para checar se há modificações
+    public boolean isDadosAlterados() {
+        return dadosAlterados;
+    }
+
+    // Método público para resetar flag após salvar
+    public void resetDadosAlterados() {
+        this.dadosAlterados = false;
+    }
+
+    // DocumentListener reutilizável que marca alterações
+    private DocumentListener criarDocumentListenerQueMarca() {
+        return new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { marcarAlterado(); }
+            @Override public void removeUpdate(DocumentEvent e) { marcarAlterado(); }
+            @Override public void changedUpdate(DocumentEvent e) { marcarAlterado(); }
+        };
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -91,6 +120,8 @@ public class PainelPerfil extends JPanel {
 
             gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1;
             fields[i] = criarCampoTexto(valores[i]);
+            // adiciona listener de documento para marcar alterações
+            fields[i].getDocument().addDocumentListener(criarDocumentListenerQueMarca());
             form.add(fields[i], gbc);
         }
 
@@ -108,6 +139,8 @@ public class PainelPerfil extends JPanel {
                 clienteController.editarTelefone(cliente, fields[3].getText().trim());
                 JOptionPane.showMessageDialog(this, "Dados salvos com sucesso!",
                         "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                // resetar flag após salvar
+                resetDadosAlterados();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Erro ao salvar dados:\n" + ex.getMessage(),
@@ -160,6 +193,8 @@ public class PainelPerfil extends JPanel {
 
             gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1;
             fields[i] = criarCampoTexto(valores[i]);
+            // adicionar listener para marcar alterações
+            fields[i].getDocument().addDocumentListener(criarDocumentListenerQueMarca());
             form.add(fields[i], gbc);
         }
 
@@ -213,6 +248,9 @@ public class PainelPerfil extends JPanel {
 
                 JOptionPane.showMessageDialog(this, "Endereço salvo com sucesso!",
                             "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
+                // resetar flag após salvar
+                resetDadosAlterados();
 
                 if (aoAtualizarEndereco != null) aoAtualizarEndereco.run();
             } catch (Exception ex) {
@@ -274,6 +312,8 @@ public class PainelPerfil extends JPanel {
                     BorderFactory.createLineBorder(new Color(180, 180, 180)),
                     BorderFactory.createEmptyBorder(2, 6, 2, 6)
             ));
+            // adicionar listener para marcar alterações em senha
+            fields[i].getDocument().addDocumentListener(criarDocumentListenerQueMarca());
             form.add(fields[i], gbc);
         }
 
@@ -300,6 +340,8 @@ public class PainelPerfil extends JPanel {
                 for (JPasswordField f : fields) f.setText("");
                 JOptionPane.showMessageDialog(this, "Senha alterada com sucesso!",
                         "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                // resetar flag após alterar senha
+                resetDadosAlterados();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Erro ao alterar senha:\n" + ex.getMessage(),
@@ -357,4 +399,3 @@ public class PainelPerfil extends JPanel {
         );
     }
 }
-
