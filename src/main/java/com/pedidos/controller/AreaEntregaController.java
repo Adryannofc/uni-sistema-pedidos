@@ -23,19 +23,19 @@ public class AreaEntregaController {
         return areaEntregaService.criarAreaEntrega(restaurante, bairro, distanciaMaximaKm, taxaEntrega, previsaoEntregaMinutos);
     }
 
-    public List<AreaEntrega> listarAreasPorRestaurante(String restauranteId) {
+    public List<AreaEntrega> listarPorRestaurante(String restauranteId) {
         return areaEntregaService.listarAreasPorRestaurante(restauranteId);
     }
 
     public void editarAreaEntrega(String id,
                                   String novoBairro,
                                   BigDecimal novaDistancia,
-                                  BigDecimal novoTaxa,
+                                  BigDecimal novaTaxa,
                                   int novoPrevisao) {
-        areaEntregaService.editarAreaEntrega(id, novoBairro, novaDistancia, novoTaxa, novoPrevisao);
+        areaEntregaService.editarAreaEntrega(id, novoBairro, novaDistancia, novaTaxa, novoPrevisao);
     }
 
-    public void deletarAreaEntrega(String id) {
+    public void removerAreaEntrega(String id) {
         areaEntregaService.deletarAreaEntrega(id);
     }
 
