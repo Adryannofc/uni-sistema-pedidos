@@ -33,6 +33,7 @@ public class LoginFrame extends BaseFrame {
     private final CarrinhoManager     carrinho;
     private final AreaEntregaController  areaEntregaController;
     private final HorarioController     horarioController;
+    private final CarrinhoController carrinhoController;
 
     private JTextField     campoEmail;
     private JPasswordField campoSenha;
@@ -51,7 +52,7 @@ public class LoginFrame extends BaseFrame {
                       PedidoController pedidoController,
                       CarrinhoManager carrinho,
                       AreaEntregaController areaEntregaController,
-                      HorarioController horarioController) {
+                      HorarioController horarioController, CarrinhoController carrinhoController) {
         super("Sistema de Delivery - Login", 500, 310);
         this.autenticacaoController = autenticacaoController;
         this.clienteController      = clienteController;
@@ -64,6 +65,7 @@ public class LoginFrame extends BaseFrame {
         this.carrinho            = carrinho;
         this.areaEntregaController  = areaEntregaController;
         this.horarioController      = horarioController;
+        this.carrinhoController = carrinhoController;
         construirInterface();
     }
 
@@ -348,7 +350,7 @@ public class LoginFrame extends BaseFrame {
                 adminController, enderecoController,
                 categoriaController, produtoController,
                 pedidoController, carrinho,
-                areaEntregaController, horarioController);
+                areaEntregaController, horarioController, carrinhoController);
         SessionManager.getInstance().trocarFrame(novoLogin);
         SessionManager.getInstance().encerrarSessao();
     }

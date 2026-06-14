@@ -44,6 +44,7 @@ public class Main {
         PedidoService pedidoService = new PedidoService(pedidoRepo, horarioFuncionamentoRepo);
         HorarioService horarioService = new HorarioService(horarioFuncionamentoRepo);
         AreaEntregaService areaEntregaService = new AreaEntregaService(areaRepo);
+        CarrinhoService carrinhoService = new CarrinhoService();
         CarrinhoManager carrinhoManager = new CarrinhoManager();
 
 
@@ -57,6 +58,7 @@ public class Main {
         EnderecoController enderecoController = new EnderecoController(enderecoService);
         HorarioController horarioController = new HorarioController(horarioService);
         AreaEntregaController areaEntregaController = new AreaEntregaController(areaEntregaService);
+        CarrinhoController carrinhoController = new CarrinhoController(carrinhoService);
 
         SwingUtilities.invokeLater(() -> {
             try {
@@ -75,7 +77,8 @@ public class Main {
                     pedidoController,
                     carrinhoManager,
                     areaEntregaController,
-                    horarioController);
+                    horarioController,
+                    carrinhoController );
             frame.setVisible(true);
         });
     }
