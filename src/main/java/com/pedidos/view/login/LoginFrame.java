@@ -31,7 +31,7 @@ public class LoginFrame extends BaseFrame {
     private final ProdutoController   produtoController;
     private final PedidoController    pedidoController;
     private final CarrinhoManager     carrinho;
-    private final AreaEntregaController areaEntregaController; // era AreaEntregaService
+    private final AreaEntregaController  areaEntregaController;
     private final HorarioController     horarioController;
 
     private JTextField     campoEmail;
@@ -50,7 +50,7 @@ public class LoginFrame extends BaseFrame {
                       ProdutoController produtoController,
                       PedidoController pedidoController,
                       CarrinhoManager carrinho,
-                      AreaEntregaController areaEntregaController, // era AreaEntregaService
+                      AreaEntregaController areaEntregaController,
                       HorarioController horarioController) {
         super("Sistema de Delivery - Login", 500, 310);
         this.autenticacaoController = autenticacaoController;
@@ -61,8 +61,8 @@ public class LoginFrame extends BaseFrame {
         this.categoriaController   = categoriaController;
         this.produtoController     = produtoController;
         this.pedidoController      = pedidoController;
-        this.carrinho              = carrinho;
-        this.areaEntregaController = areaEntregaController; // era areaEntregaService
+        this.carrinho            = carrinho;
+        this.areaEntregaController  = areaEntregaController;
         this.horarioController      = horarioController;
         construirInterface();
     }
@@ -307,7 +307,7 @@ public class LoginFrame extends BaseFrame {
                     categoriaController,
                     produtoController,
                     restauranteController,
-                    areaEntregaController, // era areaEntregaService
+                    areaEntregaController,
                     horarioController,
                     pedidoController,
                     autenticacaoController,
@@ -328,7 +328,7 @@ public class LoginFrame extends BaseFrame {
                         produtoController,
                         pedidoController,
                         carrinho,
-                        areaEntregaController, // era areaEntregaService
+                        areaEntregaController,
                         this::abrirTelaLogin);
             }
             default -> {
@@ -348,8 +348,7 @@ public class LoginFrame extends BaseFrame {
                 adminController, enderecoController,
                 categoriaController, produtoController,
                 pedidoController, carrinho,
-                areaEntregaController, // era areaEntregaService
-                horarioController);
+                areaEntregaController, horarioController);
         SessionManager.getInstance().trocarFrame(novoLogin);
         SessionManager.getInstance().encerrarSessao();
     }

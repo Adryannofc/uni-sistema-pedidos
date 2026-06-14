@@ -107,7 +107,7 @@ public class RestauranteService {
 
     public Restaurante buscarRestaurantePorId(String id) {
         try {
-            Usuario usuario = restauranteRepository.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException("Restaurante não encontrado"));
+            Usuario usuario =  restauranteRepository.buscarPorId(id).orElseThrow(() -> new IllegalArgumentException("Restaurante não encontrado"));
 
             if (!(usuario instanceof Restaurante)) {
                 throw new IllegalArgumentException("Usuario não é um restaurante");

@@ -1,5 +1,6 @@
 package com.pedidos.model.service;
 
+import com.pedidos.model.entity.Restaurante;
 import com.pedidos.model.entity.Usuario;
 import com.pedidos.model.repository.AdminRepository;
 import com.pedidos.model.repository.ClienteRepository;
@@ -60,7 +61,16 @@ public class AutenticacaoService {
             if (usuario != null) return usuario;
 
             usuario = restauranteRepository.buscarPorEmailSenha(email, senhaHash);
-            if (usuario != null) return usuario;
+            if (usuario != null){
+                Restaurante restaurante = (Restaurante) usuario;
+
+                if (!restaurante.isStatusAtivo()){
+                  throw new RuntimeException("Conta bloqueada. Entre em contato com o suporte.");
+                };
+
+                return restaurante;
+            }
+
 
             usuario = clienteRepository.buscarPorEmailSenha(email, senhaHash);
             if (usuario != null) return usuario;

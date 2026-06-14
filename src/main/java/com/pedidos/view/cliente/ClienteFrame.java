@@ -10,7 +10,11 @@ import com.pedidos.view.util.session.CarrinhoManager;
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class ClienteFrame extends BaseFrame {
 
@@ -22,7 +26,7 @@ public class ClienteFrame extends BaseFrame {
     private final ProdutoController produtoController;
     private final PedidoController pedidoController;
     private final CarrinhoManager carrinho;
-    private final AreaEntregaController areaEntregaController; // era AreaEntregaService
+    private final AreaEntregaController areaEntregaController;
     private final Runnable acaoLogout;
 
     private JTabbedPane tabbedPane;
@@ -34,6 +38,9 @@ public class ClienteFrame extends BaseFrame {
     private JLabel lblStatusPedidos;
     private JLabel lblStatusEndereco;
 
+    // track last selected tab to allow cancelling a tab change
+    private int lastSelectedIndex = 0;
+
     public ClienteFrame(Usuario usuario,
                         Cliente cliente,
                         ClienteController clienteController,
@@ -42,20 +49,39 @@ public class ClienteFrame extends BaseFrame {
                         ProdutoController produtoController,
                         PedidoController pedidoController,
                         CarrinhoManager carrinho,
-                        AreaEntregaController areaEntregaController, // era AreaEntregaService
+                        AreaEntregaController areaEntregaController,
                         Runnable acaoLogout) {
         super("Sistema Delivery — " + usuario.getNome() + " | Cliente");
-        this.usuario                = usuario;
-        this.cliente                = cliente;
+        this.usuario             = usuario;
+        this.cliente             = cliente;
         this.clienteController      = clienteController;
         this.enderecoController     = enderecoController;
         this.restauranteController  = restauranteController;
         this.produtoController      = produtoController;
         this.pedidoController       = pedidoController;
-        this.carrinho               = carrinho;
-        this.areaEntregaController  = areaEntregaController; // era areaEntregaService
-        this.acaoLogout             = acaoLogout;
+        this.carrinho            = carrinho;
+        this.areaEntregaController  = areaEntregaController;
+        this.acaoLogout          = acaoLogout;
         construirInterface();
+
+        // Interceptar fechamento da janela para confirmar se há alterações não salvas
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (painelPerfil != null && painelPerfil.isDadosAlterados()) {
+                    int r = JOptionPane.showConfirmDialog(ClienteFrame.this,
+                            "Alterações não salvas. Deseja sair?",
+                            "Confirmar saída",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE);
+                    if (r != JOptionPane.YES_OPTION) return; // cancela fechamento
+                }
+                // sem alterações ou confirmou: encerra app
+                dispose();
+                System.exit(0);
+            }
+        });
     }
 
     private void construirInterface() {
@@ -175,7 +201,7 @@ public class ClienteFrame extends BaseFrame {
                 restauranteController,
                 produtoController,
                 carrinho,
-                areaEntregaController, // era areaEntregaService
+                areaEntregaController,
                 () -> {
                     painelCheckout.sincronizar();
                     tabbedPane.setSelectedIndex(1);
@@ -212,6 +238,37 @@ public class ClienteFrame extends BaseFrame {
 
         atualizarTituloFazerPedido();
         tabbedPane.setSelectedIndex(0);
+
+        // Lembrar a aba inicial
+        lastSelectedIndex = tabbedPane.getSelectedIndex();
+
+        // Intercepta troca de abas para confirmar saída da aba Perfil se houver alterações
+        tabbedPane.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                int sel = tabbedPane.getSelectedIndex();
+                int perfilIndex = tabbedPane.indexOfComponent(painelPerfil);
+                if (lastSelectedIndex == perfilIndex && sel != perfilIndex) {
+                    if (painelPerfil != null && painelPerfil.isDadosAlterados()) {
+                        int r = JOptionPane.showConfirmDialog(ClienteFrame.this,
+                                "Alterações não salvas. Deseja sair?",
+                                "Confirmar saída",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (r != JOptionPane.YES_OPTION) {
+                            // usuário cancelou: volta para a aba anterior
+                            SwingUtilities.invokeLater(() -> tabbedPane.setSelectedIndex(lastSelectedIndex));
+                            return;
+                        } else {
+                            // usuário confirmou que quer sair sem salvar: resetar flag
+                            painelPerfil.resetDadosAlterados();
+                        }
+                    }
+                }
+                lastSelectedIndex = tabbedPane.getSelectedIndex();
+            }
+        });
+
         return tabbedPane;
     }
 

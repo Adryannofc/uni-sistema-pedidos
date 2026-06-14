@@ -30,24 +30,31 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+/**
+ * Painel responsável pela aba "Fazer Pedido".
+ * Contém lista de restaurantes, cardápio selecionado e carrinho lateral.
+ */
 public class PainelFazerPedido extends JPanel {
 
     private final Cliente cliente;
     private final RestauranteController restauranteController;
     private final ProdutoController produtoController;
     private final CarrinhoManager carrinho;
-    private final AreaEntregaController areaEntregaController; // era AreaEntregaService
+    private final AreaEntregaController areaEntregaController;
 
     private final NumberFormat moedaBR = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
     private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
+    // Componentes da lista de restaurantes
     private DefaultTableModel modelRestaurantes;
     private Restaurante restauranteSelecionado;
 
+    // CardLayout para alternar entre lista de restaurantes e cardápio
     private CardLayout cardLayoutFazerPedido;
     private JPanel centroPainelFazerPedido;
     private PainelCardapio painelCardapio;
 
+    // Carrinho — referências para atualização dinâmica
     private TitledBorder borderCarrinho;
     private JPanel painelCarrinho;
     private JLabel lblSubtotalValor;
@@ -55,20 +62,21 @@ public class PainelFazerPedido extends JPanel {
     private JTable tabelaCarrinho;
     private DefaultTableModel modelCarrinho;
 
+    // Callbacks para coordenação
     private Runnable aoFinalizarPedido;
 
     public PainelFazerPedido(Cliente cliente,
                              RestauranteController restauranteController,
                              ProdutoController produtoController,
                              CarrinhoManager carrinho,
-                             AreaEntregaController areaEntregaController, // era AreaEntregaService
+                             AreaEntregaController areaEntregaController,
                              Runnable aoFinalizarPedido) {
-        this.cliente                = cliente;
-        this.restauranteController  = restauranteController;
-        this.produtoController      = produtoController;
-        this.carrinho               = carrinho;
-        this.areaEntregaController  = areaEntregaController; // era areaEntregaService
-        this.aoFinalizarPedido      = aoFinalizarPedido;
+        this.cliente = cliente;
+        this.restauranteController = restauranteController;
+        this.produtoController = produtoController;
+        this.carrinho = carrinho;
+        this.areaEntregaController = areaEntregaController;
+        this.aoFinalizarPedido = aoFinalizarPedido;
 
         construir();
     }
@@ -96,6 +104,7 @@ public class PainelFazerPedido extends JPanel {
         add(criarPainelCarrinho(), BorderLayout.EAST);
     }
 
+    // ── Lista de Restaurantes ─────────────────────────────────────
     private JPanel criarListaRestaurantes() {
         JPanel painel = new JPanel(new BorderLayout(0, 8));
         painel.setBackground(Color.WHITE);
@@ -124,6 +133,7 @@ public class PainelFazerPedido extends JPanel {
         tabela.getColumnModel().getColumn(2).setPreferredWidth(100);
         tabela.getColumnModel().getColumn(3).setPreferredWidth(120);
 
+        // Renderer coluna Status — ●Aberto verde / ●Fechado vermelho
         tabela.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable t, Object value,
@@ -142,15 +152,21 @@ public class PainelFazerPedido extends JPanel {
             }
         });
 
+        // Mouse: clique simples na ★ = favoritar | clique simples em outra coluna = selecionar/abrir cardápio
         tabela.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int row = tabela.rowAtPoint(e.getPoint());
+                int col = tabela.columnAtPoint(e.getPoint());
                 if (row < 0) return;
+
                 List<Restaurante> restaurantes = restauranteController.buscarAtivos();
                 if (row >= restaurantes.size()) return;
+                Restaurante r = restaurantes.get(row);
+
+                // Clique simples → seleciona restaurante e abre cardápio
                 if (e.getClickCount() == 2) {
-                    abrirRestaurante(restaurantes.get(row));
+                    abrirRestaurante(r);
                 }
             }
         });
@@ -158,6 +174,7 @@ public class PainelFazerPedido extends JPanel {
         JScrollPane scroll = new JScrollPane(tabela);
         scroll.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
 
+        // Botões de ação abaixo da lista
         JButton btnVerCardapio = new JButton("Ver Cardápio");
         JButton btnVerHorarios = new JButton("● Ver Horários");
         btnVerCardapio.setFont(AppFonts.BOTAO);
@@ -172,7 +189,8 @@ public class PainelFazerPedido extends JPanel {
             }
             List<Restaurante> restaurantes = restauranteController.buscarAtivos();
             if (row >= restaurantes.size()) return;
-            abrirRestaurante(restaurantes.get(row));
+            Restaurante r = restaurantes.get(row);
+            abrirRestaurante(r);
         });
 
         btnVerHorarios.addActionListener(e -> {
@@ -231,7 +249,7 @@ public class PainelFazerPedido extends JPanel {
 
         BigDecimal taxa;
         try {
-            taxa = areaEntregaController.buscarTaxaPorBairro(r.getId(), enderecoPadrao.get().getBairro()); // era areaEntregaService
+            taxa = areaEntregaController.buscarTaxaPorBairro(r.getId(), enderecoPadrao.get().getBairro());
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this,
                     "Seu bairro (" + enderecoPadrao.get().getBairro() +
@@ -246,6 +264,7 @@ public class PainelFazerPedido extends JPanel {
         cardLayoutFazerPedido.show(centroPainelFazerPedido, "CARDAPIO");
     }
 
+    /** Carrega restaurantes ativos no model com status e horário de hoje. */
     private void carregarRestaurantes() {
         modelRestaurantes.setRowCount(0);
         DayOfWeek hoje = LocalDate.now().getDayOfWeek();
@@ -263,7 +282,7 @@ public class PainelFazerPedido extends JPanel {
             boolean aberto = horarioHoje.map(h -> h.contemHorario(agora)).orElse(false);
             String status = aberto ? "● Aberto" : "● Fechado";
             String horario = horarioHoje.map(h ->
-                            h.getHoraInicio().format(fmt) + " – " + h.getHoraFim().format(fmt))
+                    h.getHoraInicio().format(fmt) + " – " + h.getHoraFim().format(fmt))
                     .orElse("–");
 
             modelRestaurantes.addRow(new Object[]{r.getNome(), categoria, status, horario});
@@ -272,16 +291,17 @@ public class PainelFazerPedido extends JPanel {
 
     private String traduzirDia(DayOfWeek dia) {
         return switch (dia) {
-            case MONDAY    -> "Segunda-feira";
-            case TUESDAY   -> "Terça-feira";
+            case MONDAY -> "Segunda-feira";
+            case TUESDAY -> "Terça-feira";
             case WEDNESDAY -> "Quarta-feira";
-            case THURSDAY  -> "Quinta-feira";
-            case FRIDAY    -> "Sexta-feira";
-            case SATURDAY  -> "Sábado";
-            case SUNDAY    -> "Domingo";
+            case THURSDAY -> "Quinta-feira";
+            case FRIDAY -> "Sexta-feira";
+            case SATURDAY -> "Sábado";
+            case SUNDAY -> "Domingo";
         };
     }
 
+    // ── Painel Carrinho (direita) ─────────────────────────────────
     private JPanel criarPainelCarrinho() {
         painelCarrinho = new JPanel(new BorderLayout(0, 0));
         painelCarrinho.setPreferredSize(new Dimension(280, 0));
@@ -310,6 +330,7 @@ public class PainelFazerPedido extends JPanel {
         centro.setHorizontalAlignment(SwingConstants.CENTER);
         tabelaCarrinho.getColumnModel().getColumn(1).setCellRenderer(centro);
 
+        // ── Totais (subtotal + taxa) ──────────────────────────────
         JPanel totaisPanel = new JPanel(new GridBagLayout());
         totaisPanel.setBackground(Color.WHITE);
         totaisPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -340,7 +361,8 @@ public class PainelFazerPedido extends JPanel {
         lblTaxaValor.setForeground(Color.DARK_GRAY);
         totaisPanel.add(lblTaxaValor, g);
 
-        JButton btnRemover  = criarBotaoSecundario("Remover");
+        // ── Botões menores ────────────────────────────────────────
+        JButton btnRemover = criarBotaoSecundario("Remover");
         JButton btnEsvaziar = criarBotaoSecundario("Esvaziar");
 
         btnRemover.addActionListener(e -> {
@@ -361,9 +383,22 @@ public class PainelFazerPedido extends JPanel {
         });
 
         btnEsvaziar.addActionListener(e -> {
-            if (carrinho.estaVazio()) return;
-            carrinho.esvaziar();
-            sincronizarCarrinho();
+
+            if (carrinho.estaVazio())
+            { JOptionPane.showMessageDialog(this, "O carrinho já está vazio.");
+                return;
+            }
+            int confirm = JOptionPane.showConfirmDialog(this, "Tem certeza? Todos os itens serão removidos.",
+                    "Confirmar", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (confirm == JOptionPane.YES_NO_OPTION)
+            {
+                carrinho.esvaziar();
+                sincronizarCarrinho();
+            }
+
+
+
+
         });
 
         JPanel botoesPanel = new JPanel(new GridLayout(1, 2, 6, 0));
@@ -372,9 +407,12 @@ public class PainelFazerPedido extends JPanel {
         botoesPanel.add(btnRemover);
         botoesPanel.add(btnEsvaziar);
 
+        // ── Finalizar Pedido ──────────────────────────────────────
         JButton btnFinalizar = criarBotaoPrimario("Finalizar Pedido →", 260, 40);
         btnFinalizar.addActionListener(e -> {
-            if (aoFinalizarPedido != null) aoFinalizarPedido.run();
+            if (aoFinalizarPedido != null) {
+                aoFinalizarPedido.run();
+            }
         });
         JPanel finalizarPanel = new JPanel(new BorderLayout());
         finalizarPanel.setBackground(Color.WHITE);
@@ -383,8 +421,8 @@ public class PainelFazerPedido extends JPanel {
 
         JPanel rodape = new JPanel(new BorderLayout(0, 0));
         rodape.setBackground(Color.WHITE);
-        rodape.add(totaisPanel,  BorderLayout.NORTH);
-        rodape.add(botoesPanel,  BorderLayout.CENTER);
+        rodape.add(totaisPanel, BorderLayout.NORTH);
+        rodape.add(botoesPanel, BorderLayout.CENTER);
         rodape.add(finalizarPanel, BorderLayout.SOUTH);
 
         sincronizarCarrinho();
@@ -394,6 +432,7 @@ public class PainelFazerPedido extends JPanel {
         return painelCarrinho;
     }
 
+    /** Sincroniza modelCarrinho, totais e título do border com o estado atual do CarrinhoManager. */
     public void sincronizarCarrinho() {
         modelCarrinho.setRowCount(0);
 
@@ -407,11 +446,13 @@ public class PainelFazerPedido extends JPanel {
             }
         }
 
+        // Atualiza totais
         BigDecimal subtotal = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.calcularSubtotal();
-        BigDecimal taxa     = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.getTaxaEntrega();
+        BigDecimal taxa = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.getTaxaEntrega();
         if (lblSubtotalValor != null) lblSubtotalValor.setText(moedaBR.format(subtotal));
         if (lblTaxaValor != null) lblTaxaValor.setText(moedaBR.format(taxa));
 
+        // Atualiza título do border com contagem de itens distintos
         if (borderCarrinho != null && painelCarrinho != null) {
             int qtd = carrinho.estaVazio() ? 0 : carrinho.getItens().size();
             borderCarrinho.setTitle("Meu Carrinho" + (qtd > 0 ? " (" + qtd + ")" : ""));
@@ -419,10 +460,12 @@ public class PainelFazerPedido extends JPanel {
         }
     }
 
+    // ── Getters ────────────────────────────────────────────────────
     public Restaurante getRestauranteSelecionado() {
         return restauranteSelecionado;
     }
 
+    // ── Helpers ────────────────────────────────────────────────────
     private void configurarHeader(JTable tabela) {
         JTableHeader th = tabela.getTableHeader();
         th.setFont(AppFonts.TITULO);
@@ -466,3 +509,4 @@ public class PainelFazerPedido extends JPanel {
         );
     }
 }
+

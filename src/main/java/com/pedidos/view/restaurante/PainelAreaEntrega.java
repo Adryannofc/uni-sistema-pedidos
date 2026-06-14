@@ -21,7 +21,7 @@ public class PainelAreaEntrega extends JPanel {
             NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 
     private final Restaurante restaurante;
-    private final AreaEntregaController areaEntregaController; // era AreaEntregaService
+    private final AreaEntregaController areaEntregaController;
 
     private DefaultTableModel modelo;
     private JTable tabela;
@@ -31,10 +31,12 @@ public class PainelAreaEntrega extends JPanel {
     public PainelAreaEntrega(Usuario usuario, AreaEntregaController areaEntregaController) {
         super(new BorderLayout());
         this.restaurante = (Restaurante) usuario;
-        this.areaEntregaController = areaEntregaController; // era areaEntregaService
+        this.areaEntregaController = areaEntregaController;
         construir();
         carregarAreas();
     }
+
+    // ─────────────────────────── build UI ────────────────────────────────────
 
     private void construir() {
         add(criarToolbar(),  BorderLayout.NORTH);
@@ -46,8 +48,8 @@ public class PainelAreaEntrega extends JPanel {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 4));
         toolbar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
 
-        JButton btnNova    = criarBotaoPrimario("+ Nova Área");
-        JButton btnEditar  = new JButton("Editar");
+        JButton btnNova   = criarBotaoPrimario("+ Nova Área");
+        JButton btnEditar = new JButton("Editar");
         JButton btnRemover = new JButton("Remover");
 
         btnEditar.setFont(AppFonts.BOTAO);
@@ -96,20 +98,24 @@ public class PainelAreaEntrega extends JPanel {
         return rodape;
     }
 
+    // ─────────────────────────── data ────────────────────────────────────────
+
     private void carregarAreas() {
-        areas = areaEntregaController.listarPorRestaurante(restaurante.getId()); // era areaEntregaService.listarAreasPorRestaurante
+        areas = areaEntregaController.listarAreasPorRestaurante(restaurante.getId());
         modelo.setRowCount(0);
         for (int i = 0; i < areas.size(); i++) {
             AreaEntrega a = areas.get(i);
             modelo.addRow(new Object[]{
-                    i + 1,
-                    a.getBairro(),
-                    FMT_MOEDA.format(a.getTaxaEntrega()),
-                    a.getPrevisaoMinutos() + " min"
+                i + 1,
+                a.getBairro(),
+                FMT_MOEDA.format(a.getTaxaEntrega()),
+                a.getPrevisaoMinutos() + " min"
             });
         }
         labelStatus.setText(areas.size() + " área(s) de entrega cadastrada(s)");
     }
+
+    // ─────────────────────────── actions ─────────────────────────────────────
 
     private void editarSelecionada() {
         int row = tabela.getSelectedRow();
@@ -135,7 +141,7 @@ public class PainelAreaEntrega extends JPanel {
         if (opcao != JOptionPane.OK_OPTION) return;
 
         try {
-            areaEntregaController.removerAreaEntrega(area.getId()); // era areaEntregaService.deletarAreaEntrega
+            areaEntregaController.deletarAreaEntrega(area.getId());
             carregarAreas();
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this,
@@ -148,9 +154,9 @@ public class PainelAreaEntrega extends JPanel {
         boolean editando = existente != null;
         String titulo = editando ? "Editar Área de Entrega" : "Nova Área de Entrega";
 
-        JTextField campoBairro    = new JTextField(20);
-        JTextField campoTaxa      = new JTextField(10);
-        JTextField campoPrevisao  = new JTextField(10);
+        JTextField campoBairro   = new JTextField(20);
+        JTextField campoTaxa     = new JTextField(10);
+        JTextField campoPrevisao = new JTextField(10);
         JTextField campoDistancia = new JTextField(10);
 
         campoBairro.setFont(AppFonts.CAMPO);
@@ -172,7 +178,7 @@ public class PainelAreaEntrega extends JPanel {
         gbc.insets = new Insets(4, 4, 4, 4);
         gbc.anchor = GridBagConstraints.WEST;
 
-        adicionarCampoForm(form, gbc, 0, "Bairro:",               campoBairro);
+        adicionarCampoForm(form, gbc, 0, "Bairro:",              campoBairro);
         adicionarCampoForm(form, gbc, 1, "Taxa de entrega (R$):", campoTaxa);
         adicionarCampoForm(form, gbc, 2, "Previsão (minutos):",   campoPrevisao);
         adicionarCampoForm(form, gbc, 3, "Distância máx. (km):",  campoDistancia);
@@ -209,9 +215,9 @@ public class PainelAreaEntrega extends JPanel {
 
         try {
             if (editando) {
-                areaEntregaController.editarAreaEntrega(existente.getId(), bairro, distancia, taxa, previsao); // era areaEntregaService
+                areaEntregaController.editarAreaEntrega(existente.getId(), bairro, distancia, taxa, previsao);
             } else {
-                areaEntregaController.criarAreaEntrega(restaurante, bairro, distancia, taxa, previsao); // era areaEntregaService
+                areaEntregaController.criarAreaEntrega(restaurante, bairro, distancia, taxa, previsao);
             }
             carregarAreas();
         } catch (RuntimeException ex) {
@@ -220,6 +226,8 @@ public class PainelAreaEntrega extends JPanel {
                     "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
+
+    // ─────────────────────────── helpers ─────────────────────────────────────
 
     private JButton criarBotaoPrimario(String texto) {
         JButton btn = new JButton(texto);
@@ -233,7 +241,7 @@ public class PainelAreaEntrega extends JPanel {
     }
 
     private void adicionarCampoForm(JPanel form, GridBagConstraints gbc,
-                                    int row, String rotulo, JTextField campo) {
+                                     int row, String rotulo, JTextField campo) {
         gbc.gridx = 0; gbc.gridy = row; gbc.weightx = 0;
         JLabel lbl = new JLabel(rotulo);
         lbl.setFont(AppFonts.LABEL);

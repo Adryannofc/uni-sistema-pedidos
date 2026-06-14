@@ -226,7 +226,7 @@ public class PainelProdutos extends JPanel {
 
         // actions
         btnNovo.addActionListener(e -> {
-            FormularioProduto form = criarFormulario(null);
+            FormularioProduto form = criarFormulario(null, this.categoriaSelecionada);
             int opt = JOptionPane.showConfirmDialog(this, form.painel, "Novo Produto",
                     JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (opt != JOptionPane.OK_OPTION) return;
@@ -251,7 +251,7 @@ public class PainelProdutos extends JPanel {
             int row = selecionado();
             if (row < 0) return;
             Produto p = produtosCarregados.get(row);
-            FormularioProduto form = criarFormulario(p);
+            FormularioProduto form = criarFormulario(p, null);
             int opt = JOptionPane.showConfirmDialog(this, form.painel, "Editar Produto",
                     JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (opt != JOptionPane.OK_OPTION) return;
@@ -413,12 +413,19 @@ public class PainelProdutos extends JPanel {
         return btn;
     }
 
-    private FormularioProduto criarFormulario(Produto existente) {
+    private FormularioProduto criarFormulario(Produto existente, CategoriaCardapio filtroAtivo) {
         FormularioProduto form = new FormularioProduto();
 
         List<CategoriaCardapio> cats = categoriaController.listarCategoriasCardapio(usuario.getId());
         form.selecionadorCategoria.addItem("Sem categoria");
         cats.forEach(c -> form.selecionadorCategoria.addItem(c.getNome()));
+
+        if (existente == null && filtroAtivo != null) {
+            String nomeFiltro = filtroAtivo.getNome();
+            if (!"Todos".equals(nomeFiltro) && !"Sem categoria".equals(nomeFiltro)) {
+                form.selecionadorCategoria.setSelectedItem(nomeFiltro);
+            }
+        }
 
         if (existente != null) {
             form.campoNome.setText(existente.getNome());
