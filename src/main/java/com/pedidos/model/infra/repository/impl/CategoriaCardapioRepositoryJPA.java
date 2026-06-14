@@ -72,10 +72,6 @@ public class    CategoriaCardapioRepositoryJPA implements CategoriaCardapioRepos
                 em.remove(categoria);
             }
             em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
             throw new RuntimeException("Erro ao remover categoria do cardápio", e);
         }
     }

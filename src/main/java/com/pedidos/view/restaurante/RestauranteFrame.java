@@ -47,7 +47,7 @@ public class RestauranteFrame extends BaseFrame {
         this.acaoLogout = acaoLogout;
 
         //Busca do restaurante Atualizado (devido a busca direto no BD pelo ID)
-        Restaurante restauranteBd = restauranteService.buscarRestaurantePorId(usuario.getId());
+        Restaurante restauranteBd = restauranteController.buscarPorId(usuario.getId());
 
 
         if(restauranteBd != null && !restauranteBd.isStatusAtivo())
@@ -81,8 +81,8 @@ public class RestauranteFrame extends BaseFrame {
                SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
                    @Override
                    protected Boolean doInBackground() {
-                       if (restauranteService != null) {
-                           var restauranteBd = restauranteService.buscarRestaurantePorId(usuario.getId());
+                       if (restauranteController != null) {
+                           var restauranteBd = restauranteController.buscarPorId(usuario.getId());
                            return restauranteBd != null && restauranteBd.isStatusAtivo();
                        }
                        return true;
