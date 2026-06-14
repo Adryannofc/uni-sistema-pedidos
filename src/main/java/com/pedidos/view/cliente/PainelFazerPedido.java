@@ -383,9 +383,22 @@ public class PainelFazerPedido extends JPanel {
         });
 
         btnEsvaziar.addActionListener(e -> {
-            if (carrinho.estaVazio()) return;
-            carrinho.esvaziar();
-            sincronizarCarrinho();
+
+            if (carrinho.estaVazio())
+            { JOptionPane.showMessageDialog(this, "O carrinho já está vazio.");
+                return;
+            }
+            int confirm = JOptionPane.showConfirmDialog(this, "Tem certeza? Todos os itens serão removidos.",
+                    "Confirmar", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (confirm == JOptionPane.YES_NO_OPTION)
+            {
+                carrinho.esvaziar();
+                sincronizarCarrinho();
+            }
+
+
+
+
         });
 
         JPanel botoesPanel = new JPanel(new GridLayout(1, 2, 6, 0));
