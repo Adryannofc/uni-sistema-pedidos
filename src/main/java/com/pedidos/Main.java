@@ -46,6 +46,7 @@ public class Main {
         AreaEntregaService areaEntregaService = new AreaEntregaService(areaRepo);
         CarrinhoManager carrinhoManager = new CarrinhoManager();
 
+
         AutenticacaoController autenticacaoController = new AutenticacaoController(authService);
         AdminController adminController = new AdminController(adminService);
         ClienteController clienteController = new ClienteController(clienteService);

@@ -1,7 +1,7 @@
 package com.pedidos.view.restaurante;
 
 import com.pedidos.model.entity.Restaurante;
-import com.pedidos.model.service.*;
+
 import com.pedidos.controller.*;
 import com.pedidos.model.entity.Usuario;
 import com.pedidos.view.util.AppColors;

@@ -3,16 +3,33 @@ package com.pedidos.model.service;
 import com.pedidos.model.entity.Carrinho;
 import com.pedidos.model.entity.Produto;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class CarrinhoService {
 
-    private Carrinho carrinho;
+
+    private final Map<String, Carrinho> carrinhosAtivos = new HashMap<>();
+
+    private String clienteLogadoId;
+
+    public void setClienteLogado(String clienteId)
+    {
+        this.clienteLogadoId = clienteId;
+    }
+
+    private Carrinho getCarrinhoAtual(){
+        if (clienteLogadoId == null) throw new IllegalStateException("Nenhum usuário logado.");
+        return carrinhosAtivos.get(clienteLogadoId);
+    }
 
     /**
      * Inicia um novo carrinho para o restaurante escolhido.
      */
     public Carrinho iniciarCarrinho(String clienteId, String restauranteId) {
-        carrinho = new Carrinho(clienteId, restauranteId);
-        return carrinho;
+        Carrinho novoCarrinho = new Carrinho(clienteId, restauranteId);
+        carrinhosAtivos.put(clienteId, novoCarrinho);
+        return novoCarrinho;
     }
 
     /**
@@ -23,6 +40,9 @@ public class CarrinhoService {
      * @throws IllegalArgumentException Produto deve ser maior que zero
      */
     public void adicionarItem(Produto produto, int quantidade) {
+        Carrinho c = getCarrinhoAtual();
+        if (c == null) throw new IllegalStateException("Inicie um carrinho primeiro.");
+
         try {
             validarCarrinhoAtivo();
             if (!produto.isStatusAtivo()) {
@@ -32,18 +52,21 @@ public class CarrinhoService {
             if (quantidade <= 0) {
                 throw new IllegalArgumentException("Quantidade deve ser maior que zero.");
             }
-            if (!produto.getRestauranteId().equals(carrinho.getRestauranteId())) {
+            if (!produto.getRestauranteId().equals(c.getRestauranteId())) {
                 throw new IllegalStateException(
                         "Produto pertence a outro restaurante. Esvazie o carrinho antes.");
             }
-            carrinho.adicionarItem(
+            c.adicionarItem(
                     produto.getId(),
                     produto.getNome(),
                     quantidade,
                     produto.getPreco()
             );
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
+            if (e instanceof IllegalStateException || e instanceof IllegalArgumentException) {
+                throw e;
+                }
+            throw new RuntimeException("Erro ao adicionar item: " + e.getMessage(), e);
         }
     }
 
@@ -51,9 +74,10 @@ public class CarrinhoService {
      * Remove um item do carrinho pelo ID do produto.
      */
     public void removerItem(String produtoId) {
+        Carrinho c = getCarrinhoAtual();
         try {
             validarCarrinhoAtivo();
-            carrinho.removerItem(produtoId);
+            c.removerItem(produtoId);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -63,9 +87,10 @@ public class CarrinhoService {
      * Esvazia o carrinho atual.
      */
     public void limpar() {
+        Carrinho c = getCarrinhoAtual();
         try {
             validarCarrinhoAtivo();
-            carrinho.limpar();
+             c.limpar();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -75,9 +100,10 @@ public class CarrinhoService {
      * Retorna o carrinho atual.
      */
     public Carrinho getCarrinho() {
+        Carrinho c = getCarrinhoAtual();
         try {
             validarCarrinhoAtivo();
-            return carrinho;
+            return c;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -87,8 +113,9 @@ public class CarrinhoService {
      * Retorna true se há carrinho ativo com itens.
      */
     public boolean temCarrinhoAtivo() {
+        Carrinho c = getCarrinhoAtual();
         try {
-            return carrinho != null && !carrinho.estaVazio();
+            return c != null && !c.estaVazio();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -98,17 +125,17 @@ public class CarrinhoService {
      * Zera a sessão — chamado após checkout ou logout.
      */
     public void encerrarCarrinho() {
-        carrinho = null;
+        Carrinho c = getCarrinhoAtual();
+        if (clienteLogadoId != null) {
+            carrinhosAtivos.remove(clienteLogadoId);
+        }
     }
 
     private void validarCarrinhoAtivo() {
-        try {
-            if (carrinho == null) {
+        Carrinho c = getCarrinhoAtual();
+            if (c == null) {
                 throw new IllegalStateException(
                         "Nenhum carrinho ativo. Escolha um restaurante primeiro.");
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
     }
 }
