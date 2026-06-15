@@ -30,9 +30,9 @@ public class AreaEntregaController {
     public void editarAreaEntrega(String id,
                                   String novoBairro,
                                   BigDecimal novaDistancia,
-                                  BigDecimal novoTaxa,
+                                  BigDecimal novaTaxa,
                                   int novoPrevisao) {
-        areaEntregaService.editarAreaEntrega(id, novoBairro, novaDistancia, novoTaxa, novoPrevisao);
+        areaEntregaService.editarAreaEntrega(id, novoBairro, novaDistancia, novaTaxa, novoPrevisao);
     }
 
     public void deletarAreaEntrega(String id) {

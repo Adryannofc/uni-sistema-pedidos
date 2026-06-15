@@ -20,7 +20,7 @@ public class RestauranteFrame extends BaseFrame {
     private final CategoriaController categoriaController;
     private final ProdutoController produtoController;
     private final RestauranteController restauranteController;
-    private final AreaEntregaController areaEntregaController;
+    private final AreaEntregaController areaEntregaController; // era AreaEntregaService
     private final HorarioController horarioController;
     private final PedidoController pedidoController;
     private final AutenticacaoController autenticacaoController;
@@ -30,7 +30,7 @@ public class RestauranteFrame extends BaseFrame {
                             CategoriaController categoriaController,
                             ProdutoController produtoController,
                             RestauranteController restauranteController,
-                            AreaEntregaController areaEntregaController,
+                            AreaEntregaController areaEntregaController, // era AreaEntregaService
                             HorarioController horarioController,
                             PedidoController pedidoController,
                             AutenticacaoController autenticacaoController,
@@ -40,91 +40,15 @@ public class RestauranteFrame extends BaseFrame {
         this.categoriaController = categoriaController;
         this.produtoController = produtoController;
         this.restauranteController = restauranteController;
-        this.areaEntregaController = areaEntregaController;
+        this.areaEntregaController = areaEntregaController; // era areaEntregaService
         this.horarioController = horarioController;
         this.pedidoController = pedidoController;
         this.autenticacaoController = autenticacaoController;
         this.acaoLogout = acaoLogout;
-
-        //Busca do restaurante Atualizado (devido a busca direto no BD pelo ID)
-        Restaurante restauranteBd = restauranteController.buscarPorId(usuario.getId());
-
-
-        if(restauranteBd != null && !restauranteBd.isStatusAtivo())
-        {
-            JOptionPane.showMessageDialog(this,"Sua conta está bloqueada ou inativa.\nEntre em contato com o suporte para mais informações.",
-                    "Acesso Negado",
-                    JOptionPane.ERROR_MESSAGE);
-
-            dispose();
-
-            if (acaoLogout != null)
-            {
-                SwingUtilities.invokeLater(acaoLogout::run);
-            }
-            return;
-
-        }
-
         construirInterface();
         criarAbas();
         criarMenu();
-
-        verificacaoPeriodica();
     }
-
-    private void verificacaoPeriodica(){
-           int tempo = 5000;
-
-           Timer timer = new Timer(tempo, e -> {
-               // O novo operador que fara uma verificação de 5 em 5 min
-               SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
-                   @Override
-                   protected Boolean doInBackground() {
-                       if (restauranteController != null) {
-                           var restauranteBd = restauranteController.buscarPorId(usuario.getId());
-                           return restauranteBd != null && restauranteBd.isStatusAtivo();
-                       }
-                       return true;
-                   }
-
-                   @Override
-                   protected void done() {
-                       // Esse pedaço roda de volta na EDT (operador responsavel pela tela)
-                       try {
-                           boolean estáAtivo = get(); // Pega o resultado do doInBackground
-
-                           if (!estáAtivo) {
-                               // Para o timer para não ficar rodando em loop infinito após fechar
-                               ((Timer) e.getSource()).stop();
-
-
-                               JOptionPane.showMessageDialog(RestauranteFrame.this,
-                                       "Sua sessão expirou pois esta conta foi bloqueada pelo administrador.",
-                                       "Conta Bloqueada",
-                                       JOptionPane.WARNING_MESSAGE);
-
-                               dispose();
-                               if (acaoLogout != null) {
-                                   SwingUtilities.invokeLater(acaoLogout::run);
-                               }
-                           }
-                       } catch (Exception ex) {
-                           ex.printStackTrace(); // Se der erro na busca, não trava o sistema, só avisa o console
-                       }
-                   }
-               };
-
-               // Manda o operário começar a trabalhar de fundo
-               worker.execute();
-           });
-
-        // Inicializa o cronômetro
-        timer.start();
-    }
-
-
-
 
     private void construirInterface() {
         setLayout(new BorderLayout());
@@ -165,7 +89,6 @@ public class RestauranteFrame extends BaseFrame {
     }
 
     private JMenuBar criarMenu() {
-
         JMenuBar menuBar = new JMenuBar();
         menuBar.setBackground(Color.WHITE);
         menuBar.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
@@ -203,7 +126,7 @@ public class RestauranteFrame extends BaseFrame {
 
         abas.addTab("Produtos",                  new PainelProdutos(usuario, produtoController, categoriaController));
         abas.addTab("Pedidos",                   new PainelPedidos(usuario, pedidoController));
-        abas.addTab("Áreas de Entrega",          new PainelAreaEntrega(usuario, areaEntregaController));
+        abas.addTab("Áreas de Entrega",          new PainelAreaEntrega(usuario, areaEntregaController)); // era areaEntregaService
         abas.addTab("Horários de funcionamento", new PainelHorarios(usuario, horarioController));
         abas.addTab("Perfil",                    new PainelPerfil(usuario, autenticacaoController, restauranteController));
 
