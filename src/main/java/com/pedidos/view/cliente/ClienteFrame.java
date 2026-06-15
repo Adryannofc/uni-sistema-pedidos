@@ -38,7 +38,6 @@ public class ClienteFrame extends BaseFrame {
     private JLabel lblStatusPedidos;
     private JLabel lblStatusEndereco;
 
-    // track last selected tab to allow cancelling a tab change
     private int lastSelectedIndex = 0;
 
     public ClienteFrame(Usuario usuario,
