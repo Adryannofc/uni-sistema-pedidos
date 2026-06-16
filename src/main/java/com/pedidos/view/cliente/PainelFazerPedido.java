@@ -10,7 +10,7 @@ import com.pedidos.model.entity.HorarioFuncionamento;
 import com.pedidos.model.entity.Restaurante;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
-import com.pedidos.view.util.session.CarrinhoManager;
+import com.pedidos.model.entity.ItemPedido;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -375,10 +375,10 @@ public class PainelFazerPedido extends JPanel {
             }
             String nome = (String) modelCarrinho.getValueAt(row, 0);
             carrinhoController.getItens().stream()
-                    .filter(it -> it.getProduto().getNome().equals(nome))
+                    .filter(it -> it.getNomeProduto().equals(nome))
                     .findFirst()
                     .ifPresent(it -> {
-                        carrinhoController.removerItem(it.getProduto().getId());
+                        carrinhoController.removerItem(it.getProdutoId());
                         sincronizarCarrinho();
                     });
         });
@@ -438,9 +438,9 @@ public class PainelFazerPedido extends JPanel {
         modelCarrinho.setRowCount(0);
 
         if (!carrinhoController.estaVazio()) {
-            for (CarrinhoManager.ItemCarrinho item : carrinhoController.getItens()) {
+            for (ItemPedido item : carrinhoController.getItens()) {
                 modelCarrinho.addRow(new Object[]{
-                        item.getProduto().getNome(),
+                        item.getNomeProduto(),
                         item.getQuantidade(),
                         moedaBR.format(item.calcularSubtotal())
                 });

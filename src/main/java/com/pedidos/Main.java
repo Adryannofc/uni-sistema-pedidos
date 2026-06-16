@@ -7,7 +7,6 @@ import com.pedidos.model.infra.config.FlyWayconfig;
 import com.pedidos.model.infra.config.JPAUtil;
 import com.pedidos.model.infra.repository.impl.*;
 import com.pedidos.view.login.LoginFrame;
-import com.pedidos.view.util.session.CarrinhoManager;
 import jakarta.persistence.EntityManager;
 
 import javax.swing.*;
@@ -44,8 +43,8 @@ public class Main {
         PedidoService pedidoService = new PedidoService(pedidoRepo, horarioFuncionamentoRepo);
         HorarioService horarioService = new HorarioService(horarioFuncionamentoRepo);
         AreaEntregaService areaEntregaService = new AreaEntregaService(areaRepo);
-        CarrinhoManager carrinhoManager = new CarrinhoManager();
-        CarrinhoController carrinhoController = new CarrinhoController(carrinhoManager);
+        CarrinhoService carrinhoService = new CarrinhoService();
+        CarrinhoController carrinhoController = new CarrinhoController(carrinhoService);
 
 
         AutenticacaoController autenticacaoController = new AutenticacaoController(authService);

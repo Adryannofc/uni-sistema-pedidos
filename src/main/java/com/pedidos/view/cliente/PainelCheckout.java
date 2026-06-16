@@ -6,7 +6,6 @@ import com.pedidos.controller.PedidoController;
 import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
-import com.pedidos.view.util.session.CarrinhoManager;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -235,16 +234,7 @@ public class PainelCheckout extends JPanel {
         }
 
         try {
-            // Converte CarrinhoManager → Carrinho (entidade de domínio)
-            Carrinho carrinhoDominio = new Carrinho(cliente.getId(), restauranteSelecionado.getId());
-            for (CarrinhoManager.ItemCarrinho item : carrinhoController.getItens()) {
-                carrinhoDominio.adicionarItem(
-                        item.getProduto().getId(),
-                        item.getProduto().getNome(),
-                        item.getQuantidade(),
-                        item.getProduto().getPreco()
-                );
-            }
+            Carrinho carrinhoDominio = carrinhoController.getCarrinho();
 
             // Código de confirmação de entrega — últimos 4 dígitos do CPF
             String cpfDigitos = cliente.getCpf().replaceAll("[^0-9]", "");
@@ -281,15 +271,15 @@ public class PainelCheckout extends JPanel {
         }
     }
 
-    /** Sincroniza modelCheckout e totais do checkout com o estado atual do CarrinhoManager. */
+    /** Sincroniza modelCheckout e totais do checkout com o estado atual do carrinho. */
     public void sincronizar() {
         modelCheckout.setRowCount(0);
         if (!carrinhoController.estaVazio()) {
-            for (CarrinhoManager.ItemCarrinho item : carrinhoController.getItens()) {
+            for (ItemPedido item : carrinhoController.getItens()) {
                 modelCheckout.addRow(new Object[]{
-                        item.getProduto().getNome(),
+                        item.getNomeProduto(),
                         item.getQuantidade(),
-                        moedaBR.format(item.getProduto().getPreco()),
+                        moedaBR.format(item.getPrecoUnitario()),
                         moedaBR.format(item.calcularSubtotal())
                 });
             }

@@ -5,7 +5,6 @@ import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 import com.pedidos.view.util.base.BaseFrame;
-import com.pedidos.view.util.session.CarrinhoManager;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -279,7 +278,7 @@ public class ClienteFrame extends BaseFrame {
     public void atualizarTituloFazerPedido() {
         int total = carrinhoController.estaVazio() ? 0
                 : carrinhoController.getItens().stream()
-                .mapToInt(CarrinhoManager.ItemCarrinho::getQuantidade).sum();
+                .mapToInt(com.pedidos.model.entity.ItemPedido::getQuantidade).sum();
         tabbedPane.setTitleAt(0, total > 0 ? "Fazer Pedido (" + total + ")" : "Fazer Pedido");
     }
 }

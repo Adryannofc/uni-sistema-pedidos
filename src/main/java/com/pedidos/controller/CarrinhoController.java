@@ -1,56 +1,65 @@
 package com.pedidos.controller;
 
+import com.pedidos.model.entity.Carrinho;
+import com.pedidos.model.entity.ItemPedido;
 import com.pedidos.model.entity.Produto;
-import com.pedidos.view.util.session.CarrinhoManager;
+import com.pedidos.model.service.CarrinhoService;
 
 import java.math.BigDecimal;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class CarrinhoController {
 
-    private final CarrinhoManager carrinhoManager;
+    private final CarrinhoService carrinhoService;
 
-    public CarrinhoController(CarrinhoManager carrinhoManager) {
-        this.carrinhoManager = carrinhoManager;
+    public CarrinhoController(CarrinhoService carrinhoService) {
+        this.carrinhoService = carrinhoService;
     }
 
     public void iniciar(String clienteId, String restauranteId, BigDecimal taxaEntrega) {
-        carrinhoManager.iniciar(clienteId, restauranteId, taxaEntrega);
+        carrinhoService.setClienteLogado(clienteId);
+        carrinhoService.iniciarCarrinho(clienteId, restauranteId);
+        carrinhoService.setTaxaEntrega(taxaEntrega);
     }
 
     public void adicionarItem(Produto produto, int quantidade) {
-        carrinhoManager.adicionarItem(produto, quantidade);
+        carrinhoService.adicionarItem(produto, quantidade);
     }
 
     public void removerItem(String produtoId) {
-        carrinhoManager.removerItem(produtoId);
+        carrinhoService.removerItem(produtoId);
     }
 
     public void esvaziar() {
-        carrinhoManager.esvaziar();
+        carrinhoService.encerrarCarrinho();
     }
 
     public boolean estaVazio() {
-        return carrinhoManager.estaVazio();
+        return !carrinhoService.temCarrinhoAtivo();
     }
 
-    public Collection<CarrinhoManager.ItemCarrinho> getItens() {
-        return carrinhoManager.getItens();
+    public List<ItemPedido> getItens() {
+        return estaVazio() ? Collections.emptyList() : carrinhoService.getCarrinho().getItens();
+    }
+
+    public Carrinho getCarrinho() {
+        return estaVazio() ? null : carrinhoService.getCarrinho();
     }
 
     public String getRestauranteId() {
-        return carrinhoManager.getRestauranteId();
+        return estaVazio() ? null : carrinhoService.getCarrinho().getRestauranteId();
     }
 
     public BigDecimal calcularSubtotal() {
-        return carrinhoManager.calcularSubtotal();
+        return estaVazio() ? BigDecimal.ZERO : carrinhoService.getCarrinho().calcularSubtotal();
     }
 
     public BigDecimal calcularTotal() {
-        return carrinhoManager.calcularTotal();
+        return calcularSubtotal().add(carrinhoService.getTaxaEntrega());
     }
 
     public BigDecimal getTaxaEntrega() {
-        return carrinhoManager.getTaxaEntrega();
+        return carrinhoService.getTaxaEntrega();
     }
 }
