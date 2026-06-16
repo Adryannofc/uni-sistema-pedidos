@@ -1,5 +1,6 @@
 package com.pedidos.view.cliente;
 
+import com.pedidos.controller.CarrinhoController;
 import com.pedidos.controller.ClienteController;
 import com.pedidos.controller.PedidoController;
 import com.pedidos.model.entity.*;
@@ -28,7 +29,7 @@ public class PainelCheckout extends JPanel {
     private final Cliente cliente;
     private final ClienteController clienteController;
     private final PedidoController pedidoController;
-    private final CarrinhoManager carrinho;
+    private final CarrinhoController carrinhoController;
     private PainelFazerPedido painelFazerPedido;
 
     private final NumberFormat moedaBR = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
@@ -49,14 +50,14 @@ public class PainelCheckout extends JPanel {
                           Cliente cliente,
                           ClienteController clienteController,
                           PedidoController pedidoController,
-                          CarrinhoManager carrinho,
+                          CarrinhoController carrinhoController,
                           PainelFazerPedido painelFazerPedido,
                           Runnable aoConfirmarPedido) {
         this.usuario = usuario;
         this.cliente = cliente;
         this.clienteController = clienteController;
         this.pedidoController = pedidoController;
-        this.carrinho = carrinho;
+        this.carrinhoController = carrinhoController;
         this.painelFazerPedido = painelFazerPedido;
         this.aoConfirmarPedido = aoConfirmarPedido;
 
@@ -200,7 +201,7 @@ public class PainelCheckout extends JPanel {
      * esvazia carrinho → atualiza UI.
      */
     public void confirmarPedido() {
-        if (carrinho.estaVazio()) {
+        if (carrinhoController.estaVazio()) {
             JOptionPane.showMessageDialog(this,
                     "Carrinho vazio! Adicione itens antes de confirmar.",
                     "Aviso", JOptionPane.WARNING_MESSAGE);
@@ -236,7 +237,7 @@ public class PainelCheckout extends JPanel {
         try {
             // Converte CarrinhoManager → Carrinho (entidade de domínio)
             Carrinho carrinhoDominio = new Carrinho(cliente.getId(), restauranteSelecionado.getId());
-            for (CarrinhoManager.ItemCarrinho item : carrinho.getItens()) {
+            for (CarrinhoManager.ItemCarrinho item : carrinhoController.getItens()) {
                 carrinhoDominio.adicionarItem(
                         item.getProduto().getId(),
                         item.getProduto().getNome(),
@@ -255,11 +256,11 @@ public class PainelCheckout extends JPanel {
                     carrinhoDominio,
                     enderecoPadrao.get(),
                     codigoConfirmacao,
-                    carrinho.getTaxaEntrega()
+                    carrinhoController.getTaxaEntrega()
             );
 
             // Limpa sessão local
-            carrinho.esvaziar();
+            carrinhoController.esvaziar();
 
             JOptionPane.showMessageDialog(this,
                     "✅ Pedido confirmado com sucesso!\n" +
@@ -283,8 +284,8 @@ public class PainelCheckout extends JPanel {
     /** Sincroniza modelCheckout e totais do checkout com o estado atual do CarrinhoManager. */
     public void sincronizar() {
         modelCheckout.setRowCount(0);
-        if (!carrinho.estaVazio()) {
-            for (CarrinhoManager.ItemCarrinho item : carrinho.getItens()) {
+        if (!carrinhoController.estaVazio()) {
+            for (CarrinhoManager.ItemCarrinho item : carrinhoController.getItens()) {
                 modelCheckout.addRow(new Object[]{
                         item.getProduto().getNome(),
                         item.getQuantidade(),
@@ -293,9 +294,9 @@ public class PainelCheckout extends JPanel {
                 });
             }
         }
-        BigDecimal sub = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.calcularSubtotal();
-        BigDecimal taxa = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.getTaxaEntrega();
-        BigDecimal total = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.calcularTotal();
+        BigDecimal sub = carrinhoController.estaVazio() ? BigDecimal.ZERO : carrinhoController.calcularSubtotal();
+        BigDecimal taxa = carrinhoController.estaVazio() ? BigDecimal.ZERO : carrinhoController.getTaxaEntrega();
+        BigDecimal total = carrinhoController.estaVazio() ? BigDecimal.ZERO : carrinhoController.calcularTotal();
         if (lblCheckoutSubtotal != null) lblCheckoutSubtotal.setText(moedaBR.format(sub));
         if (lblCheckoutTaxa != null) lblCheckoutTaxa.setText(moedaBR.format(taxa));
         if (lblCheckoutTotal != null) lblCheckoutTotal.setText(moedaBR.format(total));
