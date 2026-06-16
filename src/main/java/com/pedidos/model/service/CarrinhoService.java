@@ -3,15 +3,16 @@ package com.pedidos.model.service;
 import com.pedidos.model.entity.Carrinho;
 import com.pedidos.model.entity.Produto;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CarrinhoService {
 
-
     private final Map<String, Carrinho> carrinhosAtivos = new HashMap<>();
 
     private String clienteLogadoId;
+    private BigDecimal taxaEntrega = BigDecimal.ZERO;
 
     public void setClienteLogado(String clienteId)
     {
@@ -19,7 +20,7 @@ public class CarrinhoService {
     }
 
     private Carrinho getCarrinhoAtual(){
-        if (clienteLogadoId == null) throw new IllegalStateException("Nenhum usuário logado.");
+        if (clienteLogadoId == null) return null;
         return carrinhosAtivos.get(clienteLogadoId);
     }
 
@@ -129,6 +130,14 @@ public class CarrinhoService {
         if (clienteLogadoId != null) {
             carrinhosAtivos.remove(clienteLogadoId);
         }
+    }
+
+    public void setTaxaEntrega(BigDecimal taxa) {
+        this.taxaEntrega = taxa != null ? taxa : BigDecimal.ZERO;
+    }
+
+    public BigDecimal getTaxaEntrega() {
+        return taxaEntrega;
     }
 
     private void validarCarrinhoAtivo() {

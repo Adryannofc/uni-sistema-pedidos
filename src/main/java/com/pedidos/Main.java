@@ -7,7 +7,6 @@ import com.pedidos.model.infra.config.FlyWayconfig;
 import com.pedidos.model.infra.config.JPAUtil;
 import com.pedidos.model.infra.repository.impl.*;
 import com.pedidos.view.login.LoginFrame;
-import com.pedidos.view.util.session.CarrinhoManager;
 import jakarta.persistence.EntityManager;
 
 import javax.swing.*;
@@ -45,7 +44,7 @@ public class Main {
         HorarioService horarioService = new HorarioService(horarioFuncionamentoRepo);
         AreaEntregaService areaEntregaService = new AreaEntregaService(areaRepo);
         CarrinhoService carrinhoService = new CarrinhoService();
-        CarrinhoManager carrinhoManager = new CarrinhoManager();
+        CarrinhoController carrinhoController = new CarrinhoController(carrinhoService);
 
 
         AutenticacaoController autenticacaoController = new AutenticacaoController(authService);
@@ -58,7 +57,6 @@ public class Main {
         EnderecoController enderecoController = new EnderecoController(enderecoService);
         HorarioController horarioController = new HorarioController(horarioService);
         AreaEntregaController areaEntregaController = new AreaEntregaController(areaEntregaService);
-        CarrinhoController carrinhoController = new CarrinhoController(carrinhoService);
 
         SwingUtilities.invokeLater(() -> {
             try {
@@ -75,10 +73,9 @@ public class Main {
                     categoriaController,
                     produtoController,
                     pedidoController,
-                    carrinhoManager,
+                    carrinhoController,
                     areaEntregaController,
-                    horarioController,
-                    carrinhoController );
+                    horarioController);
             frame.setVisible(true);
         });
     }

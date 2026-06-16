@@ -11,7 +11,6 @@ import com.pedidos.view.cadastro.CadastroFrame;
 import com.pedidos.view.cliente.ClienteFrame;
 import com.pedidos.view.restaurante.RestauranteFrame;
 import com.pedidos.view.util.base.BaseFrame;
-import com.pedidos.view.util.session.CarrinhoManager;
 import com.pedidos.view.util.session.SessionManager;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -30,10 +29,9 @@ public class LoginFrame extends BaseFrame {
     private final CategoriaController   categoriaController;
     private final ProdutoController   produtoController;
     private final PedidoController    pedidoController;
-    private final CarrinhoManager     carrinho;
+    private final CarrinhoController  carrinhoController;
     private final AreaEntregaController  areaEntregaController;
     private final HorarioController     horarioController;
-    private final CarrinhoController carrinhoController;
 
     private JTextField     campoEmail;
     private JPasswordField campoSenha;
@@ -50,9 +48,9 @@ public class LoginFrame extends BaseFrame {
                       CategoriaController categoriaController,
                       ProdutoController produtoController,
                       PedidoController pedidoController,
-                      CarrinhoManager carrinho,
+                      CarrinhoController carrinhoController,
                       AreaEntregaController areaEntregaController,
-                      HorarioController horarioController, CarrinhoController carrinhoController) {
+                      HorarioController horarioController) {
         super("Sistema de Delivery - Login", 500, 310);
         this.autenticacaoController = autenticacaoController;
         this.clienteController      = clienteController;
@@ -62,10 +60,9 @@ public class LoginFrame extends BaseFrame {
         this.categoriaController   = categoriaController;
         this.produtoController     = produtoController;
         this.pedidoController      = pedidoController;
-        this.carrinho            = carrinho;
+        this.carrinhoController  = carrinhoController;
         this.areaEntregaController  = areaEntregaController;
         this.horarioController      = horarioController;
-        this.carrinhoController = carrinhoController;
         construirInterface();
     }
 
@@ -329,7 +326,7 @@ public class LoginFrame extends BaseFrame {
                         restauranteController,
                         produtoController,
                         pedidoController,
-                        carrinho,
+                        carrinhoController,
                         areaEntregaController,
                         this::abrirTelaLogin);
             }
@@ -349,8 +346,8 @@ public class LoginFrame extends BaseFrame {
                 autenticacaoController, clienteController, restauranteController,
                 adminController, enderecoController,
                 categoriaController, produtoController,
-                pedidoController, carrinho,
-                areaEntregaController, horarioController, carrinhoController);
+                pedidoController, carrinhoController,
+                areaEntregaController, horarioController);
         SessionManager.getInstance().trocarFrame(novoLogin);
         SessionManager.getInstance().encerrarSessao();
     }

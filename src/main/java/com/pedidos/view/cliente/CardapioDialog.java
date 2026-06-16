@@ -1,12 +1,12 @@
 package com.pedidos.view.cliente;
 
+import com.pedidos.controller.CarrinhoController;
 import com.pedidos.controller.ProdutoController;
 import com.pedidos.model.entity.CategoriaCardapio;
 import com.pedidos.model.entity.Produto;
 import com.pedidos.model.entity.Restaurante;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
-import com.pedidos.view.util.session.CarrinhoManager;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -24,16 +24,16 @@ public class CardapioDialog extends JDialog {
 
     private final ProdutoController produtoController;
     private final Restaurante restaurante;
-    private final CarrinhoManager carrinho;
+    private final CarrinhoController carrinhoController;
     private final DefaultTableModel produtosModel;
     private JTable tabelaProdutos;
 
     public CardapioDialog(JFrame owner, ProdutoController produtoController,
-                          Restaurante restaurante, CarrinhoManager carrinho) {
+                          Restaurante restaurante, CarrinhoController carrinhoController) {
         super(owner, "Cardápio — " + restaurante.getNome(), true);
         this.produtoController = produtoController;
         this.restaurante = restaurante;
-        this.carrinho = carrinho;
+        this.carrinhoController = carrinhoController;
 
         setSize(700, 500);
         setLocationRelativeTo(owner);
@@ -230,7 +230,7 @@ public class CardapioDialog extends JDialog {
                 return;
             }
 
-            carrinho.adicionarItem(selecionado, quantidade);
+            carrinhoController.adicionarItem(selecionado, quantidade);
             JOptionPane.showMessageDialog(this,
                     quantidade + "x " + selecionado.getNome() + " adicionado(s) ao carrinho!",
                     "Sucesso", JOptionPane.INFORMATION_MESSAGE);

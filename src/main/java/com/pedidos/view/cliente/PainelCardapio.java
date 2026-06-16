@@ -1,12 +1,12 @@
 package com.pedidos.view.cliente;
 
+import com.pedidos.controller.CarrinhoController;
 import com.pedidos.controller.ProdutoController;
 import com.pedidos.model.entity.CategoriaCardapio;
 import com.pedidos.model.entity.Produto;
 import com.pedidos.model.entity.Restaurante;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
-import com.pedidos.view.util.session.CarrinhoManager;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -27,7 +27,7 @@ public class PainelCardapio extends JPanel {
             NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 
     private final ProdutoController   produtoController;
-    private final CarrinhoManager  carrinho;
+    private final CarrinhoController  carrinhoController;
     private final Runnable         onVoltar;
     private final Runnable         onAdicionado;
 
@@ -41,11 +41,11 @@ public class PainelCardapio extends JPanel {
     private List<Produto> todosOsProdutos  = new ArrayList<>();
     private List<Produto> produtosVisiveis = new ArrayList<>();
 
-    public PainelCardapio(ProdutoController produtoController, CarrinhoManager carrinho,
+    public PainelCardapio(ProdutoController produtoController, CarrinhoController carrinhoController,
                           Runnable onVoltar, Runnable onAdicionado) {
         super(new BorderLayout(0, 0));
         this.produtoController = produtoController;
-        this.carrinho       = carrinho;
+        this.carrinhoController = carrinhoController;
         this.onVoltar       = onVoltar;
         this.onAdicionado   = onAdicionado;
         setBackground(Color.WHITE);
@@ -267,7 +267,7 @@ public class PainelCardapio extends JPanel {
         int qtd = lerQuantidade();
 
         try {
-            carrinho.adicionarItem(produto, qtd);
+            carrinhoController.adicionarItem(produto, qtd);
             onAdicionado.run();
             campoQtd.setText("1");
         } catch (IllegalArgumentException ex) {

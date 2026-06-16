@@ -5,7 +5,6 @@ import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 import com.pedidos.view.util.base.BaseFrame;
-import com.pedidos.view.util.session.CarrinhoManager;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -25,7 +24,7 @@ public class ClienteFrame extends BaseFrame {
     private final RestauranteController restauranteController;
     private final ProdutoController produtoController;
     private final PedidoController pedidoController;
-    private final CarrinhoManager carrinho;
+    private final CarrinhoController carrinhoController;
     private final AreaEntregaController areaEntregaController;
     private final Runnable acaoLogout;
 
@@ -47,7 +46,7 @@ public class ClienteFrame extends BaseFrame {
                         RestauranteController restauranteController,
                         ProdutoController produtoController,
                         PedidoController pedidoController,
-                        CarrinhoManager carrinho,
+                        CarrinhoController carrinhoController,
                         AreaEntregaController areaEntregaController,
                         Runnable acaoLogout) {
         super("Sistema Delivery — " + usuario.getNome() + " | Cliente");
@@ -58,7 +57,7 @@ public class ClienteFrame extends BaseFrame {
         this.restauranteController  = restauranteController;
         this.produtoController      = produtoController;
         this.pedidoController       = pedidoController;
-        this.carrinho            = carrinho;
+        this.carrinhoController  = carrinhoController;
         this.areaEntregaController  = areaEntregaController;
         this.acaoLogout          = acaoLogout;
         construirInterface();
@@ -150,7 +149,7 @@ public class ClienteFrame extends BaseFrame {
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
                 null, opcoes, opcoes[0]);
         if (r == JOptionPane.YES_OPTION) {
-            carrinho.esvaziar();
+            carrinhoController.esvaziar();
             SwingUtilities.invokeLater(() -> acaoLogout.run());
         }
     }
@@ -199,7 +198,7 @@ public class ClienteFrame extends BaseFrame {
                 cliente,
                 restauranteController,
                 produtoController,
-                carrinho,
+                carrinhoController,
                 areaEntregaController,
                 () -> {
                     painelCheckout.sincronizar();
@@ -212,7 +211,7 @@ public class ClienteFrame extends BaseFrame {
                 cliente,
                 clienteController,
                 pedidoController,
-                carrinho,
+                carrinhoController,
                 painelFazerPedido,
                 () -> {
                     painelFazerPedido.sincronizarCarrinho();
@@ -276,9 +275,9 @@ public class ClienteFrame extends BaseFrame {
     }
 
     public void atualizarTituloFazerPedido() {
-        int total = carrinho.estaVazio() ? 0
-                : carrinho.getItens().stream()
-                .mapToInt(CarrinhoManager.ItemCarrinho::getQuantidade).sum();
+        int total = carrinhoController.estaVazio() ? 0
+                : carrinhoController.getItens().stream()
+                .mapToInt(com.pedidos.model.entity.ItemPedido::getQuantidade).sum();
         tabbedPane.setTitleAt(0, total > 0 ? "Fazer Pedido (" + total + ")" : "Fazer Pedido");
     }
 }
