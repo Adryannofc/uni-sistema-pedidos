@@ -1,6 +1,6 @@
 package com.pedidos.view.util.session;
 
-import com.pedidos.dto.UsuarioSessaoDTO;
+import com.pedidos.controller.dto.UsuarioSessaoDTO;
 import com.pedidos.model.enums.TipoUsuario;
 
 import javax.swing.*;

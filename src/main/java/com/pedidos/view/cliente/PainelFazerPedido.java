@@ -6,9 +6,9 @@ import com.pedidos.controller.CategoriaController;
 import com.pedidos.controller.EnderecoController;
 import com.pedidos.controller.ProdutoController;
 import com.pedidos.controller.RestauranteController;
-import com.pedidos.dto.EnderecoResumoDTO;
-import com.pedidos.dto.ItemCarrinhoDTO;
-import com.pedidos.dto.RestauranteResumoDTO;
+import com.pedidos.controller.dto.EnderecoResumoDTO;
+import com.pedidos.controller.dto.ItemCarrinhoDTO;
+import com.pedidos.controller.dto.RestauranteResumoDTO;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 

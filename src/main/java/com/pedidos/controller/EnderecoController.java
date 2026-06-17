@@ -1,6 +1,6 @@
 package com.pedidos.controller;
 
-import com.pedidos.dto.EnderecoResumoDTO;
+import com.pedidos.controller.dto.EnderecoResumoDTO;
 import com.pedidos.model.entity.Endereco;
 import com.pedidos.model.service.EnderecoService;
 

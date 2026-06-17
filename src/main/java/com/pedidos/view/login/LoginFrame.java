@@ -3,7 +3,7 @@ package com.pedidos.view.login;
 import com.pedidos.controller.AutenticacaoController;
 import com.pedidos.controller.ClienteController;
 import com.pedidos.controller.RestauranteController;
-import com.pedidos.dto.UsuarioSessaoDTO;
+import com.pedidos.controller.dto.UsuarioSessaoDTO;
 import com.pedidos.model.entity.*;
 import com.pedidos.model.enums.TipoUsuario;
 import com.pedidos.controller.*;

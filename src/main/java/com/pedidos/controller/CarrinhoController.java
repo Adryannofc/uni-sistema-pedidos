@@ -1,6 +1,6 @@
 package com.pedidos.controller;
 
-import com.pedidos.dto.ItemCarrinhoDTO;
+import com.pedidos.controller.dto.ItemCarrinhoDTO;
 import com.pedidos.model.entity.Carrinho;
 import com.pedidos.model.entity.ItemPedido;
 import com.pedidos.model.entity.Produto;

@@ -4,7 +4,7 @@ import com.pedidos.controller.CarrinhoController;
 import com.pedidos.controller.ClienteController;
 import com.pedidos.controller.PedidoController;
 import com.pedidos.controller.RestauranteController;
-import com.pedidos.dto.RestauranteResumoDTO;
+import com.pedidos.controller.dto.RestauranteResumoDTO;
 import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;

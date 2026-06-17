@@ -1,7 +1,7 @@
 package com.pedidos.view.restaurante;
 
 import com.pedidos.controller.PedidoController;
-import com.pedidos.dto.PedidoResumoDTO;
+import com.pedidos.controller.dto.PedidoResumoDTO;
 import com.pedidos.model.enums.StatusPedido;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;

@@ -1,4 +1,4 @@
-package com.pedidos.dto;
+package com.pedidos.controller.dto;
 
 import java.math.BigDecimal;
 

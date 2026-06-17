@@ -1,6 +1,6 @@
 package com.pedidos.controller;
 
-import com.pedidos.dto.PedidoResumoDTO;
+import com.pedidos.controller.dto.PedidoResumoDTO;
 import com.pedidos.model.entity.Carrinho;
 import com.pedidos.model.entity.Cliente;
 import com.pedidos.model.entity.Endereco;

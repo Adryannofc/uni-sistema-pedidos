@@ -1,7 +1,6 @@
 package com.pedidos.view.cliente;
 
 import com.pedidos.controller.*;
-import com.pedidos.dto.EnderecoResumoDTO;
 import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;

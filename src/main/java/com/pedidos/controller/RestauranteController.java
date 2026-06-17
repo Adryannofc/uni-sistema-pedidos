@@ -1,6 +1,6 @@
 package com.pedidos.controller;
 
-import com.pedidos.dto.RestauranteResumoDTO;
+import com.pedidos.controller.dto.RestauranteResumoDTO;
 import com.pedidos.model.entity.HorarioFuncionamento;
 import com.pedidos.model.entity.Restaurante;
 import com.pedidos.model.service.RestauranteService;
