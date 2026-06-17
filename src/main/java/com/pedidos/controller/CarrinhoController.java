@@ -1,5 +1,6 @@
 package com.pedidos.controller;
 
+import com.pedidos.controller.dto.ItemCarrinhoDTO;
 import com.pedidos.model.entity.Carrinho;
 import com.pedidos.model.entity.ItemPedido;
 import com.pedidos.model.entity.Produto;
@@ -41,6 +42,12 @@ public class CarrinhoController {
 
     public List<ItemPedido> getItens() {
         return estaVazio() ? Collections.emptyList() : carrinhoService.getCarrinho().getItens();
+    }
+
+    public List<ItemCarrinhoDTO> getItensComoDTO() {
+        return getItens().stream()
+                .map(i -> new ItemCarrinhoDTO(i.getProdutoId(), i.getNomeProduto(), i.getQuantidade(), i.calcularSubtotal()))
+                .toList();
     }
 
     public Carrinho getCarrinho() {
