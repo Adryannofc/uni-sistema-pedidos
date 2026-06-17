@@ -125,7 +125,7 @@ public class RestauranteFrame extends BaseFrame {
         abas.setFont(AppFonts.MENU);
 
         abas.addTab("Produtos",                  new PainelProdutos(usuario, produtoController, categoriaController));
-        abas.addTab("Pedidos",                   new PainelPedidos(usuario, pedidoController));
+        abas.addTab("Pedidos",                   new PainelPedidos(usuario.getId(), pedidoController));
         abas.addTab("Áreas de Entrega",          new PainelAreaEntrega(usuario, areaEntregaController)); // era areaEntregaService
         abas.addTab("Horários de funcionamento", new PainelHorarios(usuario, horarioController));
         abas.addTab("Perfil",                    new PainelPerfil(usuario, autenticacaoController, restauranteController));

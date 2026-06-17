@@ -3,6 +3,8 @@ package com.pedidos.view.cliente;
 import com.pedidos.controller.CarrinhoController;
 import com.pedidos.controller.ClienteController;
 import com.pedidos.controller.PedidoController;
+import com.pedidos.controller.RestauranteController;
+import com.pedidos.dto.RestauranteResumoDTO;
 import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -29,6 +31,7 @@ public class PainelCheckout extends JPanel {
     private final ClienteController clienteController;
     private final PedidoController pedidoController;
     private final CarrinhoController carrinhoController;
+    private final RestauranteController restauranteController;
     private PainelFazerPedido painelFazerPedido;
 
     private final NumberFormat moedaBR = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
@@ -50,6 +53,7 @@ public class PainelCheckout extends JPanel {
                           ClienteController clienteController,
                           PedidoController pedidoController,
                           CarrinhoController carrinhoController,
+                          RestauranteController restauranteController,
                           PainelFazerPedido painelFazerPedido,
                           Runnable aoConfirmarPedido) {
         this.usuario = usuario;
@@ -57,6 +61,7 @@ public class PainelCheckout extends JPanel {
         this.clienteController = clienteController;
         this.pedidoController = pedidoController;
         this.carrinhoController = carrinhoController;
+        this.restauranteController = restauranteController;
         this.painelFazerPedido = painelFazerPedido;
         this.aoConfirmarPedido = aoConfirmarPedido;
 
@@ -207,8 +212,8 @@ public class PainelCheckout extends JPanel {
             return;
         }
 
-        Restaurante restauranteSelecionado = painelFazerPedido.getRestauranteSelecionado();
-        if (restauranteSelecionado == null) {
+        RestauranteResumoDTO restauranteDTO = painelFazerPedido.getRestauranteSelecionado();
+        if (restauranteDTO == null) {
             JOptionPane.showMessageDialog(this,
                     "Nenhum restaurante selecionado. Volte à aba Fazer Pedido.",
                     "Aviso", JOptionPane.WARNING_MESSAGE);
@@ -234,6 +239,7 @@ public class PainelCheckout extends JPanel {
         }
 
         try {
+            Restaurante restauranteSelecionado = restauranteController.buscarPorId(restauranteDTO.id());
             Carrinho carrinhoDominio = carrinhoController.getCarrinho();
 
             // Código de confirmação de entrega — últimos 4 dígitos do CPF

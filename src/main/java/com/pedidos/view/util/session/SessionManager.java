@@ -1,6 +1,6 @@
 package com.pedidos.view.util.session;
 
-import com.pedidos.model.entity.Usuario;
+import com.pedidos.dto.UsuarioSessaoDTO;
 import com.pedidos.model.enums.TipoUsuario;
 
 import javax.swing.*;
@@ -8,7 +8,7 @@ import javax.swing.*;
 public class SessionManager {
     private static SessionManager instancia;
 
-    private Usuario   usuarioLogado;
+    private UsuarioSessaoDTO usuarioLogado;
     private JFrame frameAtual;
 
     private SessionManager() {}
@@ -18,7 +18,7 @@ public class SessionManager {
         return instancia;
     }
 
-    public void iniciarSessao(Usuario usuario, JFrame frameOrigem) {
+    public void iniciarSessao(UsuarioSessaoDTO usuario, JFrame frameOrigem) {
         this.usuarioLogado = usuario;
         this.frameAtual    = frameOrigem;
     }
@@ -34,8 +34,8 @@ public class SessionManager {
         novoFrame.setVisible(true);
     }
 
-    public Usuario    getUsuarioLogado() { return usuarioLogado; }
+    public UsuarioSessaoDTO getUsuarioLogado() { return usuarioLogado; }
     public boolean    estaLogado()       { return usuarioLogado != null; }
-    public TipoUsuario getTipo()         { return usuarioLogado != null ? usuarioLogado.getTipoUsuario() : null; }
-    public String     getNome()          { return usuarioLogado != null ? usuarioLogado.getNome() : "Desconectado"; }
+    public TipoUsuario getTipo()         { return usuarioLogado != null ? usuarioLogado.tipo() : null; }
+    public String     getNome()          { return usuarioLogado != null ? usuarioLogado.nome() : "Desconectado"; }
 }

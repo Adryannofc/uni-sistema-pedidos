@@ -1,10 +1,10 @@
 package com.pedidos.view.cliente;
 
 import com.pedidos.controller.CarrinhoController;
+import com.pedidos.controller.CategoriaController;
 import com.pedidos.controller.ProdutoController;
 import com.pedidos.model.entity.CategoriaCardapio;
 import com.pedidos.model.entity.Produto;
-import com.pedidos.model.entity.Restaurante;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 
@@ -28,6 +28,7 @@ public class PainelCardapio extends JPanel {
 
     private final ProdutoController   produtoController;
     private final CarrinhoController  carrinhoController;
+    private final CategoriaController categoriaController;
     private final Runnable         onVoltar;
     private final Runnable         onAdicionado;
 
@@ -42,10 +43,12 @@ public class PainelCardapio extends JPanel {
     private List<Produto> produtosVisiveis = new ArrayList<>();
 
     public PainelCardapio(ProdutoController produtoController, CarrinhoController carrinhoController,
+                          CategoriaController categoriaController,
                           Runnable onVoltar, Runnable onAdicionado) {
         super(new BorderLayout(0, 0));
         this.produtoController = produtoController;
         this.carrinhoController = carrinhoController;
+        this.categoriaController = categoriaController;
         this.onVoltar       = onVoltar;
         this.onAdicionado   = onAdicionado;
         setBackground(Color.WHITE);
@@ -205,14 +208,14 @@ public class PainelCardapio extends JPanel {
     // ─────────────────────────── API pública ─────────────────────────────────
 
     /** Carrega o cardápio do restaurante e atualiza categorias e título. */
-    public void configurar(Restaurante restaurante) {
-        labelTitulo.setText("Cardapio - " + restaurante.getNome());
+    public void configurar(String restauranteId, String restauranteNome) {
+        labelTitulo.setText("Cardapio - " + restauranteNome);
         campoQtd.setText("1");
 
-        todosOsProdutos = produtoController.listarAtivosPorRestaurante(restaurante.getId());
+        todosOsProdutos = produtoController.listarAtivosPorRestaurante(restauranteId);
 
         categoriaModel.clear();
-        List<CategoriaCardapio> cats = restaurante.getCategorias();
+        List<CategoriaCardapio> cats = categoriaController.listarCategoriasCardapio(restauranteId);
         if (cats != null) {
             cats.forEach(categoriaModel::addElement);
         }

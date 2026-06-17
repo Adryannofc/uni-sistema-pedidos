@@ -1,6 +1,7 @@
 package com.pedidos.view.cliente;
 
 import com.pedidos.controller.*;
+import com.pedidos.dto.EnderecoResumoDTO;
 import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -21,6 +22,7 @@ public class ClienteFrame extends BaseFrame {
     private final Cliente cliente;
     private final ClienteController clienteController;
     private final EnderecoController enderecoController;
+    private final CategoriaController categoriaController;
     private final RestauranteController restauranteController;
     private final ProdutoController produtoController;
     private final PedidoController pedidoController;
@@ -44,6 +46,7 @@ public class ClienteFrame extends BaseFrame {
                         Cliente cliente,
                         ClienteController clienteController,
                         EnderecoController enderecoController,
+                        CategoriaController categoriaController,
                         RestauranteController restauranteController,
                         ProdutoController produtoController,
                         PedidoController pedidoController,
@@ -55,6 +58,7 @@ public class ClienteFrame extends BaseFrame {
         this.cliente             = cliente;
         this.clienteController      = clienteController;
         this.enderecoController     = enderecoController;
+        this.categoriaController    = categoriaController;
         this.restauranteController  = restauranteController;
         this.produtoController      = produtoController;
         this.pedidoController       = pedidoController;
@@ -161,8 +165,8 @@ public class ClienteFrame extends BaseFrame {
         bar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(200, 200, 200)));
 
         int pedidosAtivos = pedidoController.listarPorCliente(cliente.getId()).size();
-        String infoEndereco = cliente.getEnderecoPadrao()
-                .map(e -> e.getRua() + ", " + e.getNumero() + " - " + e.getCidade())
+        String infoEndereco = enderecoController.buscarPadraoComoDTO(cliente.getId())
+                .map(e -> e.rua() + ", " + e.numero() + " - " + e.cidade())
                 .orElse("Nenhum endereço cadastrado");
 
         lblStatusPedidos  = new JLabel(pedidosAtivos + " pedido(s) ativo(s)");
@@ -185,8 +189,8 @@ public class ClienteFrame extends BaseFrame {
     public void atualizarStatusBar() {
         int total = pedidoController.listarPorCliente(cliente.getId()).size();
         lblStatusPedidos.setText(total + " pedido(s) ativo(s)");
-        lblStatusEndereco.setText(cliente.getEnderecoPadrao()
-                .map(e -> e.getRua() + ", " + e.getNumero() + " - " + e.getCidade())
+        lblStatusEndereco.setText(enderecoController.buscarPadraoComoDTO(cliente.getId())
+                .map(e -> e.rua() + ", " + e.numero() + " - " + e.cidade())
                 .orElse("Nenhum endereço cadastrado"));
     }
 
@@ -196,7 +200,9 @@ public class ClienteFrame extends BaseFrame {
         tabbedPane.setBackground(Color.WHITE);
 
         painelFazerPedido = new PainelFazerPedido(
-                cliente,
+                cliente.getId(),
+                enderecoController,
+                categoriaController,
                 restauranteController,
                 produtoController,
                 carrinhoController,
@@ -213,6 +219,7 @@ public class ClienteFrame extends BaseFrame {
                 clienteController,
                 pedidoController,
                 carrinhoController,
+                restauranteController,
                 painelFazerPedido,
                 () -> {
                     painelFazerPedido.sincronizarCarrinho();
@@ -277,8 +284,8 @@ public class ClienteFrame extends BaseFrame {
 
     public void atualizarTituloFazerPedido() {
         int total = carrinhoController.estaVazio() ? 0
-                : carrinhoController.getItens().stream()
-                .mapToInt(com.pedidos.model.entity.ItemPedido::getQuantidade).sum();
+                : carrinhoController.getItensComoDTO().stream()
+                .mapToInt(dto -> dto.quantidade()).sum();
         tabbedPane.setTitleAt(0, total > 0 ? "Fazer Pedido (" + total + ")" : "Fazer Pedido");
     }
 }
