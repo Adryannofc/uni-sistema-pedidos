@@ -1,15 +1,16 @@
 package com.pedidos.view.login;
 
-import com.pedidos.application.service.*;
-import com.pedidos.domain.entities.*;
-import com.pedidos.domain.enums.TipoUsuario;
-import com.pedidos.domain.repository.RestauranteRepository;
+import com.pedidos.controller.AutenticacaoController;
+import com.pedidos.controller.ClienteController;
+import com.pedidos.controller.RestauranteController;
+import com.pedidos.model.entity.*;
+import com.pedidos.model.enums.TipoUsuario;
+import com.pedidos.controller.*;
 import com.pedidos.view.admin.AdminFrame;
 import com.pedidos.view.cadastro.CadastroFrame;
 import com.pedidos.view.cliente.ClienteFrame;
 import com.pedidos.view.restaurante.RestauranteFrame;
 import com.pedidos.view.util.base.BaseFrame;
-import com.pedidos.view.util.session.CarrinhoManager;
 import com.pedidos.view.util.session.SessionManager;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -20,52 +21,48 @@ import java.awt.*;
 
 public class LoginFrame extends BaseFrame {
 
-    private final AutenticacaoService autenticacaoService;
-    private final AdminService        adminService;
-    private final ClienteService      clienteService;
-    private final EnderecoService     enderecoService;
-    private final CategoriaService    categoriaService;
-    private final ProdutoService      produtoService;
-    private final RestauranteService  restauranteService;
-    private final PedidoService       pedidoService;
-    private final CarrinhoManager     carrinho;
-    private final RestauranteRepository restauranteRepo;
-    private final AreaEntregaService  areaEntregaService;
-    private final HorarioService      horarioService;
+    private final AutenticacaoController autenticacaoController;
+    private final ClienteController      clienteController;
+    private final RestauranteController  restauranteController;
+    private final AdminController          adminController;
+    private final EnderecoController    enderecoController;
+    private final CategoriaController   categoriaController;
+    private final ProdutoController   produtoController;
+    private final PedidoController    pedidoController;
+    private final CarrinhoController  carrinhoController;
+    private final AreaEntregaController  areaEntregaController;
+    private final HorarioController     horarioController;
 
     private JTextField     campoEmail;
     private JPasswordField campoSenha;
-    private JCheckBox      checkLembrar;
     private JButton        botaoCancelar;
     private JButton        botaoEntrar;
     private JLabel         labelConexao;
-    private JLabel         linkCadastrar;
+    private JPanel         painelNovoCadastro;
 
-    public LoginFrame(AutenticacaoService autenticacaoService,
-                      AdminService adminService,
-                      ClienteService clienteService,
-                      EnderecoService enderecoService,
-                      CategoriaService categoriaService,
-                      ProdutoService produtoService,
-                      RestauranteService restauranteService,
-                      PedidoService pedidoService,
-                      CarrinhoManager carrinho,
-                      RestauranteRepository restauranteRepo,
-                      AreaEntregaService areaEntregaService,
-                      HorarioService horarioService) {
+    public LoginFrame(AutenticacaoController autenticacaoController,
+                      ClienteController clienteController,
+                      RestauranteController restauranteController,
+                      AdminController adminController,
+                      EnderecoController enderecoController,
+                      CategoriaController categoriaController,
+                      ProdutoController produtoController,
+                      PedidoController pedidoController,
+                      CarrinhoController carrinhoController,
+                      AreaEntregaController areaEntregaController,
+                      HorarioController horarioController) {
         super("Sistema de Delivery - Login", 500, 310);
-        this.autenticacaoService = autenticacaoService;
-        this.adminService        = adminService;
-        this.clienteService      = clienteService;
-        this.enderecoService     = enderecoService;
-        this.categoriaService    = categoriaService;
-        this.produtoService      = produtoService;
-        this.restauranteService  = restauranteService;
-        this.pedidoService       = pedidoService;
-        this.carrinho            = carrinho;
-        this.restauranteRepo     = restauranteRepo;
-        this.areaEntregaService  = areaEntregaService;
-        this.horarioService      = horarioService;
+        this.autenticacaoController = autenticacaoController;
+        this.clienteController      = clienteController;
+        this.restauranteController  = restauranteController;
+        this.adminController          = adminController;
+        this.enderecoController    = enderecoController;
+        this.categoriaController   = categoriaController;
+        this.produtoController     = produtoController;
+        this.pedidoController      = pedidoController;
+        this.carrinhoController  = carrinhoController;
+        this.areaEntregaController  = areaEntregaController;
+        this.horarioController      = horarioController;
         construirInterface();
     }
 
@@ -106,19 +103,7 @@ public class LoginFrame extends BaseFrame {
         campoSenha = new JPasswordField(22);
         campoSenha.setFont(AppFonts.CAMPO);
 
-        checkLembrar = new JCheckBox("Lembrar acesso");
-        checkLembrar.setFont(AppFonts.LABEL);
-        checkLembrar.setOpaque(false);
-
-        linkCadastrar = new JLabel("<html><a href='#'>Não tem conta? Cadastre-se</a></html>");
-        linkCadastrar.setFont(AppFonts.LABEL);
-        linkCadastrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        linkCadastrar.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                abrirCadastro();
-            }
-        });
+        painelNovoCadastro = criarLinksNovoCadastro();
 
         botaoCancelar = botaoSecundario("Cancelar");
         botaoCancelar.addActionListener(e -> cancelar());
@@ -147,8 +132,7 @@ public class LoginFrame extends BaseFrame {
                 .addGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addComponent(campoEmail,    GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
                         .addComponent(campoSenha,    GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
-                        .addComponent(checkLembrar)
-                        .addComponent(linkCadastrar)
+                        .addComponent(painelNovoCadastro)
                         .addComponent(painelBotoes,  GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
         );
 
@@ -157,9 +141,7 @@ public class LoginFrame extends BaseFrame {
                         .addComponent(labelEmail).addComponent(campoEmail))
                 .addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(labelSenha).addComponent(campoSenha))
-                .addGap(4)
-                .addComponent(checkLembrar)
-                .addComponent(linkCadastrar)
+                .addComponent(painelNovoCadastro)
                 .addGap(8)
                 .addComponent(painelBotoes)
         );
@@ -216,8 +198,48 @@ public class LoginFrame extends BaseFrame {
 
     // AÇÕES
 
-    private void abrirCadastro() {
-        new CadastroFrame(clienteService, restauranteService).setVisible(true);
+    private JPanel criarLinksNovoCadastro() {
+        JPanel painel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        painel.setOpaque(false);
+
+        JLabel prefixo = new JLabel("Novo cadastro: ");
+        prefixo.setFont(AppFonts.LABEL);
+
+        JLabel linkCliente     = criarLinkCadastro("Cliente",     () -> abrirCadastroCliente());
+        JLabel separador       = new JLabel(" | ");
+        separador.setFont(AppFonts.LABEL);
+        JLabel linkRestaurante = criarLinkCadastro("Restaurante", () -> abrirCadastroRestaurante());
+
+        painel.add(prefixo);
+        painel.add(linkCliente);
+        painel.add(separador);
+        painel.add(linkRestaurante);
+        return painel;
+    }
+
+    private JLabel criarLinkCadastro(String texto, Runnable acao) {
+        JLabel link = new JLabel("<html><a href='#'>" + texto + "</a></html>");
+        link.setFont(AppFonts.LABEL);
+        link.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        link.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                acao.run();
+            }
+        });
+        return link;
+    }
+
+    private void abrirCadastroCliente() {
+        CadastroFrame f = new CadastroFrame(clienteController, restauranteController);
+        f.mostrarCard(CadastroFrame.CARD_CLIENTE);
+        f.setVisible(true);
+    }
+
+    private void abrirCadastroRestaurante() {
+        CadastroFrame f = new CadastroFrame(clienteController, restauranteController);
+        f.mostrarCard(CadastroFrame.CARD_RESTAURANTE);
+        f.setVisible(true);
     }
 
     private void autenticarUsuario() {
@@ -227,7 +249,7 @@ public class LoginFrame extends BaseFrame {
         if (!validarCampos(email, senha)) return;
 
         try {
-            Usuario usuario = autenticacaoService.autenticar(email, senha);
+            Usuario usuario = autenticacaoController.autenticar(email, senha);
             SessionManager.getInstance().iniciarSessao(usuario, this);
             labelConexao.setText("Conectado: " + usuario.getNome());
             redirecionarConformalPapel(usuario);
@@ -278,16 +300,16 @@ public class LoginFrame extends BaseFrame {
         JFrame proximo;
 
         switch (tipo) {
-            case ADMIN -> proximo = new AdminFrame(usuario, adminService, categoriaService);
+            case ADMIN -> proximo = new AdminFrame(usuario, adminController, categoriaController);
             case RESTAURANTE -> proximo = new RestauranteFrame(
                     usuario,
-                    categoriaService,
-                    produtoService,
-                    restauranteService,
-                    areaEntregaService,
-                    horarioService,
-                    pedidoService,
-                    autenticacaoService,
+                    categoriaController,
+                    produtoController,
+                    restauranteController,
+                    areaEntregaController,
+                    horarioController,
+                    pedidoController,
+                    autenticacaoController,
                     this::abrirTelaLogin);
             case CLIENTE -> {
                 if (!(usuario instanceof Cliente)) {
@@ -299,12 +321,13 @@ public class LoginFrame extends BaseFrame {
                 proximo = new ClienteFrame(
                         usuario,
                         (Cliente) usuario,
-                        clienteService,
-                        enderecoService,
-                        restauranteService,
-                        produtoService,
-                        pedidoService,
-                        carrinho,
+                        clienteController,
+                        enderecoController,
+                        restauranteController,
+                        produtoController,
+                        pedidoController,
+                        carrinhoController,
+                        areaEntregaController,
                         this::abrirTelaLogin);
             }
             default -> {
@@ -319,14 +342,14 @@ public class LoginFrame extends BaseFrame {
     }
 
     private void abrirTelaLogin() {
-        SessionManager.getInstance().encerrarSessao();
         LoginFrame novoLogin = new LoginFrame(
-                autenticacaoService, adminService, clienteService,
-                enderecoService, categoriaService, produtoService,
-                restauranteService, pedidoService, carrinho,
-                restauranteRepo, areaEntregaService, horarioService);
-        novoLogin.setVisible(true);
+                autenticacaoController, clienteController, restauranteController,
+                adminController, enderecoController,
+                categoriaController, produtoController,
+                pedidoController, carrinhoController,
+                areaEntregaController, horarioController);
         SessionManager.getInstance().trocarFrame(novoLogin);
+        SessionManager.getInstance().encerrarSessao();
     }
 
     private void cancelar() {

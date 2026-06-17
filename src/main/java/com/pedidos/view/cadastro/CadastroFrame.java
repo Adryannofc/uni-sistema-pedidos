@@ -1,7 +1,7 @@
 package com.pedidos.view.cadastro;
 
-import com.pedidos.application.service.ClienteService;
-import com.pedidos.application.service.RestauranteService;
+import com.pedidos.controller.ClienteController;
+import com.pedidos.controller.RestauranteController;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 import com.pedidos.view.util.base.BaseFrame;
@@ -21,15 +21,15 @@ public class CadastroFrame extends BaseFrame {
     private CardLayout cardLayout;
     private JPanel     painelPrincipal;
 
-    private final ClienteService     clienteService;
-    private final RestauranteService restauranteService;
+    private final ClienteController     clienteController;
+    private final RestauranteController restauranteController;
 
     // ── construtor ────────────────────────────────────────────────────────────
-    public CadastroFrame(ClienteService clienteService,
-                         RestauranteService restauranteService) {
+    public CadastroFrame(ClienteController clienteController,
+                         RestauranteController restauranteController) {
         super("Sistema de Delivery — Novo Cadastro | Cliente", 500, 420);
-        this.clienteService     = clienteService;
-        this.restauranteService = restauranteService;
+        this.clienteController     = clienteController;
+        this.restauranteController = restauranteController;
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setJMenuBar(criarMenuBar());
@@ -44,9 +44,9 @@ public class CadastroFrame extends BaseFrame {
         cardLayout      = new CardLayout();
         painelPrincipal = new JPanel(cardLayout);
 
-        painelPrincipal.add(new PainelTipo(this),                                    CARD_TIPO);
-        painelPrincipal.add(new PainelCadastroCliente(this, clienteService),         CARD_CLIENTE);
-        painelPrincipal.add(new PainelCadastroRestaurante(this, restauranteService), CARD_RESTAURANTE);
+        painelPrincipal.add(new PainelTipo(this),                                             CARD_TIPO);
+        painelPrincipal.add(new PainelCadastroCliente(this, clienteController),              CARD_CLIENTE);
+        painelPrincipal.add(new PainelCadastroRestaurante(this, restauranteController),      CARD_RESTAURANTE);
 
         add(painelPrincipal,  BorderLayout.CENTER);
         add(criarStatusBar(), BorderLayout.SOUTH);
@@ -56,6 +56,15 @@ public class CadastroFrame extends BaseFrame {
 
     public void mostrarCard(String nomeCard) {
         cardLayout.show(painelPrincipal, nomeCard);
+        if (CARD_RESTAURANTE.equals(nomeCard)) {
+            setTitle("Sistema de Delivery — Novo Cadastro | Restaurante");
+            setSize(500, 470);
+            setLocationRelativeTo(null);
+        } else if (CARD_CLIENTE.equals(nomeCard)) {
+            setTitle("Sistema de Delivery — Novo Cadastro | Cliente");
+            setSize(500, 420);
+            setLocationRelativeTo(null);
+        }
     }
 
     // ── status bar ────────────────────────────────────────────────────────────

@@ -1,15 +1,17 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.application.service.ClienteService;
-import com.pedidos.domain.entities.Cliente;
-import com.pedidos.domain.entities.Endereco;
-import com.pedidos.domain.entities.Restaurante;
-import com.pedidos.domain.entities.Usuario;
+import com.pedidos.controller.ClienteController;
+import com.pedidos.model.entity.Cliente;
+import com.pedidos.model.entity.Endereco;
+import com.pedidos.model.entity.Restaurante;
+import com.pedidos.model.entity.Usuario;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -21,18 +23,23 @@ import java.util.Optional;
 
 /**
  * Painel responsável pela aba "Perfil".
- * Contém sub-abas: Dados, Endereço, Favoritos, Senha.
+ * Contém sub-abas: Dados, Endereço, Senha.
  */
 public class PainelPerfil extends JPanel {
 
     private final Usuario usuario;
     private final Cliente cliente;
-    private final ClienteService clienteService;
+    private final ClienteController clienteController;
+    private final Runnable aoAtualizarEndereco;
 
-    public PainelPerfil(Usuario usuario, Cliente cliente, ClienteService clienteService) {
+    // Flag de dirty-tracking
+    private boolean dadosAlterados = false;
+
+    public PainelPerfil(Usuario usuario, Cliente cliente, ClienteController clienteController, Runnable aoAtualizarEndereco) {
         this.usuario = usuario;
         this.cliente = cliente;
-        this.clienteService = clienteService;
+        this.clienteController = clienteController;
+        this.aoAtualizarEndereco = aoAtualizarEndereco;
 
         construir();
     }
@@ -48,11 +55,34 @@ public class PainelPerfil extends JPanel {
 
         subAbas.addTab("Dados", criarSubAbaDados());
         subAbas.addTab("Endereço", criarSubAbaEndereco());
-        subAbas.addTab("Favoritos", criarSubAbaFavoritos());
         subAbas.addTab("Senha", criarSubAbaSenha());
 
         subAbas.setSelectedIndex(0);
         add(subAbas, BorderLayout.CENTER);
+    }
+
+    // Método para marcar alteração
+    private void marcarAlterado() {
+        this.dadosAlterados = true;
+    }
+
+    // Método público para checar se há modificações
+    public boolean isDadosAlterados() {
+        return dadosAlterados;
+    }
+
+    // Método público para resetar flag após salvar
+    public void resetDadosAlterados() {
+        this.dadosAlterados = false;
+    }
+
+    // DocumentListener reutilizável que marca alterações
+    private DocumentListener criarDocumentListenerQueMarca() {
+        return new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { marcarAlterado(); }
+            @Override public void removeUpdate(DocumentEvent e) { marcarAlterado(); }
+            @Override public void changedUpdate(DocumentEvent e) { marcarAlterado(); }
+        };
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -90,6 +120,8 @@ public class PainelPerfil extends JPanel {
 
             gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1;
             fields[i] = criarCampoTexto(valores[i]);
+            // adiciona listener de documento para marcar alterações
+            fields[i].getDocument().addDocumentListener(criarDocumentListenerQueMarca());
             form.add(fields[i], gbc);
         }
 
@@ -101,12 +133,14 @@ public class PainelPerfil extends JPanel {
         JButton btnSalvar = criarBotaoPrimario("Salvar", 80, 30);
         btnSalvar.addActionListener(e -> {
             try {
-                clienteService.editarNome(cliente, fields[0].getText().trim());
-                clienteService.editarEmail(cliente, fields[1].getText().trim());
-                clienteService.editarCpf(cliente, fields[2].getText().trim());
-                clienteService.editarTelefone(cliente, fields[3].getText().trim());
+                clienteController.editarNome(cliente, fields[0].getText().trim());
+                clienteController.editarEmail(cliente, fields[1].getText().trim());
+                clienteController.editarCpf(cliente, fields[2].getText().trim());
+                clienteController.editarTelefone(cliente, fields[3].getText().trim());
                 JOptionPane.showMessageDialog(this, "Dados salvos com sucesso!",
                         "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                // resetar flag após salvar
+                resetDadosAlterados();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Erro ao salvar dados:\n" + ex.getMessage(),
@@ -159,6 +193,8 @@ public class PainelPerfil extends JPanel {
 
             gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1;
             fields[i] = criarCampoTexto(valores[i]);
+            // adicionar listener para marcar alterações
+            fields[i].getDocument().addDocumentListener(criarDocumentListenerQueMarca());
             form.add(fields[i], gbc);
         }
 
@@ -169,8 +205,38 @@ public class PainelPerfil extends JPanel {
 
         JButton btnSalvar = criarBotaoPrimario("Salvar Endereço", 150, 30);
         btnSalvar.addActionListener(e -> {
+
+            String rua = fields[0].getText().trim(); // rua
+            String numero = fields[1].getText().trim(); // numero
+            String bairro =fields[2].getText().trim(); // bairro
+            String cidade =fields[3].getText().trim(); // cidade
+            String estado =fields[4].getText().trim(); // estado
+            String cep =fields[5].getText().trim(); // cep
+
+            if (rua.isEmpty() || numero.isEmpty()  || bairro.isEmpty()  || cidade.isEmpty()  || estado.isEmpty()  || cep.isEmpty() ) {
+
+                JOptionPane.showMessageDialog(this, "Preencha todos os campos!",
+                        "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
+                return;
+            }
+
+            if (rua.equals(endAtual.map(Endereco::getRua).orElse("")) &&
+                numero.equals(endAtual.map(Endereco::getNumero).orElse("")) &&
+                bairro.equals(endAtual.map(Endereco::getBairro).orElse("")) &&
+                cidade.equals(endAtual.map(Endereco::getCidade).orElse("")) &&
+                estado.equals(endAtual.map(Endereco::getEstado).orElse("")) &&
+                cep.equals(endAtual.map(Endereco::getCep).orElse(""))) {
+
+
+                JOptionPane.showMessageDialog(this, "Nenhuma alteração detectada!",
+                        "Atenção", JOptionPane.INFORMATION_MESSAGE);
+
+                return;
+            }
+
             try {
-                clienteService.salvarEndereco(
+                clienteController.salvarEndereco(
                         cliente,
                         fields[0].getText().trim(), // rua
                         fields[1].getText().trim(), // numero
@@ -179,8 +245,14 @@ public class PainelPerfil extends JPanel {
                         fields[4].getText().trim(), // estado
                         fields[5].getText().trim()  // cep
                 );
+
                 JOptionPane.showMessageDialog(this, "Endereço salvo com sucesso!",
-                        "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                            "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
+                // resetar flag após salvar
+                resetDadosAlterados();
+
+                if (aoAtualizarEndereco != null) aoAtualizarEndereco.run();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Erro ao salvar endereço:\n" + ex.getMessage(),
@@ -193,114 +265,6 @@ public class PainelPerfil extends JPanel {
         return painel;
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // SUB-ABA — FAVORITOS
-    // ─────────────────────────────────────────────────────────────
-    private JPanel criarSubAbaFavoritos() {
-        JPanel painel = new JPanel(new BorderLayout(0, 8));
-        painel.setBackground(Color.WHITE);
-        painel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-
-        JLabel titulo = new JLabel("Restaurantes favoritos");
-        titulo.setFont(AppFonts.TITULO);
-        titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 6, 0));
-
-        String[] colunas = {"Restaurante", "Categoria", "Status", "★ Remover"};
-        DefaultTableModel model = new DefaultTableModel(colunas, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
-
-        // Carrega favoritos
-        List<Restaurante> favs = cliente.getFavoritos();
-        for (Restaurante r : favs) {
-            String categoria = r.getCategoriaGlobal() != null
-                    ? r.getCategoriaGlobal().getNome() : "N/A";
-            model.addRow(new Object[]{r.getNome(), categoria,
-                    r.isStatusAtivo() ? "Ativo" : "Inativo", "★"});
-        }
-
-        JTable tabela = new JTable(model);
-        tabela.setFont(AppFonts.LABEL);
-        tabela.setRowHeight(30);
-        tabela.setGridColor(new Color(220, 220, 220));
-        tabela.setShowGrid(true);
-        tabela.setSelectionBackground(new Color(220, 235, 255));
-
-        configurarHeader(tabela);
-        tabela.getColumnModel().getColumn(0).setPreferredWidth(220);
-        tabela.getColumnModel().getColumn(1).setPreferredWidth(160);
-        tabela.getColumnModel().getColumn(2).setPreferredWidth(80);
-        tabela.getColumnModel().getColumn(3).setPreferredWidth(70);
-
-        // Badge de status ativo/inativo
-        tabela.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable t, Object value,
-                                                           boolean sel, boolean foc, int row, int col) {
-                JPanel cell = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 3));
-                cell.setBackground(sel ? t.getSelectionBackground() : Color.WHITE);
-                JLabel badge = new JLabel(String.valueOf(value));
-                badge.setFont(AppFonts.STATUS.deriveFont(Font.BOLD, 11f));
-                badge.setOpaque(true);
-                badge.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
-                if ("Ativo".equals(value)) {
-                    badge.setBackground(new Color(180, 240, 190));
-                    badge.setForeground(new Color(0, 100, 30));
-                } else {
-                    badge.setBackground(new Color(255, 190, 190));
-                    badge.setForeground(new Color(150, 0, 0));
-                }
-                cell.add(badge);
-                return cell;
-            }
-        });
-
-        // Estrela laranja para remover
-        tabela.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable t, Object value,
-                                                           boolean sel, boolean foc, int row, int col) {
-                JLabel lbl = (JLabel) super.getTableCellRendererComponent(t, value, sel, foc, row, col);
-                lbl.setHorizontalAlignment(SwingConstants.CENTER);
-                lbl.setForeground(new Color(255, 160, 0));
-                lbl.setFont(lbl.getFont().deriveFont(14f));
-                return lbl;
-            }
-        });
-
-        // Clique na ★ remove favorito
-        tabela.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int col = tabela.columnAtPoint(e.getPoint());
-                int row = tabela.rowAtPoint(e.getPoint());
-                if (col == 3 && row >= 0 && row < favs.size()) {
-                    Restaurante r = favs.get(row);
-                    int confirm = JOptionPane.showConfirmDialog(PainelPerfil.this,
-                            "Remover \"" + r.getNome() + "\" dos favoritos?",
-                            "Confirmar", JOptionPane.YES_NO_OPTION);
-                    if (confirm == JOptionPane.YES_OPTION) {
-                        clienteService.favoritar(cliente, r); // toggle → remove
-                        favs.remove(r);
-                        model.removeRow(row);
-                    }
-                }
-            }
-        });
-
-        JScrollPane scroll = new JScrollPane(tabela);
-        scroll.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
-
-        JLabel info = new JLabel("💡 Clique em ★ para remover um restaurante dos favoritos.");
-        info.setFont(AppFonts.HINT);
-        info.setForeground(Color.GRAY);
-        info.setBorder(BorderFactory.createEmptyBorder(6, 2, 0, 0));
-
-        painel.add(titulo, BorderLayout.NORTH);
-        painel.add(scroll, BorderLayout.CENTER);
-        painel.add(info, BorderLayout.SOUTH);
-        return painel;
-    }
 
     // ─────────────────────────────────────────────────────────────
     // SUB-ABA — SENHA
@@ -348,6 +312,8 @@ public class PainelPerfil extends JPanel {
                     BorderFactory.createLineBorder(new Color(180, 180, 180)),
                     BorderFactory.createEmptyBorder(2, 6, 2, 6)
             ));
+            // adicionar listener para marcar alterações em senha
+            fields[i].getDocument().addDocumentListener(criarDocumentListenerQueMarca());
             form.add(fields[i], gbc);
         }
 
@@ -370,10 +336,12 @@ public class PainelPerfil extends JPanel {
             String nova = new String(fields[1].getPassword());
             String confirma = new String(fields[2].getPassword());
             try {
-                clienteService.alterarSenha(usuario, atual, nova, confirma);
+                clienteController.alterarSenha(usuario, atual, nova, confirma);
                 for (JPasswordField f : fields) f.setText("");
                 JOptionPane.showMessageDialog(this, "Senha alterada com sucesso!",
                         "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                // resetar flag após alterar senha
+                resetDadosAlterados();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Erro ao alterar senha:\n" + ex.getMessage(),
@@ -431,4 +399,3 @@ public class PainelPerfil extends JPanel {
         );
     }
 }
-

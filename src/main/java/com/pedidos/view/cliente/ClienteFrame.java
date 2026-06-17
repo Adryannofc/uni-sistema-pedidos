@@ -1,27 +1,31 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.application.service.*;
-import com.pedidos.domain.entities.*;
+import com.pedidos.controller.*;
+import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 import com.pedidos.view.util.base.BaseFrame;
-import com.pedidos.view.util.session.CarrinhoManager;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class ClienteFrame extends BaseFrame {
 
     private final Usuario usuario;
     private final Cliente cliente;
-    private final ClienteService clienteService;
-    private final EnderecoService enderecoService;
-    private final RestauranteService restauranteService;
-    private final ProdutoService produtoService;
-    private final PedidoService pedidoService;
-    private final CarrinhoManager carrinho;
+    private final ClienteController clienteController;
+    private final EnderecoController enderecoController;
+    private final RestauranteController restauranteController;
+    private final ProdutoController produtoController;
+    private final PedidoController pedidoController;
+    private final CarrinhoController carrinhoController;
+    private final AreaEntregaController areaEntregaController;
     private final Runnable acaoLogout;
 
     private JTabbedPane tabbedPane;
@@ -33,26 +37,50 @@ public class ClienteFrame extends BaseFrame {
     private JLabel lblStatusPedidos;
     private JLabel lblStatusEndereco;
 
+    // track last selected tab to allow cancelling a tab change
+    private int lastSelectedIndex = 0;
+
     public ClienteFrame(Usuario usuario,
                         Cliente cliente,
-                        ClienteService clienteService,
-                        EnderecoService enderecoService,
-                        RestauranteService restauranteService,
-                        ProdutoService produtoService,
-                        PedidoService pedidoService,
-                        CarrinhoManager carrinho,
+                        ClienteController clienteController,
+                        EnderecoController enderecoController,
+                        RestauranteController restauranteController,
+                        ProdutoController produtoController,
+                        PedidoController pedidoController,
+                        CarrinhoController carrinhoController,
+                        AreaEntregaController areaEntregaController,
                         Runnable acaoLogout) {
         super("Sistema Delivery — " + usuario.getNome() + " | Cliente");
-        this.usuario            = usuario;
-        this.cliente            = cliente;
-        this.clienteService     = clienteService;
-        this.enderecoService    = enderecoService;
-        this.restauranteService = restauranteService;
-        this.produtoService     = produtoService;
-        this.pedidoService      = pedidoService;
-        this.carrinho           = carrinho;
-        this.acaoLogout         = acaoLogout;
+        this.usuario             = usuario;
+        this.cliente             = cliente;
+        this.clienteController      = clienteController;
+        this.enderecoController     = enderecoController;
+        this.restauranteController  = restauranteController;
+        this.produtoController      = produtoController;
+        this.pedidoController       = pedidoController;
+        this.carrinhoController  = carrinhoController;
+        this.areaEntregaController  = areaEntregaController;
+        this.acaoLogout          = acaoLogout;
         construirInterface();
+
+        // Interceptar fechamento da janela para confirmar se há alterações não salvas
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (painelPerfil != null && painelPerfil.isDadosAlterados()) {
+                    int r = JOptionPane.showConfirmDialog(ClienteFrame.this,
+                            "Alterações não salvas. Deseja sair?",
+                            "Confirmar saída",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE);
+                    if (r != JOptionPane.YES_OPTION) return; // cancela fechamento
+                }
+                // sem alterações ou confirmou: encerra app
+                dispose();
+                System.exit(0);
+            }
+        });
     }
 
     private void construirInterface() {
@@ -77,15 +105,7 @@ public class ClienteFrame extends BaseFrame {
             @Override
             public void menuSelected(MenuEvent e) {
                 menuLogout.setPopupMenuVisible(false);
-                Object[] opcoes = {"Sim", "Não"};
-                int r = JOptionPane.showOptionDialog(ClienteFrame.this,
-                        "Deseja sair do sistema?", "Confirmar Logout",
-                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
-                        null, opcoes, opcoes[0]);
-                if (r == JOptionPane.YES_OPTION) {
-                    carrinho.esvaziar();
-                    SwingUtilities.invokeLater(() -> acaoLogout.run());
-                }
+                executarLogout();
             }
         });
 
@@ -104,9 +124,35 @@ public class ClienteFrame extends BaseFrame {
         nomeLabel.setFont(AppFonts.STATUS);
         nomeLabel.setForeground(AppColors.TEXTO_BRANCO);
 
-        header.add(titulo,    BorderLayout.WEST);
-        header.add(nomeLabel, BorderLayout.EAST);
+        JButton btnSair = new JButton("Sair");
+        btnSair.setFont(AppFonts.BOTAO);
+        btnSair.setBackground(new Color(220, 53, 69));
+        btnSair.setForeground(AppColors.TEXTO_BRANCO);
+        btnSair.setOpaque(true);
+        btnSair.setBorderPainted(false);
+        btnSair.setFocusPainted(false);
+        btnSair.addActionListener(e -> executarLogout());
+
+        JPanel painelDireito = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        painelDireito.setOpaque(false);
+        painelDireito.add(nomeLabel);
+        painelDireito.add(btnSair);
+
+        header.add(titulo,        BorderLayout.WEST);
+        header.add(painelDireito, BorderLayout.EAST);
         return header;
+    }
+
+    private void executarLogout() {
+        Object[] opcoes = {"Sim", "Não"};
+        int r = JOptionPane.showOptionDialog(this,
+                "Deseja sair do sistema?", "Confirmar Logout",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+                null, opcoes, opcoes[0]);
+        if (r == JOptionPane.YES_OPTION) {
+            carrinhoController.esvaziar();
+            SwingUtilities.invokeLater(() -> acaoLogout.run());
+        }
     }
 
     private JPanel criarStatusBar() {
@@ -114,7 +160,7 @@ public class ClienteFrame extends BaseFrame {
         bar.setBackground(new Color(240, 240, 240));
         bar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(200, 200, 200)));
 
-        int pedidosAtivos = pedidoService.listarPorCliente(cliente.getId()).size();
+        int pedidosAtivos = pedidoController.listarPorCliente(cliente.getId()).size();
         String infoEndereco = cliente.getEnderecoPadrao()
                 .map(e -> e.getRua() + ", " + e.getNumero() + " - " + e.getCidade())
                 .orElse("Nenhum endereço cadastrado");
@@ -137,7 +183,7 @@ public class ClienteFrame extends BaseFrame {
     }
 
     public void atualizarStatusBar() {
-        int total = pedidoService.listarPorCliente(cliente.getId()).size();
+        int total = pedidoController.listarPorCliente(cliente.getId()).size();
         lblStatusPedidos.setText(total + " pedido(s) ativo(s)");
         lblStatusEndereco.setText(cliente.getEnderecoPadrao()
                 .map(e -> e.getRua() + ", " + e.getNumero() + " - " + e.getCidade())
@@ -151,9 +197,10 @@ public class ClienteFrame extends BaseFrame {
 
         painelFazerPedido = new PainelFazerPedido(
                 cliente,
-                restauranteService,
-                produtoService,
-                carrinho,
+                restauranteController,
+                produtoController,
+                carrinhoController,
+                areaEntregaController,
                 () -> {
                     painelCheckout.sincronizar();
                     tabbedPane.setSelectedIndex(1);
@@ -163,9 +210,9 @@ public class ClienteFrame extends BaseFrame {
         painelCheckout = new PainelCheckout(
                 usuario,
                 cliente,
-                clienteService,
-                pedidoService,
-                carrinho,
+                clienteController,
+                pedidoController,
+                carrinhoController,
                 painelFazerPedido,
                 () -> {
                     painelFazerPedido.sincronizarCarrinho();
@@ -176,9 +223,12 @@ public class ClienteFrame extends BaseFrame {
                 }
         );
 
-        painelMeusPedidos = new PainelMeusPedidos(cliente, pedidoService);
+        painelMeusPedidos = new PainelMeusPedidos(cliente, pedidoController);
 
-        painelPerfil = new PainelPerfil(usuario, cliente, clienteService);
+        painelPerfil = new PainelPerfil(usuario, cliente, clienteController, () -> {
+            painelCheckout.atualizarEndereco();
+            atualizarStatusBar();
+        });
 
         tabbedPane.addTab("Fazer Pedido", painelFazerPedido);
         tabbedPane.addTab("Checkout",     painelCheckout);
@@ -187,6 +237,37 @@ public class ClienteFrame extends BaseFrame {
 
         atualizarTituloFazerPedido();
         tabbedPane.setSelectedIndex(0);
+
+        // Lembrar a aba inicial
+        lastSelectedIndex = tabbedPane.getSelectedIndex();
+
+        // Intercepta troca de abas para confirmar saída da aba Perfil se houver alterações
+        tabbedPane.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                int sel = tabbedPane.getSelectedIndex();
+                int perfilIndex = tabbedPane.indexOfComponent(painelPerfil);
+                if (lastSelectedIndex == perfilIndex && sel != perfilIndex) {
+                    if (painelPerfil != null && painelPerfil.isDadosAlterados()) {
+                        int r = JOptionPane.showConfirmDialog(ClienteFrame.this,
+                                "Alterações não salvas. Deseja sair?",
+                                "Confirmar saída",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (r != JOptionPane.YES_OPTION) {
+                            // usuário cancelou: volta para a aba anterior
+                            SwingUtilities.invokeLater(() -> tabbedPane.setSelectedIndex(lastSelectedIndex));
+                            return;
+                        } else {
+                            // usuário confirmou que quer sair sem salvar: resetar flag
+                            painelPerfil.resetDadosAlterados();
+                        }
+                    }
+                }
+                lastSelectedIndex = tabbedPane.getSelectedIndex();
+            }
+        });
+
         return tabbedPane;
     }
 
@@ -195,9 +276,9 @@ public class ClienteFrame extends BaseFrame {
     }
 
     public void atualizarTituloFazerPedido() {
-        int total = carrinho.estaVazio() ? 0
-                : carrinho.getItens().stream()
-                .mapToInt(CarrinhoManager.ItemCarrinho::getQuantidade).sum();
+        int total = carrinhoController.estaVazio() ? 0
+                : carrinhoController.getItens().stream()
+                .mapToInt(com.pedidos.model.entity.ItemPedido::getQuantidade).sum();
         tabbedPane.setTitleAt(0, total > 0 ? "Fazer Pedido (" + total + ")" : "Fazer Pedido");
     }
 }

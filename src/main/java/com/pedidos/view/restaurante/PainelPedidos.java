@@ -1,10 +1,9 @@
 package com.pedidos.view.restaurante;
 
-import com.pedidos.application.service.PedidoService;
-import com.pedidos.domain.entities.ItemPedido;
-import com.pedidos.domain.entities.Pedido;
-import com.pedidos.domain.entities.Usuario;
-import com.pedidos.domain.enums.StatusPedido;
+import com.pedidos.controller.PedidoController;
+import com.pedidos.model.entity.Pedido;
+import com.pedidos.model.entity.Usuario;
+import com.pedidos.model.enums.StatusPedido;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 
@@ -25,7 +24,7 @@ public class PainelPedidos extends JPanel {
     private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final Usuario usuario;
-    private final PedidoService pedidoService;
+    private final PedidoController pedidoController;
 
     private DefaultTableModel modelPedidos;
     private JTable tabelaPedidos;
@@ -34,10 +33,10 @@ public class PainelPedidos extends JPanel {
     private JButton btnCancelar;
     private List<Pedido> pedidosCarregados = new ArrayList<>();
 
-    public PainelPedidos(Usuario usuario, PedidoService pedidoService) {
+    public PainelPedidos(Usuario usuario, PedidoController pedidoController) {
         super(new BorderLayout());
         this.usuario = usuario;
-        this.pedidoService = pedidoService;
+        this.pedidoController = pedidoController;
         construir();
     }
 
@@ -109,7 +108,7 @@ public class PainelPedidos extends JPanel {
                     "Confirmar", JOptionPane.OK_CANCEL_OPTION);
             if (ok != JOptionPane.OK_OPTION) return;
             try {
-                pedidoService.atualizarStatus(p.getId(), proximo);
+                pedidoController.atualizarStatus(p.getId(), proximo);
                 carregarPedidos(filtroAtual(filtro));
             } catch (RuntimeException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -125,7 +124,7 @@ public class PainelPedidos extends JPanel {
                     "Confirmar cancelamento", JOptionPane.OK_CANCEL_OPTION);
             if (ok != JOptionPane.OK_OPTION) return;
             try {
-                pedidoService.atualizarStatus(p.getId(), StatusPedido.CANCELADO);
+                pedidoController.atualizarStatus(p.getId(), StatusPedido.CANCELADO);
                 carregarPedidos(filtroAtual(filtro));
             } catch (RuntimeException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -177,7 +176,7 @@ public class PainelPedidos extends JPanel {
     // ─────────────────────────── data ────────────────────────────────────────
 
     private void carregarPedidos(StatusPedido filtro) {
-        List<Pedido> todos = pedidoService.listarPorRestaurante(usuario.getId());
+        List<Pedido> todos = pedidoController.listarPorRestaurante(usuario.getId());
         pedidosCarregados = filtro == null ? todos
                 : todos.stream().filter(p -> p.getStatus() == filtro).collect(Collectors.toList());
 

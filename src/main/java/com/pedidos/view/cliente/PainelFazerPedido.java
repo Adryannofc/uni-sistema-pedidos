@@ -1,13 +1,16 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.application.service.ProdutoService;
-import com.pedidos.application.service.RestauranteService;
-import com.pedidos.domain.entities.Cliente;
-import com.pedidos.domain.entities.HorarioFuncionamento;
-import com.pedidos.domain.entities.Restaurante;
+import com.pedidos.controller.AreaEntregaController;
+import com.pedidos.controller.CarrinhoController;
+import com.pedidos.controller.ProdutoController;
+import com.pedidos.controller.RestauranteController;
+import com.pedidos.model.entity.Cliente;
+import com.pedidos.model.entity.Endereco;
+import com.pedidos.model.entity.HorarioFuncionamento;
+import com.pedidos.model.entity.Restaurante;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
-import com.pedidos.view.util.session.CarrinhoManager;
+import com.pedidos.model.entity.ItemPedido;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -35,9 +38,10 @@ import java.util.Optional;
 public class PainelFazerPedido extends JPanel {
 
     private final Cliente cliente;
-    private final RestauranteService restauranteService;
-    private final ProdutoService produtoService;
-    private final CarrinhoManager carrinho;
+    private final RestauranteController restauranteController;
+    private final ProdutoController produtoController;
+    private final CarrinhoController carrinhoController;
+    private final AreaEntregaController areaEntregaController;
 
     private final NumberFormat moedaBR = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
     private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -63,14 +67,16 @@ public class PainelFazerPedido extends JPanel {
     private Runnable aoFinalizarPedido;
 
     public PainelFazerPedido(Cliente cliente,
-                             RestauranteService restauranteService,
-                             ProdutoService produtoService,
-                             CarrinhoManager carrinho,
+                             RestauranteController restauranteController,
+                             ProdutoController produtoController,
+                             CarrinhoController carrinhoController,
+                             AreaEntregaController areaEntregaController,
                              Runnable aoFinalizarPedido) {
         this.cliente = cliente;
-        this.restauranteService = restauranteService;
-        this.produtoService = produtoService;
-        this.carrinho = carrinho;
+        this.restauranteController = restauranteController;
+        this.produtoController = produtoController;
+        this.carrinhoController = carrinhoController;
+        this.areaEntregaController = areaEntregaController;
         this.aoFinalizarPedido = aoFinalizarPedido;
 
         construir();
@@ -86,8 +92,8 @@ public class PainelFazerPedido extends JPanel {
         centroPainelFazerPedido.setBackground(Color.WHITE);
 
         painelCardapio = new PainelCardapio(
-                produtoService,
-                carrinho,
+                produtoController,
+                carrinhoController,
                 () -> cardLayoutFazerPedido.show(centroPainelFazerPedido, "RESTAURANTES"),
                 () -> { sincronizarCarrinho(); }
         );
@@ -119,6 +125,7 @@ public class PainelFazerPedido extends JPanel {
         tabela.setGridColor(new Color(220, 220, 220));
         tabela.setShowGrid(true);
         tabela.setSelectionBackground(new Color(220, 235, 255));
+        tabela.setSelectionForeground(AppColors.TEXTO_PRIMARIO);
         tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         configurarHeader(tabela);
@@ -134,8 +141,14 @@ public class PainelFazerPedido extends JPanel {
                                                            boolean sel, boolean foc, int row, int col) {
                 JLabel lbl = (JLabel) super.getTableCellRendererComponent(t, value, sel, foc, row, col);
                 lbl.setHorizontalAlignment(SwingConstants.CENTER);
-                boolean aberto = "● Aberto".equals(value);
-                lbl.setForeground(aberto ? new Color(0, 150, 0) : new Color(200, 0, 0));
+                if (sel) {
+                    lbl.setBackground(t.getSelectionBackground());
+                    lbl.setForeground(AppColors.TEXTO_PRIMARIO);
+                } else {
+                    lbl.setBackground(t.getBackground());
+                    boolean aberto = "● Aberto".equals(value);
+                    lbl.setForeground(aberto ? new Color(0, 150, 0) : new Color(200, 0, 0));
+                }
                 return lbl;
             }
         });
@@ -148,12 +161,12 @@ public class PainelFazerPedido extends JPanel {
                 int col = tabela.columnAtPoint(e.getPoint());
                 if (row < 0) return;
 
-                List<Restaurante> restaurantes = restauranteService.buscarRestaurantesAtivos();
+                List<Restaurante> restaurantes = restauranteController.buscarAtivos();
                 if (row >= restaurantes.size()) return;
                 Restaurante r = restaurantes.get(row);
 
                 // Clique simples → seleciona restaurante e abre cardápio
-                if (e.getClickCount() >= 1) {
+                if (e.getClickCount() == 2) {
                     abrirRestaurante(r);
                 }
             }
@@ -175,7 +188,7 @@ public class PainelFazerPedido extends JPanel {
                         "Selecione um restaurante para ver o cardápio.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            List<Restaurante> restaurantes = restauranteService.buscarRestaurantesAtivos();
+            List<Restaurante> restaurantes = restauranteController.buscarAtivos();
             if (row >= restaurantes.size()) return;
             Restaurante r = restaurantes.get(row);
             abrirRestaurante(r);
@@ -188,7 +201,7 @@ public class PainelFazerPedido extends JPanel {
                         "Selecione um restaurante para ver os horários.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            List<Restaurante> restaurantes = restauranteService.buscarRestaurantesAtivos();
+            List<Restaurante> restaurantes = restauranteController.buscarAtivos();
             if (row >= restaurantes.size()) return;
             Restaurante r = restaurantes.get(row);
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm");
@@ -218,17 +231,36 @@ public class PainelFazerPedido extends JPanel {
     }
 
     private void abrirRestaurante(Restaurante r) {
-        if (!carrinho.estaVazio() && !carrinho.getRestauranteId().equals(r.getId())) {
+        if (!carrinhoController.estaVazio() && !carrinhoController.getRestauranteId().equals(r.getId())) {
             int op = JOptionPane.showConfirmDialog(this,
                     "Você já tem itens de outro restaurante no carrinho.\n" +
                             "Deseja esvaziá-lo e selecionar \"" + r.getNome() + "\"?",
                     "Trocar restaurante", JOptionPane.YES_NO_OPTION);
             if (op != JOptionPane.YES_OPTION) return;
-            carrinho.esvaziar();
+            carrinhoController.esvaziar();
+        }
+
+        Optional<Endereco> enderecoPadrao = cliente.getEnderecoPadrao();
+        if (enderecoPadrao.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Cadastre um endereço de entrega antes de selecionar um restaurante.",
+                    "Endereço obrigatório", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        BigDecimal taxa;
+        try {
+            taxa = areaEntregaController.buscarTaxaPorBairro(r.getId(), enderecoPadrao.get().getBairro());
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Seu bairro (" + enderecoPadrao.get().getBairro() +
+                            ") não é atendido por este restaurante.",
+                    "Bairro não atendido", JOptionPane.WARNING_MESSAGE);
+            return;
         }
 
         restauranteSelecionado = r;
-        carrinho.iniciar(cliente.getId(), r.getId(), new BigDecimal("5.00"));
+        carrinhoController.iniciar(cliente.getId(), r.getId(), taxa);
         painelCardapio.configurar(restauranteSelecionado);
         cardLayoutFazerPedido.show(centroPainelFazerPedido, "CARDAPIO");
     }
@@ -240,7 +272,7 @@ public class PainelFazerPedido extends JPanel {
         LocalTime agora = LocalTime.now();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm");
 
-        for (Restaurante r : restauranteService.buscarRestaurantesAtivos()) {
+        for (Restaurante r : restauranteController.buscarAtivos()) {
             String categoria = r.getCategoriaGlobal() != null
                     ? r.getCategoriaGlobal().getNome() : "N/A";
 
@@ -342,19 +374,32 @@ public class PainelFazerPedido extends JPanel {
                 return;
             }
             String nome = (String) modelCarrinho.getValueAt(row, 0);
-            carrinho.getItens().stream()
-                    .filter(it -> it.getProduto().getNome().equals(nome))
+            carrinhoController.getItens().stream()
+                    .filter(it -> it.getNomeProduto().equals(nome))
                     .findFirst()
                     .ifPresent(it -> {
-                        carrinho.removerItem(it.getProduto().getId());
+                        carrinhoController.removerItem(it.getProdutoId());
                         sincronizarCarrinho();
                     });
         });
 
         btnEsvaziar.addActionListener(e -> {
-            if (carrinho.estaVazio()) return;
-            carrinho.esvaziar();
-            sincronizarCarrinho();
+
+            if (carrinhoController.estaVazio())
+            { JOptionPane.showMessageDialog(this, "O carrinho já está vazio.");
+                return;
+            }
+            int confirm = JOptionPane.showConfirmDialog(this, "Tem certeza? Todos os itens serão removidos.",
+                    "Confirmar", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (confirm == JOptionPane.YES_NO_OPTION)
+            {
+                carrinhoController.esvaziar();
+                sincronizarCarrinho();
+            }
+
+
+
+
         });
 
         JPanel botoesPanel = new JPanel(new GridLayout(1, 2, 6, 0));
@@ -392,10 +437,10 @@ public class PainelFazerPedido extends JPanel {
     public void sincronizarCarrinho() {
         modelCarrinho.setRowCount(0);
 
-        if (!carrinho.estaVazio()) {
-            for (CarrinhoManager.ItemCarrinho item : carrinho.getItens()) {
+        if (!carrinhoController.estaVazio()) {
+            for (ItemPedido item : carrinhoController.getItens()) {
                 modelCarrinho.addRow(new Object[]{
-                        item.getProduto().getNome(),
+                        item.getNomeProduto(),
                         item.getQuantidade(),
                         moedaBR.format(item.calcularSubtotal())
                 });
@@ -403,14 +448,14 @@ public class PainelFazerPedido extends JPanel {
         }
 
         // Atualiza totais
-        BigDecimal subtotal = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.calcularSubtotal();
-        BigDecimal taxa = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.getTaxaEntrega();
+        BigDecimal subtotal = carrinhoController.estaVazio() ? BigDecimal.ZERO : carrinhoController.calcularSubtotal();
+        BigDecimal taxa = carrinhoController.estaVazio() ? BigDecimal.ZERO : carrinhoController.getTaxaEntrega();
         if (lblSubtotalValor != null) lblSubtotalValor.setText(moedaBR.format(subtotal));
         if (lblTaxaValor != null) lblTaxaValor.setText(moedaBR.format(taxa));
 
         // Atualiza título do border com contagem de itens distintos
         if (borderCarrinho != null && painelCarrinho != null) {
-            int qtd = carrinho.estaVazio() ? 0 : carrinho.getItens().size();
+            int qtd = carrinhoController.estaVazio() ? 0 : carrinhoController.getItens().size();
             borderCarrinho.setTitle("Meu Carrinho" + (qtd > 0 ? " (" + qtd + ")" : ""));
             painelCarrinho.repaint();
         }

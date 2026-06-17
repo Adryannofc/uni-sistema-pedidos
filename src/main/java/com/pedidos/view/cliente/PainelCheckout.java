@@ -1,11 +1,11 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.application.service.ClienteService;
-import com.pedidos.application.service.PedidoService;
-import com.pedidos.domain.entities.*;
+import com.pedidos.controller.CarrinhoController;
+import com.pedidos.controller.ClienteController;
+import com.pedidos.controller.PedidoController;
+import com.pedidos.model.entity.*;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
-import com.pedidos.view.util.session.CarrinhoManager;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Painel responsável pela aba "Checkout".
@@ -27,9 +26,9 @@ public class PainelCheckout extends JPanel {
 
     private final Usuario usuario;
     private final Cliente cliente;
-    private final ClienteService clienteService;
-    private final PedidoService pedidoService;
-    private final CarrinhoManager carrinho;
+    private final ClienteController clienteController;
+    private final PedidoController pedidoController;
+    private final CarrinhoController carrinhoController;
     private PainelFazerPedido painelFazerPedido;
 
     private final NumberFormat moedaBR = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
@@ -43,18 +42,21 @@ public class PainelCheckout extends JPanel {
     // Callback após confirmar pedido
     private Runnable aoConfirmarPedido;
 
+    // Label do endereço — atualizado externamente quando o cliente muda o endereço
+    private JLabel endLabel;
+
     public PainelCheckout(Usuario usuario,
                           Cliente cliente,
-                          ClienteService clienteService,
-                          PedidoService pedidoService,
-                          CarrinhoManager carrinho,
+                          ClienteController clienteController,
+                          PedidoController pedidoController,
+                          CarrinhoController carrinhoController,
                           PainelFazerPedido painelFazerPedido,
                           Runnable aoConfirmarPedido) {
         this.usuario = usuario;
         this.cliente = cliente;
-        this.clienteService = clienteService;
-        this.pedidoService = pedidoService;
-        this.carrinho = carrinho;
+        this.clienteController = clienteController;
+        this.pedidoController = pedidoController;
+        this.carrinhoController = carrinhoController;
         this.painelFazerPedido = painelFazerPedido;
         this.aoConfirmarPedido = aoConfirmarPedido;
 
@@ -148,19 +150,13 @@ public class PainelCheckout extends JPanel {
         JPanel rodape = new JPanel(new BorderLayout(0, 10));
         rodape.setBackground(Color.WHITE);
 
-        // Endereço padrão
-        String enderecoTexto = cliente.getEnderecoPadrao()
-                .map(e -> e.getRua() + ", " + e.getNumero() + " - " +
-                        e.getBairro() + ", " + e.getCidade() + " - " + e.getEstado())
-                .orElse("⚠ Nenhum endereço cadastrado. Acesse Perfil > Endereço.");
-
         JPanel enderecoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
         enderecoPanel.setBackground(Color.WHITE);
         enderecoPanel.setBorder(titledBorder("Endereço de Entrega"));
 
         JLabel icone = new JLabel("📍");
         icone.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14));
-        JLabel endLabel = new JLabel(enderecoTexto);
+        endLabel = new JLabel(textoEndereco());
         endLabel.setFont(AppFonts.LABEL);
 
         enderecoPanel.add(icone);
@@ -204,7 +200,7 @@ public class PainelCheckout extends JPanel {
      * esvazia carrinho → atualiza UI.
      */
     public void confirmarPedido() {
-        if (carrinho.estaVazio()) {
+        if (carrinhoController.estaVazio()) {
             JOptionPane.showMessageDialog(this,
                     "Carrinho vazio! Adicione itens antes de confirmar.",
                     "Aviso", JOptionPane.WARNING_MESSAGE);
@@ -238,32 +234,23 @@ public class PainelCheckout extends JPanel {
         }
 
         try {
-            // Converte CarrinhoManager → Carrinho (entidade de domínio)
-            Carrinho carrinhoDominio = new Carrinho(cliente.getId(), restauranteSelecionado.getId());
-            for (CarrinhoManager.ItemCarrinho item : carrinho.getItens()) {
-                carrinhoDominio.adicionarItem(
-                        item.getProduto().getId(),
-                        item.getProduto().getNome(),
-                        item.getQuantidade(),
-                        item.getProduto().getPreco()
-                );
-            }
+            Carrinho carrinhoDominio = carrinhoController.getCarrinho();
 
-            // Código de confirmação de entrega
-            String codigoConfirmacao = cliente.getCpf() != null
-                    ? cliente.getCpf().replaceAll("[^0-9]", "").substring(0, Math.min(4, cliente.getCpf().replaceAll("[^0-9]", "").length()))
-                    : UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+            // Código de confirmação de entrega — últimos 4 dígitos do CPF
+            String cpfDigitos = cliente.getCpf().replaceAll("[^0-9]", "");
+            String codigoConfirmacao = cpfDigitos.substring(cpfDigitos.length() - 4);
 
-            Pedido pedido = pedidoService.criarPedido(
+            Pedido pedido = pedidoController.criarPedido(
                     cliente,
                     restauranteSelecionado,
                     carrinhoDominio,
                     enderecoPadrao.get(),
-                    codigoConfirmacao
+                    codigoConfirmacao,
+                    carrinhoController.getTaxaEntrega()
             );
 
             // Limpa sessão local
-            carrinho.esvaziar();
+            carrinhoController.esvaziar();
 
             JOptionPane.showMessageDialog(this,
                     "✅ Pedido confirmado com sucesso!\n" +
@@ -284,22 +271,22 @@ public class PainelCheckout extends JPanel {
         }
     }
 
-    /** Sincroniza modelCheckout e totais do checkout com o estado atual do CarrinhoManager. */
+    /** Sincroniza modelCheckout e totais do checkout com o estado atual do carrinho. */
     public void sincronizar() {
         modelCheckout.setRowCount(0);
-        if (!carrinho.estaVazio()) {
-            for (CarrinhoManager.ItemCarrinho item : carrinho.getItens()) {
+        if (!carrinhoController.estaVazio()) {
+            for (ItemPedido item : carrinhoController.getItens()) {
                 modelCheckout.addRow(new Object[]{
-                        item.getProduto().getNome(),
+                        item.getNomeProduto(),
                         item.getQuantidade(),
-                        moedaBR.format(item.getProduto().getPreco()),
+                        moedaBR.format(item.getPrecoUnitario()),
                         moedaBR.format(item.calcularSubtotal())
                 });
             }
         }
-        BigDecimal sub = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.calcularSubtotal();
-        BigDecimal taxa = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.getTaxaEntrega();
-        BigDecimal total = carrinho.estaVazio() ? BigDecimal.ZERO : carrinho.calcularTotal();
+        BigDecimal sub = carrinhoController.estaVazio() ? BigDecimal.ZERO : carrinhoController.calcularSubtotal();
+        BigDecimal taxa = carrinhoController.estaVazio() ? BigDecimal.ZERO : carrinhoController.getTaxaEntrega();
+        BigDecimal total = carrinhoController.estaVazio() ? BigDecimal.ZERO : carrinhoController.calcularTotal();
         if (lblCheckoutSubtotal != null) lblCheckoutSubtotal.setText(moedaBR.format(sub));
         if (lblCheckoutTaxa != null) lblCheckoutTaxa.setText(moedaBR.format(taxa));
         if (lblCheckoutTotal != null) lblCheckoutTotal.setText(moedaBR.format(total));
@@ -337,6 +324,18 @@ public class PainelCheckout extends JPanel {
         btn.setOpaque(true);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return btn;
+    }
+
+    /** Atualiza o label do endereço quando o cliente altera seu endereço padrão. */
+    public void atualizarEndereco() {
+        if (endLabel != null) endLabel.setText(textoEndereco());
+    }
+
+    private String textoEndereco() {
+        return cliente.getEnderecoPadrao()
+                .map(e -> e.getRua() + ", " + e.getNumero() + " - " +
+                        e.getBairro() + ", " + e.getCidade() + " - " + e.getEstado())
+                .orElse("⚠ Nenhum endereço cadastrado. Acesse Perfil > Endereço.");
     }
 
     private TitledBorder titledBorder(String titulo) {

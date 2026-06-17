@@ -10,18 +10,18 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <!-- ENTIDADES -->
-        <class>com.pedidos.domain.entities.Usuario</class>
-        <class>com.pedidos.domain.entities.Admin</class>
-        <class>com.pedidos.domain.entities.Cliente</class>
-        <class>com.pedidos.domain.entities.Restaurante</class>
-        <class>com.pedidos.domain.entities.Endereco</class>
-        <class>com.pedidos.domain.entities.CategoriaGlobal</class>
-        <class>com.pedidos.domain.entities.CategoriaCardapio</class>
-        <class>com.pedidos.domain.entities.Produto</class>
-        <class>com.pedidos.domain.entities.Pedido</class>
-        <class>com.pedidos.domain.entities.ItemPedido</class>
-        <class>com.pedidos.domain.entities.AreaEntrega</class>
-        <class>com.pedidos.domain.entities.HorarioFuncionamento</class>
+        <class>com.pedidos.model.entity.Usuario</class>
+        <class>com.pedidos.model.entity.Admin</class>
+        <class>com.pedidos.model.entity.Cliente</class>
+        <class>com.pedidos.model.entity.Restaurante</class>
+        <class>com.pedidos.model.entity.Endereco</class>
+        <class>com.pedidos.model.entity.CategoriaGlobal</class>
+        <class>com.pedidos.model.entity.CategoriaCardapio</class>
+        <class>com.pedidos.model.entity.Produto</class>
+        <class>com.pedidos.model.entity.Pedido</class>
+        <class>com.pedidos.model.entity.ItemPedido</class>
+        <class>com.pedidos.model.entity.AreaEntrega</class>
+        <class>com.pedidos.model.entity.HorarioFuncionamento</class>
         <properties>
 
             <!-- JDBC LOCAL -->

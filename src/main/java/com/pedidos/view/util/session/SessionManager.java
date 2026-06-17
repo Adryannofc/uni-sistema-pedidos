@@ -1,7 +1,7 @@
 package com.pedidos.view.util.session;
 
-import com.pedidos.domain.entities.Usuario;
-import com.pedidos.domain.enums.TipoUsuario;
+import com.pedidos.model.entity.Usuario;
+import com.pedidos.model.enums.TipoUsuario;
 
 import javax.swing.*;
 
@@ -13,7 +13,7 @@ public class SessionManager {
 
     private SessionManager() {}
 
-    public static SessionManager getInstance() {
+    public static synchronized SessionManager getInstance() {
         if (instancia == null) instancia = new SessionManager();
         return instancia;
     }
@@ -25,6 +25,7 @@ public class SessionManager {
 
     public void encerrarSessao() {
         this.usuarioLogado = null;
+        this.frameAtual = null;
     }
 
     public void trocarFrame(JFrame novoFrame) {
