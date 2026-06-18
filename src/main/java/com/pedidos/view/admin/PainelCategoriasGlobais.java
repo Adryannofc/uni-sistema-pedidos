@@ -1,7 +1,7 @@
 package com.pedidos.view.admin;
 
-import com.pedidos.application.service.CategoriaService;
-import com.pedidos.domain.entities.CategoriaGlobal;
+import com.pedidos.controller.CategoriaController;
+import com.pedidos.model.entity.CategoriaGlobal;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class PainelCategoriasGlobais extends JPanel {
 
-    private final CategoriaService categoriaService;
+    private final CategoriaController categoriaController;
 
     private DefaultTableModel model;
     private JTable tabela;
@@ -24,9 +24,9 @@ public class PainelCategoriasGlobais extends JPanel {
 
     private List<CategoriaGlobal> categoriasCarregadas = new ArrayList<>();
 
-    public PainelCategoriasGlobais(CategoriaService categoriaService) {
+    public PainelCategoriasGlobais(CategoriaController categoriaController) {
         super(new BorderLayout());
-        this.categoriaService = categoriaService;
+        this.categoriaController = categoriaController;
         construir();
     }
 
@@ -63,11 +63,11 @@ public class PainelCategoriasGlobais extends JPanel {
         btnEditar  = new JButton(" Editar");
         btnRemover = new JButton(" Remover");
         btnNova.setFont(AppFonts.BOTAO);
-        btnNova.setIcon(carregarIcone("/icones/criar.png"));
+        btnNova.setIcon(carregarIcone("/img/criar.png"));
         btnEditar.setFont(AppFonts.BOTAO);
-        btnEditar.setIcon(carregarIcone("/icones/editar.png"));
+        btnEditar.setIcon(carregarIcone("/img/editar.png"));
         btnRemover.setFont(AppFonts.BOTAO);
-        btnRemover.setIcon(carregarIcone("/icones/remover.png"));
+        btnRemover.setIcon(carregarIcone("/img/remover.png"));
         btnEditar.setEnabled(false);
         btnRemover.setEnabled(false);
 
@@ -125,7 +125,7 @@ public class PainelCategoriasGlobais extends JPanel {
     // ─── data ─────────────────────────────────────────────────────────────────
 
     private void carregar() {
-        categoriasCarregadas = new ArrayList<>(categoriaService.listarCategoriasGlobais());
+        categoriasCarregadas = new ArrayList<>(categoriaController.listarCategoriasGlobais());
         model.setRowCount(0);
         for (int i = 0; i < categoriasCarregadas.size(); i++) {
             CategoriaGlobal c = categoriasCarregadas.get(i);
@@ -160,7 +160,7 @@ public class PainelCategoriasGlobais extends JPanel {
             return;
         }
         try {
-            categoriaService.criarCategoriaGlobal(nome, campoDesc.getText().trim());
+            categoriaController.criarCategoriaGlobal(nome, campoDesc.getText().trim());
             carregar();
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -193,7 +193,7 @@ public class PainelCategoriasGlobais extends JPanel {
             return;
         }
         try {
-            categoriaService.editarCategoriaGlobal(cat.getId(), novoNome, campoDesc.getText().trim());
+            categoriaController.editarCategoriaGlobal(cat.getId(), novoNome, campoDesc.getText().trim());
             carregar();
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -209,7 +209,7 @@ public class PainelCategoriasGlobais extends JPanel {
                 "Confirmar remoção", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
         if (ok != JOptionPane.OK_OPTION) return;
         try {
-            categoriaService.removerCategoriaGlobal(cat.getId());
+            categoriaController.removerCategoriaGlobal(cat.getId());
             carregar();
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);

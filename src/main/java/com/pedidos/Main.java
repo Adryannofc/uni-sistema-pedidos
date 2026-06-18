@@ -1,17 +1,19 @@
 package com.pedidos;
 
-import com.pedidos.application.service.*;
-import com.pedidos.domain.repository.AreaEntregaRepository;
-import com.pedidos.infra.config.FlyWayconfig;
-import com.pedidos.infra.config.JPAUtil;
-import com.pedidos.infra.repository.impl.*;
-import com.pedidos.presentation.MenuLogin;
+
+import com.pedidos.controller.*;
+import com.pedidos.model.service.*;
+import com.pedidos.model.infra.config.FlyWayconfig;
+import com.pedidos.model.infra.config.JPAUtil;
+import com.pedidos.model.infra.repository.impl.*;
+import com.pedidos.view.login.LoginFrame;
 import jakarta.persistence.EntityManager;
 
-import java.util.Scanner;
+import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
+
         try {
             FlyWayconfig.migrate();
         } catch (Exception e) {
@@ -19,8 +21,6 @@ public class Main {
         }
 
         EntityManager em = JPAUtil.getEntityManager();
-
-        Scanner scanner = new Scanner(System.in);
 
         AdminRepositoryJPA adminRepo = new AdminRepositoryJPA(em);
         RestauranteRepositoryJPA restauranteRepo = new RestauranteRepositoryJPA(em);
@@ -34,23 +34,49 @@ public class Main {
         EnderecoRepositoryJPA enderecoRepo = new EnderecoRepositoryJPA(em);
 
         AutenticacaoService authService = new AutenticacaoService(adminRepo, restauranteRepo, clienteRepo);
-        AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo);
         ClienteService clienteService = new ClienteService(clienteRepo, authService, adminRepo, restauranteRepo, enderecoRepo);
+        AdminService adminService = new AdminService(adminRepo, authService, restauranteRepo, categoriaCardapioRepo, clienteRepo);
+        EnderecoService enderecoService = new EnderecoService(enderecoRepo);
         CategoriaService categoriaService = new CategoriaService(categoriaGlobalRepo, categoriaCardapioRepo, restauranteRepo, produtoRepo);
         ProdutoService produtoService = new ProdutoService(produtoRepo, restauranteRepo);
         RestauranteService restauranteService = new RestauranteService(restauranteRepo, categoriaGlobalRepo, authService);
         PedidoService pedidoService = new PedidoService(pedidoRepo, horarioFuncionamentoRepo);
-        CarrinhoService carrinhoService = new CarrinhoService();
         HorarioService horarioService = new HorarioService(horarioFuncionamentoRepo);
         AreaEntregaService areaEntregaService = new AreaEntregaService(areaRepo);
+        CarrinhoService carrinhoService = new CarrinhoService();
+        CarrinhoController carrinhoController = new CarrinhoController(carrinhoService);
 
 
-        new MenuLogin(
-                authService, adminService, clienteService,
-                categoriaService, produtoService, restauranteService,
-                pedidoService, carrinhoService, restauranteRepo, areaEntregaService, horarioService
-        ).iniciar();
+        AutenticacaoController autenticacaoController = new AutenticacaoController(authService);
+        AdminController adminController = new AdminController(adminService);
+        ClienteController clienteController = new ClienteController(clienteService);
+        RestauranteController restauranteController = new RestauranteController(restauranteService);
+        PedidoController pedidoController = new PedidoController(pedidoService);
+        ProdutoController produtoController = new ProdutoController(produtoService);
+        CategoriaController categoriaController = new CategoriaController(categoriaService);
+        EnderecoController enderecoController = new EnderecoController(enderecoService);
+        HorarioController horarioController = new HorarioController(horarioService);
+        AreaEntregaController areaEntregaController = new AreaEntregaController(areaEntregaService);
 
-        JPAUtil.close();
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception ignored) {
+            }
+
+            LoginFrame frame = new LoginFrame(
+                    autenticacaoController,
+                    clienteController,
+                    restauranteController,
+                    adminController,
+                    enderecoController,
+                    categoriaController,
+                    produtoController,
+                    pedidoController,
+                    carrinhoController,
+                    areaEntregaController,
+                    horarioController);
+            frame.setVisible(true);
+        });
     }
 }

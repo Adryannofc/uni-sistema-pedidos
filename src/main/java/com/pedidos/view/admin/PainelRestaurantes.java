@@ -1,8 +1,8 @@
 package com.pedidos.view.admin;
 
-import com.pedidos.application.service.AdminService;
-import com.pedidos.domain.entities.Restaurante;
-import com.pedidos.domain.enums.StatusRestaurante;
+import com.pedidos.controller.AdminController;
+import com.pedidos.model.entity.Restaurante;
+import com.pedidos.model.enums.StatusRestaurante;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
 
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class PainelRestaurantes extends JPanel {
 
-    private final AdminService adminService;
+    private final AdminController adminController;
 
     private DefaultTableModel model;
     private JTable tabela;
@@ -29,9 +29,9 @@ public class PainelRestaurantes extends JPanel {
 
     private List<Restaurante> restaurantesCarregados = new ArrayList<>();
 
-    public PainelRestaurantes(AdminService adminService) {
+    public PainelRestaurantes(AdminController adminController) {
         super(new BorderLayout());
-        this.adminService = adminService;
+        this.adminController = adminController;
         construir();
     }
 
@@ -69,9 +69,9 @@ public class PainelRestaurantes extends JPanel {
         btnBloquear = botaoAcao(" Bloquear", new Color(248, 215, 218), new Color(114, 28, 36));
         btnRemover  = botaoAcao(" Remover",  new Color(255, 243, 205), new Color(133, 100, 4));
 
-        btnAprovar.setIcon(new ImageIcon(getClass().getResource("/icones/aprovar.png")));
-        btnBloquear.setIcon(new ImageIcon(getClass().getResource("/icones/bloquear.png")));
-        btnRemover.setIcon(new ImageIcon(getClass().getResource("/icones/remover.png")));
+        btnAprovar.setIcon(new ImageIcon(getClass().getResource("/img/aprovar.png")));
+        btnBloquear.setIcon(new ImageIcon(getClass().getResource("/img/bloquear.png")));
+        btnRemover.setIcon(new ImageIcon(getClass().getResource("/img/remover.png")));
 
         btnAprovar.setEnabled(false);
         btnBloquear.setEnabled(false);
@@ -152,7 +152,7 @@ public class PainelRestaurantes extends JPanel {
     // ─── data ─────────────────────────────────────────────────────────────────
 
     private void carregar(String filtro) {
-        List<Restaurante> todos = adminService.listarRestaurantes();
+        List<Restaurante> todos = adminController.listarRestaurantes();
 
         if (filtro != null && !filtro.isEmpty()) {
             String lower = filtro.toLowerCase();
@@ -208,7 +208,7 @@ public class PainelRestaurantes extends JPanel {
                 "Confirmar aprovação", JOptionPane.OK_CANCEL_OPTION);
         if (ok != JOptionPane.OK_OPTION) return;
         try {
-            adminService.aprovarRestaurante(r.getId());
+            adminController.aprovarRestaurante(r.getId());
             carregar(campoBusca.getText().trim());
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -224,7 +224,7 @@ public class PainelRestaurantes extends JPanel {
                 "Confirmar bloqueio", JOptionPane.OK_CANCEL_OPTION);
         if (ok != JOptionPane.OK_OPTION) return;
         try {
-            adminService.bloquearRestaurante(r.getId());
+            adminController.bloquearRestaurante(r.getId());
             carregar(campoBusca.getText().trim());
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -240,7 +240,7 @@ public class PainelRestaurantes extends JPanel {
                 "Confirmar remoção", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
         if (ok != JOptionPane.OK_OPTION) return;
         try {
-            adminService.removerRestaurante(r.getId());
+            adminController.removerRestaurante(r.getId());
             carregar(campoBusca.getText().trim());
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);

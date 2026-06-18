@@ -1,12 +1,12 @@
 package com.pedidos.view.cliente;
 
-import com.pedidos.application.service.ProdutoService;
-import com.pedidos.domain.entities.CategoriaCardapio;
-import com.pedidos.domain.entities.Produto;
-import com.pedidos.domain.entities.Restaurante;
+import com.pedidos.controller.CarrinhoController;
+import com.pedidos.controller.ProdutoController;
+import com.pedidos.model.entity.CategoriaCardapio;
+import com.pedidos.model.entity.Produto;
+import com.pedidos.model.entity.Restaurante;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
-import com.pedidos.view.util.session.CarrinhoManager;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -22,18 +22,18 @@ import java.util.Locale;
  */
 public class CardapioDialog extends JDialog {
 
-    private final ProdutoService produtoService;
+    private final ProdutoController produtoController;
     private final Restaurante restaurante;
-    private final CarrinhoManager carrinho;
+    private final CarrinhoController carrinhoController;
     private final DefaultTableModel produtosModel;
     private JTable tabelaProdutos;
 
-    public CardapioDialog(JFrame owner, ProdutoService produtoService,
-                          Restaurante restaurante, CarrinhoManager carrinho) {
+    public CardapioDialog(JFrame owner, ProdutoController produtoController,
+                          Restaurante restaurante, CarrinhoController carrinhoController) {
         super(owner, "Cardápio — " + restaurante.getNome(), true);
-        this.produtoService = produtoService;
+        this.produtoController = produtoController;
         this.restaurante = restaurante;
-        this.carrinho = carrinho;
+        this.carrinhoController = carrinhoController;
 
         setSize(700, 500);
         setLocationRelativeTo(owner);
@@ -175,7 +175,7 @@ public class CardapioDialog extends JDialog {
     private void carregarProdutosDaCategoria(CategoriaCardapio categoria) {
         produtosModel.setRowCount(0);
 
-        List<Produto> produtos = produtoService.listarAtivosPorRestaurante(restaurante.getId());
+        List<Produto> produtos = produtoController.listarAtivosPorRestaurante(restaurante.getId());
         NumberFormat formato = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 
         produtos.stream()
@@ -199,7 +199,7 @@ public class CardapioDialog extends JDialog {
         String nomeProduto = (String) produtosModel.getValueAt(linhaSelecionada, 0);
 
         // Procurar o produto por nome
-        List<Produto> produtos = produtoService.listarAtivosPorRestaurante(restaurante.getId());
+        List<Produto> produtos = produtoController.listarAtivosPorRestaurante(restaurante.getId());
         Produto selecionado = produtos.stream()
                 .filter(p -> p.getNome().equals(nomeProduto))
                 .findFirst()
@@ -230,7 +230,7 @@ public class CardapioDialog extends JDialog {
                 return;
             }
 
-            carrinho.adicionarItem(selecionado, quantidade);
+            carrinhoController.adicionarItem(selecionado, quantidade);
             JOptionPane.showMessageDialog(this,
                     quantidade + "x " + selecionado.getNome() + " adicionado(s) ao carrinho!",
                     "Sucesso", JOptionPane.INFORMATION_MESSAGE);
