@@ -1,8 +1,7 @@
 package com.pedidos.view.restaurante;
 
 import com.pedidos.controller.PedidoController;
-import com.pedidos.model.entity.Pedido;
-import com.pedidos.model.entity.Usuario;
+import com.pedidos.controller.dto.PedidoResumoDTO;
 import com.pedidos.model.enums.StatusPedido;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
@@ -12,7 +11,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.text.NumberFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -21,9 +19,8 @@ import java.util.stream.Collectors;
 public class PainelPedidos extends JPanel {
 
     private static final NumberFormat    FMT_MOEDA = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-    private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private final Usuario usuario;
+    private final String restauranteId;
     private final PedidoController pedidoController;
 
     private DefaultTableModel modelPedidos;
@@ -31,11 +28,11 @@ public class PainelPedidos extends JPanel {
     private JLabel labelContagem;
     private JButton btnAvancar;
     private JButton btnCancelar;
-    private List<Pedido> pedidosCarregados = new ArrayList<>();
+    private List<PedidoResumoDTO> pedidosCarregados = new ArrayList<>();
 
-    public PainelPedidos(Usuario usuario, PedidoController pedidoController) {
+    public PainelPedidos(String restauranteId, PedidoController pedidoController) {
         super(new BorderLayout());
-        this.usuario = usuario;
+        this.restauranteId = restauranteId;
         this.pedidoController = pedidoController;
         construir();
     }
@@ -86,7 +83,6 @@ public class PainelPedidos extends JPanel {
         toolbar.add(filtro);
         toolbar.add(labelContagem);
 
-        // actions
         filtro.addActionListener(e -> {
             String sel = (String) filtro.getSelectedItem();
             if ("Todos os status".equals(sel)) {
@@ -99,16 +95,15 @@ public class PainelPedidos extends JPanel {
         btnAvancar.addActionListener(e -> {
             int row = tabelaPedidos.getSelectedRow();
             if (row < 0) return;
-            Pedido p = pedidosCarregados.get(row);
-            StatusPedido proximo = proximoStatus(p.getStatus());
-            if (proximo == null) return;
+            PedidoResumoDTO dto = pedidosCarregados.get(row);
+            if (dto.proximoStatus() == null) return;
             int ok = JOptionPane.showConfirmDialog(this,
-                    "Avançar pedido de " + labelStatus(p.getStatus())
-                    + " para " + labelStatus(proximo) + "?",
+                    "Avançar pedido de " + labelStatus(dto.status())
+                    + " para " + labelStatus(dto.proximoStatus()) + "?",
                     "Confirmar", JOptionPane.OK_CANCEL_OPTION);
             if (ok != JOptionPane.OK_OPTION) return;
             try {
-                pedidoController.atualizarStatus(p.getId(), proximo);
+                pedidoController.atualizarStatus(dto.id(), dto.proximoStatus());
                 carregarPedidos(filtroAtual(filtro));
             } catch (RuntimeException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -118,13 +113,13 @@ public class PainelPedidos extends JPanel {
         btnCancelar.addActionListener(e -> {
             int row = tabelaPedidos.getSelectedRow();
             if (row < 0) return;
-            Pedido p = pedidosCarregados.get(row);
+            PedidoResumoDTO dto = pedidosCarregados.get(row);
             int ok = JOptionPane.showConfirmDialog(this,
-                    "Cancelar o pedido de " + p.getCliente().getNome() + "?",
+                    "Cancelar o pedido de " + dto.clienteNome() + "?",
                     "Confirmar cancelamento", JOptionPane.OK_CANCEL_OPTION);
             if (ok != JOptionPane.OK_OPTION) return;
             try {
-                pedidoController.atualizarStatus(p.getId(), StatusPedido.CANCELADO);
+                pedidoController.atualizarStatus(dto.id(), StatusPedido.CANCELADO);
                 carregarPedidos(filtroAtual(filtro));
             } catch (RuntimeException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -161,9 +156,9 @@ public class PainelPedidos extends JPanel {
             int row = tabelaPedidos.getSelectedRow();
             boolean temSel = row >= 0;
             if (temSel) {
-                StatusPedido s = pedidosCarregados.get(row).getStatus();
-                btnAvancar.setEnabled(proximoStatus(s) != null);
-                btnCancelar.setEnabled(s != StatusPedido.ENTREGUE && s != StatusPedido.CANCELADO);
+                PedidoResumoDTO dto = pedidosCarregados.get(row);
+                btnAvancar.setEnabled(dto.proximoStatus() != null);
+                btnCancelar.setEnabled(dto.podeCancelar());
             } else {
                 btnAvancar.setEnabled(false);
                 btnCancelar.setEnabled(false);
@@ -176,19 +171,19 @@ public class PainelPedidos extends JPanel {
     // ─────────────────────────── data ────────────────────────────────────────
 
     private void carregarPedidos(StatusPedido filtro) {
-        List<Pedido> todos = pedidoController.listarPorRestaurante(usuario.getId());
+        List<PedidoResumoDTO> todos = pedidoController.listarPorRestauranteComoDTO(restauranteId);
         pedidosCarregados = filtro == null ? todos
-                : todos.stream().filter(p -> p.getStatus() == filtro).collect(Collectors.toList());
+                : todos.stream().filter(p -> p.status() == filtro).collect(Collectors.toList());
 
         modelPedidos.setRowCount(0);
-        for (Pedido p : pedidosCarregados) {
+        for (PedidoResumoDTO p : pedidosCarregados) {
             modelPedidos.addRow(new Object[]{
-                idCurto(p.getId()),
-                p.getCliente().getNome(),
-                resumoItens(p),
-                FMT_MOEDA.format(p.getTotal()),
-                p.getStatus(),
-                p.getDataPedido() != null ? p.getDataPedido().format(FMT_DATA) : "—"
+                p.idCurto(),
+                p.clienteNome(),
+                p.itensResumo(),
+                FMT_MOEDA.format(p.total()),
+                p.status(),
+                p.dataFormatada()
             });
         }
 
@@ -198,27 +193,6 @@ public class PainelPedidos extends JPanel {
     }
 
     // ─────────────────────────── helpers ─────────────────────────────────────
-
-    private static String idCurto(String id) {
-        if (id == null) return "—";
-        return id.length() > 8 ? id.substring(0, 8).toUpperCase() : id.toUpperCase();
-    }
-
-    private static String resumoItens(Pedido p) {
-        return p.getItens().stream()
-                .map(i -> i.getQuantidade() + "× " + i.getNomeProduto())
-                .collect(Collectors.joining(", "));
-    }
-
-    private static StatusPedido proximoStatus(StatusPedido atual) {
-        return switch (atual) {
-            case AGUARDANDO_CONFIRMACAO -> StatusPedido.CONFIRMADO;
-            case CONFIRMADO             -> StatusPedido.EM_PREPARO;
-            case EM_PREPARO             -> StatusPedido.SAIU_PARA_ENTREGA;
-            case SAIU_PARA_ENTREGA      -> StatusPedido.ENTREGUE;
-            default                     -> null;
-        };
-    }
 
     private static String labelStatus(StatusPedido s) {
         return switch (s) {

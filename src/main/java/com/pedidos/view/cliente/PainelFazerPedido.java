@@ -2,15 +2,15 @@ package com.pedidos.view.cliente;
 
 import com.pedidos.controller.AreaEntregaController;
 import com.pedidos.controller.CarrinhoController;
+import com.pedidos.controller.CategoriaController;
+import com.pedidos.controller.EnderecoController;
 import com.pedidos.controller.ProdutoController;
 import com.pedidos.controller.RestauranteController;
-import com.pedidos.model.entity.Cliente;
-import com.pedidos.model.entity.Endereco;
-import com.pedidos.model.entity.HorarioFuncionamento;
-import com.pedidos.model.entity.Restaurante;
+import com.pedidos.controller.dto.EnderecoResumoDTO;
+import com.pedidos.controller.dto.ItemCarrinhoDTO;
+import com.pedidos.controller.dto.RestauranteResumoDTO;
 import com.pedidos.view.util.AppColors;
 import com.pedidos.view.util.AppFonts;
-import com.pedidos.model.entity.ItemPedido;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -22,11 +22,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -37,18 +32,18 @@ import java.util.Optional;
  */
 public class PainelFazerPedido extends JPanel {
 
-    private final Cliente cliente;
+    private final String clienteId;
+    private final EnderecoController enderecoController;
     private final RestauranteController restauranteController;
     private final ProdutoController produtoController;
     private final CarrinhoController carrinhoController;
     private final AreaEntregaController areaEntregaController;
 
     private final NumberFormat moedaBR = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-    private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     // Componentes da lista de restaurantes
     private DefaultTableModel modelRestaurantes;
-    private Restaurante restauranteSelecionado;
+    private RestauranteResumoDTO restauranteSelecionado;
 
     // CardLayout para alternar entre lista de restaurantes e cardápio
     private CardLayout cardLayoutFazerPedido;
@@ -66,23 +61,26 @@ public class PainelFazerPedido extends JPanel {
     // Callbacks para coordenação
     private Runnable aoFinalizarPedido;
 
-    public PainelFazerPedido(Cliente cliente,
+    public PainelFazerPedido(String clienteId,
+                             EnderecoController enderecoController,
+                             CategoriaController categoriaController,
                              RestauranteController restauranteController,
                              ProdutoController produtoController,
                              CarrinhoController carrinhoController,
                              AreaEntregaController areaEntregaController,
                              Runnable aoFinalizarPedido) {
-        this.cliente = cliente;
+        this.clienteId = clienteId;
+        this.enderecoController = enderecoController;
         this.restauranteController = restauranteController;
         this.produtoController = produtoController;
         this.carrinhoController = carrinhoController;
         this.areaEntregaController = areaEntregaController;
         this.aoFinalizarPedido = aoFinalizarPedido;
 
-        construir();
+        construir(categoriaController);
     }
 
-    private void construir() {
+    private void construir(CategoriaController categoriaController) {
         setLayout(new BorderLayout(12, 0));
         setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
@@ -94,8 +92,9 @@ public class PainelFazerPedido extends JPanel {
         painelCardapio = new PainelCardapio(
                 produtoController,
                 carrinhoController,
+                categoriaController,
                 () -> cardLayoutFazerPedido.show(centroPainelFazerPedido, "RESTAURANTES"),
-                () -> { sincronizarCarrinho(); }
+                () -> sincronizarCarrinho()
         );
 
         centroPainelFazerPedido.add(criarListaRestaurantes(), "RESTAURANTES");
@@ -134,7 +133,6 @@ public class PainelFazerPedido extends JPanel {
         tabela.getColumnModel().getColumn(2).setPreferredWidth(100);
         tabela.getColumnModel().getColumn(3).setPreferredWidth(120);
 
-        // Renderer coluna Status — ●Aberto verde / ●Fechado vermelho
         tabela.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable t, Object value,
@@ -153,21 +151,15 @@ public class PainelFazerPedido extends JPanel {
             }
         });
 
-        // Mouse: clique simples na ★ = favoritar | clique simples em outra coluna = selecionar/abrir cardápio
         tabela.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int row = tabela.rowAtPoint(e.getPoint());
-                int col = tabela.columnAtPoint(e.getPoint());
                 if (row < 0) return;
-
-                List<Restaurante> restaurantes = restauranteController.buscarAtivos();
+                List<RestauranteResumoDTO> restaurantes = restauranteController.buscarAtivosComoDTO();
                 if (row >= restaurantes.size()) return;
-                Restaurante r = restaurantes.get(row);
-
-                // Clique simples → seleciona restaurante e abre cardápio
                 if (e.getClickCount() == 2) {
-                    abrirRestaurante(r);
+                    abrirRestaurante(restaurantes.get(row));
                 }
             }
         });
@@ -175,7 +167,6 @@ public class PainelFazerPedido extends JPanel {
         JScrollPane scroll = new JScrollPane(tabela);
         scroll.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
 
-        // Botões de ação abaixo da lista
         JButton btnVerCardapio = new JButton("Ver Cardápio");
         JButton btnVerHorarios = new JButton("● Ver Horários");
         btnVerCardapio.setFont(AppFonts.BOTAO);
@@ -188,10 +179,9 @@ public class PainelFazerPedido extends JPanel {
                         "Selecione um restaurante para ver o cardápio.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            List<Restaurante> restaurantes = restauranteController.buscarAtivos();
+            List<RestauranteResumoDTO> restaurantes = restauranteController.buscarAtivosComoDTO();
             if (row >= restaurantes.size()) return;
-            Restaurante r = restaurantes.get(row);
-            abrirRestaurante(r);
+            abrirRestaurante(restaurantes.get(row));
         });
 
         btnVerHorarios.addActionListener(e -> {
@@ -201,20 +191,11 @@ public class PainelFazerPedido extends JPanel {
                         "Selecione um restaurante para ver os horários.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            List<Restaurante> restaurantes = restauranteController.buscarAtivos();
+            List<RestauranteResumoDTO> restaurantes = restauranteController.buscarAtivosComoDTO();
             if (row >= restaurantes.size()) return;
-            Restaurante r = restaurantes.get(row);
-            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm");
-            StringBuilder sb = new StringBuilder("Horários de funcionamento — ").append(r.getNome()).append("\n\n");
-            r.getHorarios().stream()
-                    .sorted(Comparator.comparing(HorarioFuncionamento::getDiaSemana))
-                    .forEach(h -> sb.append(String.format("%-16s %s – %s%n",
-                            traduzirDia(h.getDiaSemana()),
-                            h.getHoraInicio().format(fmt),
-                            h.getHoraFim().format(fmt))));
-            if (r.getHorarios().isEmpty()) sb.append("Sem horários cadastrados.");
-            JOptionPane.showMessageDialog(PainelFazerPedido.this, sb.toString(),
-                    "Horários", JOptionPane.INFORMATION_MESSAGE);
+            RestauranteResumoDTO dto = restaurantes.get(row);
+            String msg = "Horário de hoje — " + dto.nome() + "\n\n" + dto.horarioHoje();
+            JOptionPane.showMessageDialog(PainelFazerPedido.this, msg, "Horários", JOptionPane.INFORMATION_MESSAGE);
         });
 
         JPanel acoesBaixo = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
@@ -230,17 +211,17 @@ public class PainelFazerPedido extends JPanel {
         return painel;
     }
 
-    private void abrirRestaurante(Restaurante r) {
-        if (!carrinhoController.estaVazio() && !carrinhoController.getRestauranteId().equals(r.getId())) {
+    private void abrirRestaurante(RestauranteResumoDTO dto) {
+        if (!carrinhoController.estaVazio() && !carrinhoController.getRestauranteId().equals(dto.id())) {
             int op = JOptionPane.showConfirmDialog(this,
                     "Você já tem itens de outro restaurante no carrinho.\n" +
-                            "Deseja esvaziá-lo e selecionar \"" + r.getNome() + "\"?",
+                            "Deseja esvaziá-lo e selecionar \"" + dto.nome() + "\"?",
                     "Trocar restaurante", JOptionPane.YES_NO_OPTION);
             if (op != JOptionPane.YES_OPTION) return;
             carrinhoController.esvaziar();
         }
 
-        Optional<Endereco> enderecoPadrao = cliente.getEnderecoPadrao();
+        Optional<EnderecoResumoDTO> enderecoPadrao = enderecoController.buscarPadraoComoDTO(clienteId);
         if (enderecoPadrao.isEmpty()) {
             JOptionPane.showMessageDialog(this,
                     "Cadastre um endereço de entrega antes de selecionar um restaurante.",
@@ -250,56 +231,28 @@ public class PainelFazerPedido extends JPanel {
 
         BigDecimal taxa;
         try {
-            taxa = areaEntregaController.buscarTaxaPorBairro(r.getId(), enderecoPadrao.get().getBairro());
+            taxa = areaEntregaController.buscarTaxaPorBairro(dto.id(), enderecoPadrao.get().bairro());
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this,
-                    "Seu bairro (" + enderecoPadrao.get().getBairro() +
+                    "Seu bairro (" + enderecoPadrao.get().bairro() +
                             ") não é atendido por este restaurante.",
                     "Bairro não atendido", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        restauranteSelecionado = r;
-        carrinhoController.iniciar(cliente.getId(), r.getId(), taxa);
-        painelCardapio.configurar(restauranteSelecionado);
+        restauranteSelecionado = dto;
+        carrinhoController.iniciar(clienteId, dto.id(), taxa);
+        painelCardapio.configurar(dto.id(), dto.nome());
         cardLayoutFazerPedido.show(centroPainelFazerPedido, "CARDAPIO");
     }
 
     /** Carrega restaurantes ativos no model com status e horário de hoje. */
-    private void carregarRestaurantes() {
+    public void carregarRestaurantes() {
         modelRestaurantes.setRowCount(0);
-        DayOfWeek hoje = LocalDate.now().getDayOfWeek();
-        LocalTime agora = LocalTime.now();
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm");
-
-        for (Restaurante r : restauranteController.buscarAtivos()) {
-            String categoria = r.getCategoriaGlobal() != null
-                    ? r.getCategoriaGlobal().getNome() : "N/A";
-
-            Optional<HorarioFuncionamento> horarioHoje = r.getHorarios().stream()
-                    .filter(h -> h.getDiaSemana() == hoje)
-                    .findFirst();
-
-            boolean aberto = horarioHoje.map(h -> h.contemHorario(agora)).orElse(false);
-            String status = aberto ? "● Aberto" : "● Fechado";
-            String horario = horarioHoje.map(h ->
-                    h.getHoraInicio().format(fmt) + " – " + h.getHoraFim().format(fmt))
-                    .orElse("–");
-
-            modelRestaurantes.addRow(new Object[]{r.getNome(), categoria, status, horario});
+        for (RestauranteResumoDTO dto : restauranteController.buscarAtivosComoDTO()) {
+            String status = dto.aberto() ? "● Aberto" : "● Fechado";
+            modelRestaurantes.addRow(new Object[]{dto.nome(), dto.categoriaNome(), status, dto.horarioHoje()});
         }
-    }
-
-    private String traduzirDia(DayOfWeek dia) {
-        return switch (dia) {
-            case MONDAY -> "Segunda-feira";
-            case TUESDAY -> "Terça-feira";
-            case WEDNESDAY -> "Quarta-feira";
-            case THURSDAY -> "Quinta-feira";
-            case FRIDAY -> "Sexta-feira";
-            case SATURDAY -> "Sábado";
-            case SUNDAY -> "Domingo";
-        };
     }
 
     // ── Painel Carrinho (direita) ─────────────────────────────────
@@ -331,7 +284,6 @@ public class PainelFazerPedido extends JPanel {
         centro.setHorizontalAlignment(SwingConstants.CENTER);
         tabelaCarrinho.getColumnModel().getColumn(1).setCellRenderer(centro);
 
-        // ── Totais (subtotal + taxa) ──────────────────────────────
         JPanel totaisPanel = new JPanel(new GridBagLayout());
         totaisPanel.setBackground(Color.WHITE);
         totaisPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -362,7 +314,6 @@ public class PainelFazerPedido extends JPanel {
         lblTaxaValor.setForeground(Color.DARK_GRAY);
         totaisPanel.add(lblTaxaValor, g);
 
-        // ── Botões menores ────────────────────────────────────────
         JButton btnRemover = criarBotaoSecundario("Remover");
         JButton btnEsvaziar = criarBotaoSecundario("Esvaziar");
 
@@ -374,32 +325,26 @@ public class PainelFazerPedido extends JPanel {
                 return;
             }
             String nome = (String) modelCarrinho.getValueAt(row, 0);
-            carrinhoController.getItens().stream()
-                    .filter(it -> it.getNomeProduto().equals(nome))
+            carrinhoController.getItensComoDTO().stream()
+                    .filter(it -> it.nomeProduto().equals(nome))
                     .findFirst()
                     .ifPresent(it -> {
-                        carrinhoController.removerItem(it.getProdutoId());
+                        carrinhoController.removerItem(it.produtoId());
                         sincronizarCarrinho();
                     });
         });
 
         btnEsvaziar.addActionListener(e -> {
-
-            if (carrinhoController.estaVazio())
-            { JOptionPane.showMessageDialog(this, "O carrinho já está vazio.");
+            if (carrinhoController.estaVazio()) {
+                JOptionPane.showMessageDialog(this, "O carrinho já está vazio.");
                 return;
             }
             int confirm = JOptionPane.showConfirmDialog(this, "Tem certeza? Todos os itens serão removidos.",
                     "Confirmar", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-            if (confirm == JOptionPane.YES_NO_OPTION)
-            {
+            if (confirm == JOptionPane.YES_OPTION) {
                 carrinhoController.esvaziar();
                 sincronizarCarrinho();
             }
-
-
-
-
         });
 
         JPanel botoesPanel = new JPanel(new GridLayout(1, 2, 6, 0));
@@ -408,7 +353,6 @@ public class PainelFazerPedido extends JPanel {
         botoesPanel.add(btnRemover);
         botoesPanel.add(btnEsvaziar);
 
-        // ── Finalizar Pedido ──────────────────────────────────────
         JButton btnFinalizar = criarBotaoPrimario("Finalizar Pedido →", 260, 40);
         btnFinalizar.addActionListener(e -> {
             if (aoFinalizarPedido != null) {
@@ -438,31 +382,29 @@ public class PainelFazerPedido extends JPanel {
         modelCarrinho.setRowCount(0);
 
         if (!carrinhoController.estaVazio()) {
-            for (ItemPedido item : carrinhoController.getItens()) {
+            for (ItemCarrinhoDTO item : carrinhoController.getItensComoDTO()) {
                 modelCarrinho.addRow(new Object[]{
-                        item.getNomeProduto(),
-                        item.getQuantidade(),
-                        moedaBR.format(item.calcularSubtotal())
+                        item.nomeProduto(),
+                        item.quantidade(),
+                        moedaBR.format(item.subtotal())
                 });
             }
         }
 
-        // Atualiza totais
         BigDecimal subtotal = carrinhoController.estaVazio() ? BigDecimal.ZERO : carrinhoController.calcularSubtotal();
         BigDecimal taxa = carrinhoController.estaVazio() ? BigDecimal.ZERO : carrinhoController.getTaxaEntrega();
         if (lblSubtotalValor != null) lblSubtotalValor.setText(moedaBR.format(subtotal));
         if (lblTaxaValor != null) lblTaxaValor.setText(moedaBR.format(taxa));
 
-        // Atualiza título do border com contagem de itens distintos
         if (borderCarrinho != null && painelCarrinho != null) {
-            int qtd = carrinhoController.estaVazio() ? 0 : carrinhoController.getItens().size();
+            int qtd = carrinhoController.estaVazio() ? 0 : carrinhoController.getItensComoDTO().size();
             borderCarrinho.setTitle("Meu Carrinho" + (qtd > 0 ? " (" + qtd + ")" : ""));
             painelCarrinho.repaint();
         }
     }
 
     // ── Getters ────────────────────────────────────────────────────
-    public Restaurante getRestauranteSelecionado() {
+    public RestauranteResumoDTO getRestauranteSelecionado() {
         return restauranteSelecionado;
     }
 
@@ -510,4 +452,3 @@ public class PainelFazerPedido extends JPanel {
         );
     }
 }
-

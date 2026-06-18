@@ -3,6 +3,7 @@ package com.pedidos.model.infra.repository.impl;
 import com.pedidos.model.entity.Cliente;
 import com.pedidos.model.entity.Restaurante;
 import com.pedidos.model.entity.Usuario;
+import com.pedidos.model.enums.StatusRestaurante;
 import com.pedidos.model.repository.RestauranteRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -76,6 +77,22 @@ public class RestauranteRepositoryJPA implements RestauranteRepository {
     public List<Restaurante> listarRestaurantes(){
         return em.createQuery("SELECT r FROM Restaurante r", Restaurante.class).getResultList();
     };
+
+    @Override
+    public List<Restaurante> listarAtivosComHorarios() {
+        EntityManager tempEm = em.getEntityManagerFactory().createEntityManager();
+        try {
+            return tempEm.createQuery(
+                "SELECT DISTINCT r FROM Restaurante r " +
+                "LEFT JOIN FETCH r.horarios " +
+                "LEFT JOIN FETCH r.categoriaGlobal " +
+                "WHERE r.status = :status",
+                Restaurante.class
+            ).setParameter("status", StatusRestaurante.ATIVO).getResultList();
+        } finally {
+            tempEm.close();
+        }
+    }
 
     @Override
     public void deletar (String id) {

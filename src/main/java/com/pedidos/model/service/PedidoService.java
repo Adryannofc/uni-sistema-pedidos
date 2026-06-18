@@ -190,6 +190,16 @@ public class PedidoService {
         return pedidoRepository.buscarHistoricoFinalizado(restauranteId);
     }
 
+    public StatusPedido proximoStatus(StatusPedido atual) {
+        return switch (atual) {
+            case AGUARDANDO_CONFIRMACAO -> StatusPedido.CONFIRMADO;
+            case CONFIRMADO             -> StatusPedido.EM_PREPARO;
+            case EM_PREPARO             -> StatusPedido.SAIU_PARA_ENTREGA;
+            case SAIU_PARA_ENTREGA      -> StatusPedido.ENTREGUE;
+            default                     -> null;
+        };
+    }
+
     /**
      * Verifica se um restaurante está aberto no momento atual.
      *

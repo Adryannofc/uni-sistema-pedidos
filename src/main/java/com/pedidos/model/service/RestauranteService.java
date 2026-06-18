@@ -129,6 +129,14 @@ public class RestauranteService {
         }
     }
 
+    public List<Restaurante> buscarRestaurantesAtivosComHorarios() {
+        try {
+            return restauranteRepository.listarAtivosComHorarios();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     private String normalizarCnpj(String cnpj) {
         if (cnpj == null) {
             throw new IllegalArgumentException("CNPJ inválido — informe 14 dígitos numéricos");

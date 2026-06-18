@@ -3,6 +3,8 @@ package com.pedidos.model.service;
 import com.pedidos.model.entity.Endereco;
 import com.pedidos.model.repository.EnderecoRepository;
 
+import java.util.Optional;
+
 public class EnderecoService {
 
     private final EnderecoRepository enderecoRepository;
@@ -58,6 +60,10 @@ public class EnderecoService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+    }
+
+    public Optional<Endereco> buscarPadraoDoCliente(String clienteId) {
+        return enderecoRepository.buscarPadraoDoCliente(clienteId);
     }
 
     /**

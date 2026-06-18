@@ -3,6 +3,7 @@ package com.pedidos.view.login;
 import com.pedidos.controller.AutenticacaoController;
 import com.pedidos.controller.ClienteController;
 import com.pedidos.controller.RestauranteController;
+import com.pedidos.controller.dto.UsuarioSessaoDTO;
 import com.pedidos.model.entity.*;
 import com.pedidos.model.enums.TipoUsuario;
 import com.pedidos.controller.*;
@@ -250,7 +251,9 @@ public class LoginFrame extends BaseFrame {
 
         try {
             Usuario usuario = autenticacaoController.autenticar(email, senha);
-            SessionManager.getInstance().iniciarSessao(usuario, this);
+            SessionManager.getInstance().iniciarSessao(
+                    new UsuarioSessaoDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getTipoUsuario()),
+                    this);
             labelConexao.setText("Conectado: " + usuario.getNome());
             redirecionarConformalPapel(usuario);
 
@@ -323,6 +326,7 @@ public class LoginFrame extends BaseFrame {
                         (Cliente) usuario,
                         clienteController,
                         enderecoController,
+                        categoriaController,
                         restauranteController,
                         produtoController,
                         pedidoController,

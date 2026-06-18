@@ -39,7 +39,9 @@ public class PedidoRepositoryJPA implements PedidoRepository {
 
     @Override
     public List<Pedido> buscarPorCliente(String clienteId) {
-        return em.createQuery("SELECT p FROM Pedido p WHERE p.cliente.id = :cid ORDER BY p.dataPedido DESC", Pedido.class)
+        return em.createQuery(
+                "SELECT DISTINCT p FROM Pedido p LEFT JOIN FETCH p.itens WHERE p.cliente.id = :cid ORDER BY p.dataPedido DESC",
+                Pedido.class)
                 .setParameter("cid", clienteId).getResultList();
     }
 
@@ -72,7 +74,9 @@ public class PedidoRepositoryJPA implements PedidoRepository {
 
     @Override
     public List<Pedido> buscarPorRestaurante(String restauranteId) {
-        return em.createQuery("SELECT p FROM Pedido p WHERE p.restaurante.id = :rid", Pedido.class)
+        return em.createQuery(
+                "SELECT DISTINCT p FROM Pedido p LEFT JOIN FETCH p.itens LEFT JOIN FETCH p.cliente WHERE p.restaurante.id = :rid ORDER BY p.dataPedido DESC",
+                Pedido.class)
                 .setParameter("rid", restauranteId)
                 .getResultList();
     }
