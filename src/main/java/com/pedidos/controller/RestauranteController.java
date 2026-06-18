@@ -36,7 +36,7 @@ public class RestauranteController {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm");
         DayOfWeek hoje = LocalDate.now().getDayOfWeek();
         LocalTime agora = LocalTime.now();
-        return restauranteService.buscarRestaurantesAtivos().stream()
+        return restauranteService.buscarRestaurantesAtivosComHorarios().stream()
                 .map(r -> {
                     Optional<HorarioFuncionamento> h = r.getHorarios().stream()
                             .filter(hr -> hr.getDiaSemana() == hoje)

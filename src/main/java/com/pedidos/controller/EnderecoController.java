@@ -31,12 +31,7 @@ public class EnderecoController {
     }
 
     public Optional<EnderecoResumoDTO> buscarPadraoComoDTO(String clienteId) {
-        try {
-            Endereco e = enderecoService.buscarPorCliente(clienteId);
-            if (e == null) return Optional.empty();
-            return Optional.of(new EnderecoResumoDTO(e.getRua(), e.getNumero(), e.getBairro(), e.getCidade()));
-        } catch (Exception ex) {
-            return Optional.empty();
-        }
+        return enderecoService.buscarPadraoDoCliente(clienteId)
+                .map(e -> new EnderecoResumoDTO(e.getRua(), e.getNumero(), e.getBairro(), e.getCidade()));
     }
 }

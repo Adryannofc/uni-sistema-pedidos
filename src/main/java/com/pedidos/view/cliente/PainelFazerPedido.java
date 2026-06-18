@@ -247,7 +247,7 @@ public class PainelFazerPedido extends JPanel {
     }
 
     /** Carrega restaurantes ativos no model com status e horário de hoje. */
-    private void carregarRestaurantes() {
+    public void carregarRestaurantes() {
         modelRestaurantes.setRowCount(0);
         for (RestauranteResumoDTO dto : restauranteController.buscarAtivosComoDTO()) {
             String status = dto.aberto() ? "● Aberto" : "● Fechado";

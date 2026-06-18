@@ -251,6 +251,11 @@ public class ClienteFrame extends BaseFrame {
             @Override
             public void stateChanged(ChangeEvent e) {
                 int sel = tabbedPane.getSelectedIndex();
+
+                if (sel == tabbedPane.indexOfComponent(painelFazerPedido)) {
+                    painelFazerPedido.carregarRestaurantes();
+                }
+
                 int perfilIndex = tabbedPane.indexOfComponent(painelPerfil);
                 if (lastSelectedIndex == perfilIndex && sel != perfilIndex) {
                     if (painelPerfil != null && painelPerfil.isDadosAlterados()) {
