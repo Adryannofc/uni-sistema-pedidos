@@ -14,4 +14,6 @@ public interface RestauranteRepository extends UsuarioRepository {
 
 
     List<Restaurante> listarRestaurantes();
+
+    List<Restaurante> listarAtivosComHorarios();
 }
